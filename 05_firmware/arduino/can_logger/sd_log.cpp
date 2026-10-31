@@ -80,9 +80,10 @@ bool sd_log_frame(const CanFrame &f) {
 }
 
 void sd_log_stats(const CanStats &s, int64_t t_us) {
-  file.printf("#stat,%lld,%lu,%lu,%lu,%u,%u\n", (long long)(t_us - t0),
+  file.printf("#stat,%lld,%lu,%lu,%lu,%u,%u,%lu\n", (long long)(t_us - t0),
               (unsigned long)s.frames, (unsigned long)s.queue_drops,
-              (unsigned long)s.hw_overflows, s.rx_err, s.tx_err);
+              (unsigned long)s.hw_overflows, s.rx_err, s.tx_err,
+              (unsigned long)s.spi_errors);
 }
 
 void sd_log_flush() {

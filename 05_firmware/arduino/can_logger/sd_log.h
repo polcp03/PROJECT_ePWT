@@ -4,7 +4,7 @@
 // File format:
 //   #boot,<n>,<reset reason>                       why the ESP32 last restarted
 //   t_us,id,ext,dlc,d0,d1,d2,d3,d4,d5,d6,d7      t_us since recording start, id and data in hex
-//   #stat,t_us,frames,queue_drops,hw_overflows,rx_err,tx_err   once per second
+//   #stat,t_us,frames,queue_drops,hw_overflows,rx_err,tx_err,spi_errors   once per second
 // pandas: read_csv(path, comment='#') skips the #stat lines.
 #pragma once
 #include <Stream.h>

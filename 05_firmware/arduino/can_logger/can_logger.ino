@@ -124,9 +124,11 @@ void loop() {
     CanStats s = can_rx_stats();
     sd_log_stats(s, esp_timer_get_time());
     sd_log_flush();
-    Serial.printf("%s  frames %lu  queue drops %lu  hw overflows %lu  RX err %u  TX err %u\n",
+    Serial.printf("%s  frames %lu  queue drops %lu  hw overflows %lu  RX err %u  TX err %u"
+                  "  SPI err %lu\n",
                   sd_log_name(), (unsigned long)s.frames, (unsigned long)s.queue_drops,
-                  (unsigned long)s.hw_overflows, s.rx_err, s.tx_err);
+                  (unsigned long)s.hw_overflows, s.rx_err, s.tx_err,
+                  (unsigned long)s.spi_errors);
   }
 
   control_led(state == State::Recording ? LedMode::Recording

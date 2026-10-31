@@ -21,11 +21,16 @@ static const int64_t STATS_PERIOD_US = 10000;
 static const uint8_t INS_READ = 0x03;
 static const uint8_t INS_BIT_MODIFY = 0x05;
 static const uint8_t INS_READ_STATUS = 0xA0;
-static const uint8_t INS_READ_RXB0 = 0x90;  // reading from RXB0SIDH clears RX0IF on CS high
-static const uint8_t INS_READ_RXB1 = 0x94;
 static const uint8_t REG_TEC = 0x1C;
 static const uint8_t REG_REC = 0x1D;
+static const uint8_t REG_CANINTF = 0x2C;
 static const uint8_t REG_EFLG = 0x2D;
+static const uint8_t REG_RXB0SIDH = 0x61;  // RXB0: SIDH SIDL EID8 EID0 DLC D0..D7
+static const uint8_t REG_RXB1SIDH = 0x71;
+static const uint8_t RX0IF = 0x01;          // same bit in READ STATUS and CANINTF
+static const uint8_t RX1IF = 0x02;
+static const uint8_t FRAME_BYTES = 13;
+static const uint8_t MAX_READS = 4;
 
 static SPIClass canSpi(HSPI);
 static MCP_CAN can(&canSpi, PIN_CS);  // only used to configure the chip at boot
@@ -43,13 +48,13 @@ static uint8_t readRegister(uint8_t addr) {
   return v;
 }
 
-// Clears the overflow bits 7:6 of EFLG, which otherwise stay set forever.
-static void clearOverflowFlags() {
+// Clears the bits of `mask` in a register, leaving the others untouched.
+static void clearBits(uint8_t addr, uint8_t mask) {
   canSpi.beginTransaction(SPI_CFG);
   digitalWrite(PIN_CS, LOW);
   canSpi.transfer(INS_BIT_MODIFY);
-  canSpi.transfer(REG_EFLG);
-  canSpi.transfer(0xC0);
+  canSpi.transfer(addr);
+  canSpi.transfer(mask);
   canSpi.transfer(0x00);
   digitalWrite(PIN_CS, HIGH);
   canSpi.endTransaction();
@@ -65,19 +70,41 @@ static uint8_t readStatus() {
   return s;
 }
 
-// Reads one receive buffer in a single SPI transaction: SIDH SIDL EID8 EID0 DLC D0..D7.
-// Written here instead of using the library because the library trusts the DLC:
-// a corrupted DLC of 9..15 made it copy past its 8-byte buffer and crash the ESP32.
-static void readBuffer(uint8_t instruction, CanFrame &f) {
-  uint8_t r[13];
+static void readRaw(uint8_t addr, uint8_t *r) {
   canSpi.beginTransaction(SPI_CFG);
   digitalWrite(PIN_CS, LOW);
-  canSpi.transfer(instruction);
-  for (uint8_t i = 0; i < sizeof(r); i++) {
+  canSpi.transfer(INS_READ);
+  canSpi.transfer(addr);
+  for (uint8_t i = 0; i < FRAME_BYTES; i++) {
     r[i] = canSpi.transfer(0);
   }
   digitalWrite(PIN_CS, HIGH);
   canSpi.endTransaction();
+}
+
+// Reads one receive buffer until two consecutive reads agree, then releases it.
+// Noise on the SPI link flipped bits during throttle; it rarely flips the same bit twice,
+// so two identical reads are trusted. The plain READ does not clear RXnIF, and the
+// MCP2515 never overwrites a buffer whose flag is set, so the buffer cannot change
+// between reads. Returns false if no two reads agreed; the frame is then dropped.
+// Written here instead of using the library because the library trusts the DLC:
+// a corrupted DLC of 9..15 made it copy past its 8-byte buffer and crash the ESP32.
+static bool readBuffer(uint8_t addr, uint8_t flag, CanFrame &f) {
+  uint8_t r[FRAME_BYTES], prev[FRAME_BYTES];
+  bool agreed = false;
+  readRaw(addr, prev);
+  for (uint8_t n = 1; n < MAX_READS && !agreed; n++) {
+    readRaw(addr, r);
+    agreed = memcmp(r, prev, FRAME_BYTES) == 0;
+    if (!agreed) {
+      stats.spi_errors = stats.spi_errors + 1;
+      memcpy(prev, r, FRAME_BYTES);
+    }
+  }
+  clearBits(REG_CANINTF, flag);
+  if (!agreed) {
+    return false;
+  }
 
   uint32_t sid = ((uint32_t)r[0] << 3) | (r[1] >> 5);
   f.ext = (r[1] & 0x08) ? 1 : 0;
@@ -87,6 +114,19 @@ static void readBuffer(uint8_t instruction, CanFrame &f) {
   uint8_t n = f.dlc > 8 ? 8 : f.dlc;
   memset(f.data, 0, sizeof(f.data));
   memcpy(f.data, &r[5], n);
+  return true;
+}
+
+// READ STATUS twice: a flipped bit here made us read empty buffers (phantom frames).
+// A flag only counts if both reads show it; a frame that arrives between them
+// is picked up on the next pass.
+static uint8_t readFlags() {
+  uint8_t a = readStatus() & (RX0IF | RX1IF);
+  uint8_t b = readStatus() & (RX0IF | RX1IF);
+  if ((a & ~b) != 0) {
+    stats.spi_errors = stats.spi_errors + 1;
+  }
+  return a & b;
 }
 
 static void push(CanFrame &f) {
@@ -103,14 +143,12 @@ static void push(CanFrame &f) {
 static void rxTask(void *) {
   int64_t lastStats = 0;
   while (true) {
-    uint8_t status = readStatus();
+    uint8_t flags = readFlags();
     CanFrame f;
-    if (status & 0x01) {  // RX0IF
-      readBuffer(INS_READ_RXB0, f);
+    if ((flags & RX0IF) && readBuffer(REG_RXB0SIDH, RX0IF, f)) {
       push(f);
     }
-    if (status & 0x02) {  // RX1IF
-      readBuffer(INS_READ_RXB1, f);
+    if ((flags & RX1IF) && readBuffer(REG_RXB1SIDH, RX1IF, f)) {
       push(f);
     }
 
@@ -119,7 +157,7 @@ static void rxTask(void *) {
       lastStats = now;
       if (readRegister(REG_EFLG) & 0xC0) {  // RX1OVR | RX0OVR
         stats.hw_overflows = stats.hw_overflows + 1;
-        clearOverflowFlags();
+        clearBits(REG_EFLG, 0xC0);  // otherwise they stay set forever
       }
       stats.rx_err = readRegister(REG_REC);
       stats.tx_err = readRegister(REG_TEC);
@@ -153,6 +191,7 @@ CanStats can_rx_stats() {
   s.frames = stats.frames;
   s.queue_drops = stats.queue_drops;
   s.hw_overflows = stats.hw_overflows;
+  s.spi_errors = stats.spi_errors;
   s.rx_err = stats.rx_err;
   s.tx_err = stats.tx_err;
   return s;

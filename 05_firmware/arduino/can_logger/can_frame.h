@@ -16,6 +16,7 @@ struct CanStats {
   uint32_t frames;         // frames read from the MCP2515 since boot
   uint32_t queue_drops;    // frames lost because the RAM queue was full (SD too slow)
   uint32_t hw_overflows;   // MCP2515 overflow events (frames lost before we could read them)
+  uint32_t spi_errors;     // SPI reads that disagreed with each other (noise on the MCP2515 link)
   uint8_t rx_err;          // MCP2515 receive error counter
   uint8_t tx_err;          // MCP2515 transmit error counter
 };
