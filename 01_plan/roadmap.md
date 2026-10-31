@@ -19,12 +19,27 @@ Presupuesto: ~14 h por ciclo (1 h/día, desde el 20-oct; antes 2 h/día).
 | **C01** | 28 sep → 11 oct | Modelo longitudinal antes que datos (pivote 8-oct) — **hecho** | vie 9 oct |
 | **C02** | 20 → 30 oct     | Motor + inversor: **modelar y saber explicarlo**. Nada de validar. Ver [C02](C02.md) | **vie 30 oct** |
 | **C03** | 31 oct → 13 nov | Modelo dq (L3), primer control (lazo abierto/cerrado, PI) y el motor en Simulink (L4). Plan en Google Calendar (25-oct); artifacts aún sin construir | vie 13 nov        |
-| **C04** | 14 → 27 nov     | ⚠️ En discusión (20-oct)                       | vie 27 nov        |
-| **C05** | 28 nov → 11 dic | ⚠️ En discusión (20-oct)                       | vie 11 dic        |
-| **C06** | 12 → 25 dic     | ⚠️ En discusión (20-oct). Navidad: probablemente se mueve | vie 25 dic |
+| **C04** | 14 → 27 nov     | Dirección (1-nov): validar el modelo de motor con los logs CAN | vie 27 nov        |
+| **C05** | 28 nov → 11 dic | Dirección: validación del vehículo (coast-down, aceleración) con el registrador | vie 11 dic        |
+| **C06** | 12 → 25 dic     | Dirección: cerrar el modelo validado; unidad de control v0 si cabe. Navidad: probablemente se mueve | vie 25 dic |
 
 **Secuencia decidida el 20-oct:** modelo de motor + inversor → data logger → validación
 (coast-down, correlación modelo ↔ vehículo). Sin logger no hay datos y sin datos no se valida.
+
+**Actualizada el 1-nov:** el registrador CAN se adelantó y funciona (31-oct, EXP-002), así
+que el eslabón de los datos ya está. Orden acordado con Pol:
+
+1. **C03 sin cambios:** modelo dq y lazo PI en Simulink. Inversor y motor.
+2. **Validar el motor con los logs:** corriente, erpm, ciclo de trabajo y tensión del VESC
+   contra el modelo (p. ej. ciclo × tensión frente a erpm debe dar λm).
+3. **Unidad de control v0** (dic–ene): acelerador → ESP32 → orden de corriente por CAN →
+   VESC. Sin control, con las protecciones en el código. Revisar DEC-004 antes.
+4. **IMU y velocidad de rueda** registradas en la SD.
+5. **Control de tracción:** primero en Simulink, después en el ESP32.
+
+**Fuera, por decisión de Pol:** el BMS por CAN (el VESC ya da tensión y corriente del pack;
+el foco es motor e inversor). Recordatorio: la unidad de control enseña control de vehículo
+y C embebido, no inversor; el inversor se aprende en el modelo.
 
 **Fin de 2026: modelo validado contra el vehículo real.** Ese es el objetivo del año.
 
@@ -111,6 +126,10 @@ produce un sistema que parece funcionar y que no se puede depurar, porque no sab
 capa está mintiendo.
 
 ## El data logger: por qué NO va primero, y la excepción
+
+> [!note] Historia
+> Escrito antes de construirlo. El registrador existe desde el 31-oct-2026 y graba con
+> carga sin depender del USB del VESC: lo de abajo queda como razonamiento de entonces.
 
 **El problema real:** hoy solo puedo registrar con el motor en vacío. Con el vehículo
 funcionando, el USB del VESC se corta bajo carga. Para logs con carga haría falta un
