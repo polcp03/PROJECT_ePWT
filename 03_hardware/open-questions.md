@@ -61,6 +61,12 @@ contacto eléctrico con un sistema de 54 V que conmuta, sin nada en medio.
 a red exige aislamiento galvánico. ISO1050 para el CAN, ADUM3160 para el USB.
 Ver `shopping-list.md`.
 
+> [!note] 2026-10-31: el registrador lo evita sin aislar
+> El registrador CAN se alimenta de su propia batería de 12 V: no hay equipo de red en el
+> lazo, así que no hace falta el ISO1050 ([DEC-004](../08_decisions/DEC-004-can-sin-aislar-logger-flotante.md)).
+> Portátil por USB solo sin cargador. Y el registrador graba con carga sin depender del
+> USB del VESC, así que el corte de USB deja de bloquear los datos.
+
 ## Riesgo 3 — El motor no está identificado con certeza
 
 La referencia MY1020/BM1109 no está confirmada. Caracterizarlo (R de fase, back-EMF,

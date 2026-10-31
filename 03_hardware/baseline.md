@@ -1,6 +1,7 @@
 # Hardware baseline — the quad as it is today
 
-**Source of truth for the hardware.** Last full review: 2026-10-25.
+**Source of truth for the hardware.** Last full review: 2026-10-25. CAN, battery and
+electronics updated 2026-11-01 (CAN logger working).
 
 Every value carries a tag: **MEASURED** (on this vehicle) · **VESC_ESTIMATE** (VESC
 detection, not independent) · **CONFIG** (typed in by a human) · **ASSUMED** (guess,
@@ -87,10 +88,15 @@ no decoupling, MTPA off, field weakening off.
 | Duty | 0.95 |
 | Battery cut-off | 44.2 → 39.0 V |
 
-**CAN:** mode = UNUSED (bus silent). No on-board termination (217 Ω measured unpowered
-= transceiver leakage): both 120 Ω terminators must be external. Set CAN mode to VESC
-before any bus bring-up. **Any link VESC ↔ mains-referenced equipment needs galvanic
-isolation** (see EXP-001).
+Firmware **7.01** (CONFIG, read in VESC Tool 2026-10-31).
+
+**CAN:** mode = **VESC**, 500 kbit/s, controller ID **15**, status messages 1–6 at 50 Hz
+(≈ 290 frames/s). Extended id = `(packet << 8) | 15`. Connector pins: `-` (GND), CAL,
+CAH, 5V (5V unused). Termination on the VESC side **unclear**: with the logger's 120 Ω
+fitted, CAN-H–CAN-L read 88 Ω, and the readings do not add up; the bus runs with
+0 errors on a short cable, so it is left as is. **Any link VESC ↔ mains-referenced
+equipment needs galvanic isolation** (EXP-001); the logger avoids it by floating on its
+own 12 V battery ([DEC-004](../08_decisions/DEC-004-can-sin-aislar-logger-flotante.md)).
 
 Observed in use: battery current peaks ~40 A, typical 20 A; at launch the motor-current
 limit is reached, then duty becomes the limit as speed rises.
@@ -99,12 +105,15 @@ limit is reached, then duty becomes the limit as speed rises.
 
 13S5P, 65 × SINC ISR18650-26A (no verified datasheet), ~13 Ah.
 48.1 V nominal, 54.6 V full, 39.0 V empty.
-`R_int` 0.10 Ω [0.06–0.15] ASSUMED — measure from voltage sag in a log.
+Pack resistance **≈ 0.18 Ω, battery + wiring + BMS** — MEASURED 2026-10-31, CAN log
+(50.9 V at rest → 45.8 V at 29 A; [EXP-002](../07_experiments/EXP-002-ruido-spi-can-logger.md)).
+Replaces the 0.10 Ω assumption. ~70 mΩ per cell equivalent: part of it is wiring.
 Design assumption 5 A/cell = 25 A continuous; observed peaks ~40 A. **Risk 1** in
 [open-questions](open-questions.md).
 
 BMS: JK-BD4A17S4P, 40 A continuous, active balancing, Bluetooth only in use.
-Physical comms interface not verified (BMS stays mounted).
+Pol reports a CAN output with a closed protocol (`syssi/esphome-jk-bms` documents JK
+protocols); not connected. The VESC already reports pack voltage and current.
 
 ## 7. Driver inputs and sensors
 
@@ -118,18 +127,20 @@ Physical comms interface not verified (BMS stays mounted).
 | Item | Status |
 |---|---|
 | ESP32-WROOM-32 (original) | **Destroyed** 2026-09-07 (ground loop, EXP-001) |
-| ESP32 ×3 (new) | Bought, reported 2026-10-20. Not yet used |
-| MCP2515 + TJA1050 CAN module | **Retired** — 5 V logic, not isolated |
-| microSD module + 16 GB card, D4184 DC/DC, protoboard | Available |
+| ESP32 ×3 (new) | No. 2 runs the CAN logger (verified 2026-10-31); two spare |
+| MCP2515 + TJA1050 CAN module | **In use** in the logger, 5 V, SO through a 1k/2k divider ([DEC-004](../08_decisions/DEC-004-can-sin-aislar-logger-flotante.md)) |
+| microSD module (AMS1117) + 16 GB card | In use in the logger |
+| 12 V battery + DC-DC to 5 V (5.3 V out) | Powers the logger, floating from the 13S pack |
+| D4184 module, protoboard | Available. D4184 was listed as a DC/DC; the part number is a MOSFET switch module — check |
 | Oscilloscope, multimeter, soldering | Available. Floating phase voltages need a differential probe |
 
-Isolated CAN (ISO1050) and the rest: [shopping-list](shopping-list.md).
-**Firmware is parked until the data-logger cycle** (after C03, see roadmap).
+**CAN logger working** (2026-11-01): [`05_firmware/arduino/can_logger/`](../05_firmware/arduino/can_logger/README.md).
+What is still to buy: [shopping-list](shopping-list.md).
 
 ## 9. Still open
 
-Magnet arrangement · slot count · `r_roll` · `h_cg` · axle weights · `R_int` · cell
+Magnet arrangement · slot count · `r_roll` · `h_cg` · axle weights · cell
 current capability · drivetrain efficiency · control-loop period (15 vs 30 kHz) ·
-VESC firmware version · BMS overcurrent settings.
+BMS overcurrent settings · VESC-side CAN termination.
 
 Superseded source: the August 2026 "master technical context" (in `_archive/`).

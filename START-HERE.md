@@ -26,7 +26,7 @@ Haz solo la fila de hoy. El día exacto también está en Google Calendar (07:00
 | `02_knowledge/` | Lo que he aprendido, en mis palabras, y mis errores | Antes de cada examen |
 | `03_hardware/` | El quad: lo medido. Fuente de verdad | Cuando necesito un número |
 | `04_model/` | Simulink: gemelo digital | En las tareas de modelo |
-| `05_firmware/` | ESP32 / Arduino — **parado** hasta el ciclo del data logger | No |
+| `05_firmware/` | ESP32 / Arduino. **Registrador CAN funcionando** (`arduino/can_logger/`) | Al grabar |
 | `06_data/` | Ensayos por campaña | Cuando haya datos |
 | `07_experiments/` · `08_decisions/` | Hipótesis → medida; decisiones con su porqué | Al cerrar algo |
 | `../BOOKS/` | Biblioteca, en la raíz del repositorio (fuera de Git). Índice en [fuentes](02_knowledge/fuentes.md) | Lo filtra Claude |

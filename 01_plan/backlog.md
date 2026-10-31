@@ -34,19 +34,20 @@ Debe entregar **fuentes + preguntas**, no conclusiones.
 |---|---|
 | **Agente examinador** (alimentado con libros de texto, me cuestiona antes de las reviews) | Que exista material de referencia elegido y ≥3 ciclos de rutina que codificar |
 | ~~**Skills propias**~~ | **Activado 2026-10-25:** `review-deck`, `leccion` y `corregir` existen. Siguientes (analizar datos, documentar decisión): misma regla, 3 veces a mano |
-| **CI: compilar el firmware en cada push** | Que haya firmware propio en el repo |
-| **Logger de telemetría propio (ESP32 + CAN)** | Que el gemelo necesite datos que el VESC Tool no da. Revisar VESC Express antes de escribir nada |
-| **Dashboard / análisis en Python de los logs** | Que existan los primeros CSV |
+| **CI: compilar el firmware en cada push** | Condición cumplida (2026-10-31): ya hay firmware propio. Pendiente de decidir cuándo |
+| ~~**Logger de telemetría propio (ESP32 + CAN)**~~ | **Hecho 2026-10-31**, adelantado por Pol: `05_firmware/arduino/can_logger/`. Graba con gas sin errores (EXP-002) |
+| **Dashboard / análisis en Python de los logs** | Condición cumplida: ya hay CSV. Hoy existe `04_model/scripts/can_log_decode.py` (resumen + figura); más, cuando el análisis lo pida |
 | **Hook de fin de sesión: avisar de trabajo sin commitear** | Haber cerrado 3 sesiones más olvidando el commit. Ver la nota de abajo |
 | **Control de tracción, launch control** | Modelo validado + control de par funcionando |
 | **MPC** | Modelo validado. MPC sin modelo es imposible por definición |
 | **Percepción, cámaras, autonomía, robot acompañante** | Muy lejos. Mantener como horizonte, no planificar |
 | **Diagnóstico del corte de USB del VESC bajo carga** | Fallo conocido en la comunidad VESC (EMI / bucle de tierra / pull-ups). 30 min de osciloscopio antes de construir nada para evitarlo |
 | **Decidir `l_in_current_max` (hoy 40 A = límite continuo del BMS)** | Salió del modelo C01: por encima de 9 km/h cada aceleración a fondo va pegada a 40 A. Llevado a la review C01 como pregunta a los mentores |
-| **Medir `R_int` del pack** | Caída de tensión ante un escalón de corriente en un log del VESC. Hoy ASSUMED 0,10 Ω sin datasheet |
+| ~~**Medir `R_int` del pack**~~ | **Hecho 2026-10-31:** ≈ 0,18 Ω batería + cables + BMS, de un log CAN (EXP-002). Falta pasarlo a `04_model/params/` |
 | **`si_wheel_diameter` 0,30 m vs `2·r_roll` 0,31 m** | Decidir cuál vale cuando se haga el roll-out con neumáticos nuevos |
 | **Altura del CG (`h_cg`)** | MISSING. La necesita el load transfer del L2 (examen C01, bloque I) |
-| **EXP-001 (bucle de tierra) sin medir** | Sigue sin día. Antes de montar el ESP32 nuevo: M1 y M2 son 20 min de multímetro |
+| **EXP-001 (bucle de tierra) sin medir** | Sigue sin día. El registrador lo esquiva flotando (DEC-004); vuelve a importar si el ESP32 manda par al VESC |
+| **BMS por CAN** | Solo si hace falta la tensión o la temperatura por celda. La tensión y la corriente del pack ya llegan del VESC, y el foco es motor e inversor (Pol, 2026-11-01) |
 
 ---
 

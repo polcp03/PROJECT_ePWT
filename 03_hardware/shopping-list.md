@@ -1,54 +1,46 @@
 # Lista de compra — hardware pendiente
 
-Actualizada 2026-09-07. Marcar `[x]` al recibir y mover al inventario de `baseline.md`.
+Actualizada 2026-11-01, con el registrador CAN funcionando. Marcar `[x]` al recibir y
+mover al inventario de `baseline.md`.
 
-## Prioridad 1 — bloquea el logger de CAN
+## Ahora — para usar el registrador montado en el quad (~15 €)
 
-- [x] **ESP32-WROOM-32 DevKit** — comprados 3 (Pol, 2026-10-20)
-  Buscar: `ESP32 WROOM 32 DevKit 38 pin`
-  ~6 €/ud. Uno para el logger, otro para hacer de VESC falso en banco.
-  El Starter Kit del inventario **no trae placa** (verificado 2026-09-07).
-
-- [ ] **Módulo CAN aislado ISO1050 ×1**
-  Buscar: `ISO1050 isolated CAN transceiver module`
-  ~10 €. **Sustituye al MCP2515/TJA1050.** Aislamiento galvánico entre el lado del
-  VESC y el lado del ESP32: es la causa raíz del incidente del 07-09.
-  Alternativa barata y peor: `SN65HVD230` (~3 €) — 3,3 V nativo pero **sin aislar**.
-
-- [ ] **Lector microSD USB ×1**
+- [ ] **Lector microSD USB ×1** · ~5 €
   Buscar: `lector tarjetas microSD USB`
-  ~5 €. El PC no tiene ranura SD (verificado: solo lector de smartcards del teclado HP).
-  El adaptador microSD→SD que ya hay es pasivo, no sirve sin ranura.
+  El PC no tiene ranura SD. Descargar por el USB del ESP32 funciona pero mete basura en
+  ficheros grandes (hay que bajar cada uno tres veces). Con lector: segundos y sin errores.
 
-## Prioridad 2 — diagnóstico del Riesgo 2 (corte de USB del VESC bajo carga)
+- [ ] **Placa perforada + tiras de pines hembra** · ~5 €
+  Buscar: `placa perforada PCB prototipo 7x9 cm` y `tira pines hembra 2.54`
+  La protoboard con cables dupont no aguanta las vibraciones del quad, y los cables
+  largos del SPI fueron la entrada del ruido (EXP-002). Soldado y corto. ESP32 y módulos
+  en zócalos de pines hembra, para poder cambiarlos.
 
-- [ ] **Aislador USB ADUM3160 ×1**
-  Buscar: `USB isolator ADUM3160`
-  ~12 €. Pedido por `01_plan/backlog.md`. Corta la conexión eléctrica PC↔VESC dejando
-  pasar los datos. USB 1.1 (velocidad baja) — suficiente para VESC Tool.
-
-- [ ] **Ferritas de pinza, pack ×1**
-  Buscar: `ferrite clamp 5mm 7mm cable`
-  ~6 €. La otra mitad de la bisección EMI vs bucle de tierra (ver `EXP-001`).
-
-- [ ] **Resistencias 120 Ω 1/4 W, pack ×1**
-  Buscar: `resistencias 120 ohm 1/4W`
-  ~3 €. Medido el 07-09: **el VESC no lleva terminación de bus** (217 Ω entre CAN-H y
-  CAN-L con la placa sin alimentar = fuga por el transceptor, no una resistencia real).
-
-## Total aproximado
-
-~48 €
+- [ ] **Caja de plástico pequeña** · ~5 € (opcional)
+  Buscar: `caja estanca ABS 100x68x50`
+  Polvo y barro. De plástico: una de aluminio habría que conectarla a masa con criterio.
 
 ## Ya en inventario — NO comprar
 
-- Módulo microSD AMS1117 + tarjeta Kodak 16 GB
-- Protoboard, cables dupont
-- Osciloscopio, multímetro, equipo de soldadura
+- ESP32 ×2 de repuesto (el nº 2 hace de registrador)
+- MCP2515 + TJA1050, módulo microSD + tarjeta Kodak 16 GB, batería 12 V + DC-DC a 5 V
+- **Para los pasos siguientes:** IMU GY-LSM6DS3, sensores Hall 3144 + imanes (velocidad
+  de rueda), el acelerador Hall de 5 V
+- Protoboard, cables dupont, resistencias, osciloscopio, multímetro, soldador
 
-## Descartado
+## Cuando toque la unidad de control del vehículo
 
-- **MCP2515 + TJA1050**: se queda en el cajón. 5 V contra los 3,3 V del ESP32, sin
-  aislamiento, y añade un bus SPI que compite con el módulo SD. El ISO1050 lo sustituye.
-- **ESP32-WROOM-32 nº 1**: destruido el 2026-09-07. Cortocircuito interno. Marcar y
-  guardar aparte para no confundirla con una buena.
+Nada todavía. Lo que haga falta (corte de emergencia, adaptar el acelerador de 5 V a la
+entrada de 3,3 V del ESP32) se decide al diseñarla, no antes.
+
+## Descartado o aplazado
+
+- **Módulo CAN aislado ISO1050:** descartado el 2026-10-31. El registrador flota con su
+  propia batería; ver [DEC-004](../08_decisions/DEC-004-can-sin-aislar-logger-flotante.md).
+  Se revisa si el ESP32 llega a mandar par al VESC.
+- **Aislador USB ADUM3160 y ferritas de pinza:** aplazados. Eran para diagnosticar el corte
+  del USB del VESC bajo carga; el registrador ya graba con carga sin USB.
+- **Resistencias de 120 Ω:** aplazadas. El MCP2515 trae la suya (jumper J1) y el bus
+  funciona con 0 errores.
+- **ESP32-WROOM-32 nº 1:** destruido el 2026-09-07. Cortocircuito interno. Marcada y
+  guardada aparte para no confundirla con una buena.
