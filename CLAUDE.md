@@ -12,14 +12,15 @@ y control en Israel. Saber explicarlo en una entrevista es la prueba final.
 > NEWS_Engineering, junto al brief semanal y a `carrera/` (la preparación para Israel). Se
 > unió para que una sola sesión vea el quad y el currículum a la vez. Consecuencias:
 > - **Todas las rutas de este fichero son relativas a `PROJECT_ePWT/`.** Desde la raíz: `PROJECT_ePWT/01_plan/`…
-> - **Estas reglas mandan solo en `PROJECT_ePWT/`.** El modo ingeniero senior y "cerebro primero"
->   no se aplican al brief ni a `carrera/`, que tienen las suyas en el `CLAUDE.md` de la raíz.
+> - **Estas reglas mandan en `PROJECT_ePWT/`** y, para todo lo que Pol tenga que aprender fuera
+>   de aquí (entrevistas, software), las aplica la skill `como-aprendo`. No se aplican al brief.
 > - **Git:** se trabaja en `polcp03/NEWS_Engineering` (privado). `polcp03/PROJECT_ePWT` es el
 >   **portfolio público**: una copia de esta carpeta que la tarea «Sincronizar con GitHub»
->   actualiza cada noche con lo ya fusionado. **Nunca se edita allí.** Todo lo que se escriba
+>   actualiza cada domingo con lo ya fusionado. **Nunca se edita allí.** Todo lo que se escriba
 >   en `PROJECT_ePWT/` acaba siendo público. Para ePWT se sigue trabajando con rama + Pull Request;
 >   `git pull --no-rebase`, nunca rebase. Commits de `PROJECT_ePWT/` en inglés, como siempre.
-> - Skills (`leccion`, `corregir`, `review-deck`), `.mcp.json` y `BOOKS/` están en la raíz.
+> - Skills (`leccion`, `corregir`, `review-deck`, `como-aprendo`), agentes (`entrevistador`,
+>   `critico`, `investigador`), `.mcp.json` y `BOOKS/` están en la raíz.
 > - **Al cerrar un ciclo**, apunta lo demostrado en `../carrera/logros.md`. Es de donde sale
 >   el currículum.
 

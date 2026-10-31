@@ -23,7 +23,8 @@ drones, semiconductores, IA, ecosistema israelí, y referentes técnicos concret
 *Argumento a favor (suyo, válido):* no quiere perder tiempo en redes; prefiere
 señal filtrada de gente cuyas acciones tienen consecuencias reales.
 *Riesgo a vigilar:* una síntesis que se acepta sin cuestionar es cognición delegada.
-Si se construye, debe entregar **fuentes + preguntas**, no conclusiones.
+Debe entregar **fuentes + preguntas**, no conclusiones.
+*Hecho desde septiembre de 2026:* es el brief semanal de los lunes, fuera de esta carpeta.
 
 ---
 
@@ -49,20 +50,24 @@ Si se construye, debe entregar **fuentes + preguntas**, no conclusiones.
 
 ---
 
-## Hacia robótica — apuntado el 30 de octubre de 2026, sin plan
+## Hacia robótica — apuntado, sin plan
 
-Decidido: el quad tiene que acabar enseñando **software de robot**, no solo física. Las
-startups de robótica piden C++, Linux, ROS 2 y comunicaciones, y hoy el repositorio no tiene
-código que lo demuestre. La idea no es añadir un proyecto al lado, sino **construir lo que el
-quad ya necesita con las herramientas de la robótica**. Nada de esto se planifica todavía: se
-concreta al abrir el ciclo que toque, y se decide juntos.
+**Decidido el 31 de octubre de 2026: primero se termina el quad.** Nada de ROS 2 ni de
+sensores de robot dentro de los ciclos actuales. El orden:
 
-| Idea | Cuándo, y por qué ahí |
-|---|---|
-| **Registrador de datos con ROS 2.** Ordenador Linux pequeño (tipo Raspberry Pi) que lee el VESC por CAN, publica la telemetría como topics de ROS 2, la graba en rosbag y se ve con Foxglove | Sustituye al logger con ESP32 de arriba, que ya hacía falta para validar (C05). Una sola pieza enseña Linux, C++ o Python, ROS 2, CAN y git, y deja código público |
-| **Fusión de sensores.** Unidad inercial + velocidad de rueda en un filtro de Kalman extendido, para tener la velocidad y la posición reales del quad | Primer trimestre de 2027, con el registrador funcionando. Sirve para validar el modelo y es la pregunta de Kalman de cualquier entrevista |
-| **Control en el hardware, en C/C++.** El lazo de control del modelo, escrito y corriendo en el microcontrolador | Primer trimestre de 2027, ya en el roadmap. Es lo que convierte "sé Simulink" en "sé hacer firmware" |
-| **Lidar, cámara, gemelo digital con sensores, autonomía** | **No antes de 2027, y solo si es útil de verdad**: cuando haya una pregunta que el quad no pueda contestar sin ellos. Sin cadena de percepción detrás es una demo, no ingeniería. La autonomía exige además un actuador de dirección, que es hardware nuevo |
+1. **Terminar el quad**: el modelo validado contra el vehículo (C02–C06).
+2. **Vehicle Control Unit propia**: la unidad que manda sobre el inversor.
+3. **Programar en C** sobre esa unidad: el lazo de control del modelo, corriendo en el
+   microcontrolador. Es lo que convierte "sé Simulink" en "sé hacer firmware".
+4. **Telemetría**: sacar los datos del vehículo en marcha (ver el logger de arriba).
+5. **Después, decidir** entre dos caminos:
+   - **Quad autónomo**: ROS 2, lidar, cámara, fusión de sensores (unidad inercial + velocidad de
+     rueda en un filtro de Kalman). Exige un actuador de dirección, que es hardware nuevo.
+   - **Dron autónomo**: proyecto nuevo, donde ROS 2 y la percepción son el centro.
+
+El motivo de fondo no cambia: las startups de robótica piden C/C++, Linux, ROS 2 y
+comunicaciones, y hoy el repositorio no tiene código que lo demuestre. Los pasos 2–4 empiezan a
+cubrirlo sin salir del quad; el 5 se decide juntos cuando llegue.
 
 ---
 
@@ -70,7 +75,7 @@ concreta al abrir el ciclo que toque, y se decide juntos.
 
 > **Actualizado el 2026-10-30: ya se automatiza, con revisión.** Pol decidió que no quiere
 > hacer el trabajo de git a mano: lo hace un agente y él es el revisor. La tarea
-> «Sincronizar con GitHub» (cada noche, 22:00, en el PC) agrupa los cambios por tema en
+> «Sincronizar con GitHub» (cada domingo, en el PC; cada noche hasta el 31-oct-2026) agrupa los cambios por tema en
 > commits con su porqué, abre un Pull Request y Pol lo fusiona. Eso responde a la objeción
 > de abajo: el criterio lo pone el agente y Pol lo valida en el PR, en vez de un commit
 > automático a ciegas. Procedimiento en `../prompts/sincronizar.md`. Lo de abajo queda
