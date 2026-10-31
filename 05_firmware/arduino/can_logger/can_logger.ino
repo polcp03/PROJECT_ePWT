@@ -20,6 +20,24 @@ static State state = State::Idle;
 static unsigned long lastSecond = 0;
 static bool sdReady = false;
 
+// Why the chip restarted. BROWNOUT = supply dipped below ~2.4 V on 3V3;
+// PANIC = firmware crash; TASK_WDT / INT_WDT = something hung; POWERON = power was cut.
+static const char *resetReasonName(esp_reset_reason_t r) {
+  switch (r) {
+    case ESP_RST_POWERON:   return "POWERON";
+    case ESP_RST_EXT:       return "EXT_PIN";
+    case ESP_RST_SW:        return "SOFTWARE";
+    case ESP_RST_PANIC:     return "PANIC";
+    case ESP_RST_INT_WDT:   return "INT_WDT";
+    case ESP_RST_TASK_WDT:  return "TASK_WDT";
+    case ESP_RST_WDT:       return "OTHER_WDT";
+    case ESP_RST_DEEPSLEEP: return "DEEPSLEEP";
+    case ESP_RST_BROWNOUT:  return "BROWNOUT";
+    case ESP_RST_SDIO:      return "SDIO";
+    default:                return "UNKNOWN";
+  }
+}
+
 static void startRecording() {
   // Retry the card each time: it may have been inserted after boot.
   if (!sdReady) {
@@ -70,7 +88,12 @@ void setup() {
     while (true) { control_led(LedMode::Error); }
   }
   sdReady = sd_log_begin();
-  Serial.printf("can_logger ready - SD %s - press BOOT to record\n", sdReady ? "OK" : "MISSING");
+  const char *reason = resetReasonName(esp_reset_reason());
+  if (sdReady) {
+    sd_log_boot(reason);
+  }
+  Serial.printf("can_logger ready - last reset: %s - SD %s - press BOOT to record\n", reason,
+                sdReady ? "OK" : "MISSING");
 }
 
 void loop() {

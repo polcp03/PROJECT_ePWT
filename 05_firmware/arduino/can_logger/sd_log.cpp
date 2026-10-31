@@ -7,9 +7,28 @@ static const uint8_t PIN_CS = 5;
 static File file;
 static char fileName[16] = "";
 static int64_t t0 = 0;
+static char bootLine[48] = "";
 
 bool sd_log_begin() {
   return SD.begin(PIN_CS);
+}
+
+// One line per boot in /boot.txt, so restarts in the field leave a trace.
+void sd_log_boot(const char *reason) {
+  int n = 1;
+  File f = SD.open("/boot.txt", FILE_READ);
+  if (f) {
+    while (f.available()) {
+      if (f.read() == '\n') n++;
+    }
+    f.close();
+  }
+  snprintf(bootLine, sizeof(bootLine), "#boot,%d,%s", n, reason);
+  f = SD.open("/boot.txt", FILE_APPEND);
+  if (f) {
+    f.println(bootLine + 1);  // without the '#'
+    f.close();
+  }
 }
 
 // Next number = highest existing log_NNN.csv + 1, so old recordings are never overwritten.
@@ -33,12 +52,19 @@ bool sd_log_open() {
   if (!file) {
     return false;
   }
+  if (bootLine[0]) {
+    file.println(bootLine);
+  }
   file.println("t_us,id,ext,dlc,d0,d1,d2,d3,d4,d5,d6,d7");
   t0 = esp_timer_get_time();
   return true;
 }
 
 bool sd_log_frame(const CanFrame &f) {
+  // Frames queued while the file was being opened belong to before the recording.
+  if (f.t_us < t0) {
+    return true;
+  }
   char line[80];
   int n = snprintf(line, sizeof(line), "%lld,%lX,%u,%u",
                    (long long)(f.t_us - t0), (unsigned long)f.id, f.ext, f.dlc);

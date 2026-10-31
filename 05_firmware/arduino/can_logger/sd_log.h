@@ -2,6 +2,7 @@
 // Stores raw frames; decoding happens on the PC, so a new CAN node never changes this module.
 //
 // File format:
+//   #boot,<n>,<reset reason>                       why the ESP32 last restarted
 //   t_us,id,ext,dlc,d0,d1,d2,d3,d4,d5,d6,d7      t_us since recording start, id and data in hex
 //   #stat,t_us,frames,queue_drops,hw_overflows,rx_err,tx_err   once per second
 // pandas: read_csv(path, comment='#') skips the #stat lines.
@@ -10,6 +11,7 @@
 #include "can_frame.h"
 
 bool sd_log_begin();                    // false if no card or not FAT32
+void sd_log_boot(const char *reason);   // appends to /boot.txt; also goes into each log header
 bool sd_log_open();                     // opens the next free log_NNN.csv
 bool sd_log_frame(const CanFrame &f);   // false if the write failed (card removed, full)
 void sd_log_stats(const CanStats &s, int64_t t_us);
