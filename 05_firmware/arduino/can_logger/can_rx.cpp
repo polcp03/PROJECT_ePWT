@@ -9,26 +9,92 @@ static const int8_t PIN_MISO = 27;
 static const int8_t PIN_MOSI = 13;
 static const int8_t PIN_CS = 26;
 
-// 1024 frames = about 5 s of VESC traffic at 200 frames/s before the SD must catch up.
+// 4 MHz instead of the library's 10 MHz: the divider and breadboard wires round off
+// the MISO edges, and at 10 MHz bits flipped. 300 frames/s needs well under 1 MHz.
+static const SPISettings SPI_CFG(4000000, MSBFIRST, SPI_MODE0);
+
+// 1024 frames = about 3 s of VESC traffic at 300 frames/s before the SD must catch up.
 static const int QUEUE_LEN = 1024;
 static const int64_t STATS_PERIOD_US = 10000;
 
+// MCP2515 SPI instructions and registers (datasheet DS20001801, section 12)
+static const uint8_t INS_READ = 0x03;
+static const uint8_t INS_BIT_MODIFY = 0x05;
+static const uint8_t INS_READ_STATUS = 0xA0;
+static const uint8_t INS_READ_RXB0 = 0x90;  // reading from RXB0SIDH clears RX0IF on CS high
+static const uint8_t INS_READ_RXB1 = 0x94;
+static const uint8_t REG_TEC = 0x1C;
+static const uint8_t REG_REC = 0x1D;
+static const uint8_t REG_EFLG = 0x2D;
+
 static SPIClass canSpi(HSPI);
-static MCP_CAN can(&canSpi, PIN_CS);
+static MCP_CAN can(&canSpi, PIN_CS);  // only used to configure the chip at boot
 static QueueHandle_t queue;
 static volatile CanStats stats;
 
-// The library reads the error flags but cannot clear them, so the overflow
-// bits would stay set forever. SPI BIT MODIFY (0x05) on EFLG (0x2D), bits 7:6.
-static void clearOverflowFlags() {
-  canSpi.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
+static uint8_t readRegister(uint8_t addr) {
+  canSpi.beginTransaction(SPI_CFG);
   digitalWrite(PIN_CS, LOW);
-  canSpi.transfer(0x05);
-  canSpi.transfer(0x2D);
+  canSpi.transfer(INS_READ);
+  canSpi.transfer(addr);
+  uint8_t v = canSpi.transfer(0);
+  digitalWrite(PIN_CS, HIGH);
+  canSpi.endTransaction();
+  return v;
+}
+
+// Clears the overflow bits 7:6 of EFLG, which otherwise stay set forever.
+static void clearOverflowFlags() {
+  canSpi.beginTransaction(SPI_CFG);
+  digitalWrite(PIN_CS, LOW);
+  canSpi.transfer(INS_BIT_MODIFY);
+  canSpi.transfer(REG_EFLG);
   canSpi.transfer(0xC0);
   canSpi.transfer(0x00);
   digitalWrite(PIN_CS, HIGH);
   canSpi.endTransaction();
+}
+
+static uint8_t readStatus() {
+  canSpi.beginTransaction(SPI_CFG);
+  digitalWrite(PIN_CS, LOW);
+  canSpi.transfer(INS_READ_STATUS);
+  uint8_t s = canSpi.transfer(0);
+  digitalWrite(PIN_CS, HIGH);
+  canSpi.endTransaction();
+  return s;
+}
+
+// Reads one receive buffer in a single SPI transaction: SIDH SIDL EID8 EID0 DLC D0..D7.
+// Written here instead of using the library because the library trusts the DLC:
+// a corrupted DLC of 9..15 made it copy past its 8-byte buffer and crash the ESP32.
+static void readBuffer(uint8_t instruction, CanFrame &f) {
+  uint8_t r[13];
+  canSpi.beginTransaction(SPI_CFG);
+  digitalWrite(PIN_CS, LOW);
+  canSpi.transfer(instruction);
+  for (uint8_t i = 0; i < sizeof(r); i++) {
+    r[i] = canSpi.transfer(0);
+  }
+  digitalWrite(PIN_CS, HIGH);
+  canSpi.endTransaction();
+
+  uint32_t sid = ((uint32_t)r[0] << 3) | (r[1] >> 5);
+  f.ext = (r[1] & 0x08) ? 1 : 0;
+  f.id = f.ext ? (sid << 18) | ((uint32_t)(r[1] & 0x03) << 16) | ((uint32_t)r[2] << 8) | r[3]
+               : sid;
+  f.dlc = r[4] & 0x0F;  // kept as read, so a corrupted value stays visible in the log
+  uint8_t n = f.dlc > 8 ? 8 : f.dlc;
+  memset(f.data, 0, sizeof(f.data));
+  memcpy(f.data, &r[5], n);
+}
+
+static void push(CanFrame &f) {
+  f.t_us = esp_timer_get_time();
+  stats.frames = stats.frames + 1;
+  if (xQueueSend(queue, &f, 0) != pdTRUE) {
+    stats.queue_drops = stats.queue_drops + 1;
+  }
 }
 
 // Busy-polls on purpose: the VESC sends its status frames back to back,
@@ -37,30 +103,26 @@ static void clearOverflowFlags() {
 static void rxTask(void *) {
   int64_t lastStats = 0;
   while (true) {
-    if (can.checkReceive() == CAN_MSGAVAIL) {
-      CanFrame f;
-      unsigned long rawId = 0;
-      byte ext = 0;
-      if (can.readMsgBuf(&rawId, &ext, &f.dlc, f.data) == CAN_OK) {
-        f.t_us = esp_timer_get_time();
-        f.id = rawId & 0x1FFFFFFF;
-        f.ext = ext;
-        stats.frames = stats.frames + 1;
-        if (xQueueSend(queue, &f, 0) != pdTRUE) {
-          stats.queue_drops = stats.queue_drops + 1;
-        }
-      }
+    uint8_t status = readStatus();
+    CanFrame f;
+    if (status & 0x01) {  // RX0IF
+      readBuffer(INS_READ_RXB0, f);
+      push(f);
+    }
+    if (status & 0x02) {  // RX1IF
+      readBuffer(INS_READ_RXB1, f);
+      push(f);
     }
 
     int64_t now = esp_timer_get_time();
     if (now - lastStats >= STATS_PERIOD_US) {
       lastStats = now;
-      if (can.getError() & (MCP_EFLG_RX0OVR | MCP_EFLG_RX1OVR)) {
+      if (readRegister(REG_EFLG) & 0xC0) {  // RX1OVR | RX0OVR
         stats.hw_overflows = stats.hw_overflows + 1;
         clearOverflowFlags();
       }
-      stats.rx_err = can.errorCountRX();
-      stats.tx_err = can.errorCountTX();
+      stats.rx_err = readRegister(REG_REC);
+      stats.tx_err = readRegister(REG_TEC);
     }
   }
 }
