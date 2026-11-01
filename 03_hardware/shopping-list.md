@@ -1,9 +1,25 @@
 # Lista de compra — hardware pendiente
 
-Actualizada 2026-11-01, con el registrador CAN funcionando. Marcar `[x]` al recibir y
+Actualizada 2026-11-01 (noche): velocidad de rueda montada, tarjeta e IMU rotas. Marcar `[x]` al recibir y
 mover al inventario de `baseline.md`.
 
-## Ahora — para usar el registrador montado en el quad (~15 €)
+## Ahora — para usar el registrador montado en el quad (~35 €)
+
+- [ ] **Tarjeta microSD 16–32 GB, de marca (SanDisk o Samsung)** · ~6 €
+  Buscar: `microSD SanDisk 32GB`
+  La Kodak de 16 GB murió el 2026-11-01: contesta, pero no guarda lo que se le escribe
+  (ni un formateo). Sin tarjeta el registrador no graba nada. **La primera.** Más de 32 GB
+  viene en exFAT y hay que pasarla a FAT32.
+
+- [ ] **IMU GY-LSM6DS3 ×1 (o ×2, por si acaso)** · ~5 € cada una
+  Buscar: `GY-LSM6DS3`
+  La de inventario se rompió soldándola (se arrancó la resistencia de SDA). Al soldar la
+  nueva: pines primero en la protoboard, punta fina y poco tiempo.
+
+- [ ] **Condensadores cerámicos 100 nF ("104"), surtido** · ~3 €
+  Buscar: `condensador ceramico 100nF 104 pack`
+  Uno junto a cada sensor (Hall, IMU), entre VCC y GND. El de 220 µF que hay no filtra
+  el ruido rápido.
 
 - [ ] **Lector microSD USB ×1** · ~5 €
   Buscar: `lector tarjetas microSD USB`
@@ -23,9 +39,9 @@ mover al inventario de `baseline.md`.
 ## Ya en inventario — NO comprar
 
 - ESP32 ×2 de repuesto (el nº 2 hace de registrador)
-- MCP2515 + TJA1050, módulo microSD + tarjeta Kodak 16 GB, batería 12 V + DC-DC a 5 V
-- **Para los pasos siguientes:** IMU GY-LSM6DS3, sensores Hall 3144 + imanes (velocidad
-  de rueda), el acelerador Hall de 5 V
+- MCP2515 + TJA1050, módulo microSD (la tarjeta, muerta), batería 12 V + DC-DC a 5 V
+- Sensores Hall 3144 (uno montado en la rueda delantera, el resto de repuesto) + imanes;
+  el acelerador Hall de 5 V
 - Protoboard, cables dupont, resistencias, osciloscopio, multímetro, soldador
 
 ## Cuando toque la unidad de control del vehículo

@@ -40,7 +40,8 @@ Front 13×4.10-6, rear 13×5.00-6 TR13, 6 in rims, pneumatic knobby, tubed.
 | Loaded rolling radius `r_roll` | 155 mm [150–160] | ASSUMED — **most leveraged unmeasured number** |
 
 Measure `r_roll` by roll-out (rider seated, 10 revolutions, `r = D/(20π)`), never with a
-ruler. Procedure in `04_model/params/vehicle_params.m`. New tyres bought (reported
+ruler. Since 2026-11-01 the wheel sensor counts the revolutions: push the quad slowly,
+rider on board, over a measured 10 m and count magnets (10 per turn). Procedure in `04_model/params/vehicle_params.m`. New tyres bought (reported
 2026-10-20): measure once they are fitted — the old 155 mm guess does not carry over.
 
 ## 3. Transmission
@@ -119,8 +120,13 @@ protocols); not connected. The VESC already reports pack voltage and current.
 
 - Throttle: 3-wire 5 V Hall, wired directly to VESC ADC.
 - Brake switch: original, disconnected.
-- Wheel speed: 3144 Hall sensors + magnets available, not fitted.
-- IMU: GY-LSM6DS3 (6-axis), not fitted.
+- Wheel speed: **fitted 2026-11-01** on the front wheel. One 3144 Hall on GPIO 34 of the
+  logger ESP32, 10 neodymium magnets on a 160 mm diameter circle, ~5 mm gap. Spacing
+  redone with a compass; residual ±8 % gap-to-gap error that repeats every turn, and a
+  once-per-turn swing that suggests the magnet circle is not centred on the axle. The
+  logger stores raw magnet times; speed needs `r_roll` (still ASSUMED, section 2).
+- IMU: GY-LSM6DS3 (6-axis) **damaged 2026-11-01** while soldering (SDA pull-up torn off,
+  then the chip stopped answering on I2C). Replacement on the shopping list.
 
 ## 8. Electronics and tools on hand
 

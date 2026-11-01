@@ -65,6 +65,35 @@ descarga por puerto serie mete alguna línea basura. Con lector de tarjetas no h
 
 ---
 
+## `2026-11-01_wheel_hall` — sensor de velocidad de rueda
+
+Rueda delantera girada a mano, quad en el caballete. Un Hall 3144 en GPIO 34 y 10 imanes
+en un círculo de 160 mm de diámetro. Capturado con `05_firmware/arduino/wheel_capture/`
+(lee el nivel del pin y el contador de interrupciones, CSV a 921600).
+
+| Ruta | Qué es |
+|---|---|
+| `raw/run1.csv` | Imanes colocados a ojo. `t_us,level,isr_edges`, ~575 imanes |
+| `raw/run2_spacing_fixed.csv` | Imanes recolocados con compás (cuerda 4,94 cm). Mismo formato |
+| `speed_raw.png` | Run 1: velocidad imán a imán y media de una vuelta |
+| `speed_run2.png` | Run 2: lo mismo después de recolocar |
+
+**Qué salió:**
+- **1 flanco de interrupción por imán y 0 falsos** en las dos capturas. El cableado vale.
+- **El error de separación entre imanes se repite cada 10 pulsos**, con el mismo porcentaje
+  a cualquier velocidad: ±20 % a ojo, **±8 %** con compás.
+- **La media de una vuelta lo cancela del todo** (queda un 0,7 % de ruido), a costa de una
+  vuelta de retraso: 0,7 s a 5 km/h.
+- Queda una oscilación de una vez por vuelta: el círculo de imanes no está centrado en el eje.
+- **Siguiente:** calibrar el ángulo real de cada hueco (como un ABS con la rueda fónica
+  imperfecta) y elegir el filtro con datos del quad rodando. Grabará el `can_logger`
+  (líneas `#wheel`) en cuanto haya tarjeta nueva.
+
+**Análisis:** hecho en la sesión, sin script guardado. El primero que haga falta para los
+logs del quad irá a `04_model/scripts/`.
+
+---
+
 ## Cómo añadir una campaña
 
 1. `mkdir 06_data/AAAA-MM-DD_<ensayo>/raw`.

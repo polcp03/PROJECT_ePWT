@@ -47,6 +47,8 @@ Debe entregar **fuentes + preguntas**, no conclusiones.
 | **`si_wheel_diameter` 0,30 m vs `2·r_roll` 0,31 m** | Decidir cuál vale cuando se haga el roll-out con neumáticos nuevos |
 | **Altura del CG (`h_cg`)** | MISSING. La necesita el load transfer del L2 (examen C01, bloque I) |
 | **EXP-001 (bucle de tierra) sin medir** | Sigue sin día. El registrador lo esquiva flotando (DEC-004); vuelve a importar si el ESP32 manda par al VESC |
+| **Velocidad de rueda: método de filtrado** | Datos del `can_logger` con el quad rodando (hace falta tarjeta nueva). Comparar media de una vuelta, calibración por hueco y filtro; solo entonces se pasa al ESP32 (Pol, 2026-11-01) |
+| **IMU al registrador** | Que llegue la GY-LSM6DS3 nueva. I2C en GPIO 21/22, 10 kΩ a 3V3, dirección 0x6A |
 | **BMS por CAN** | Solo si hace falta la tensión o la temperatura por celda. La tensión y la corriente del pack ya llegan del VESC, y el foco es motor e inversor (Pol, 2026-11-01) |
 
 ---
