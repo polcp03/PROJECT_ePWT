@@ -10,6 +10,10 @@ mover al inventario de `baseline.md`.
   La Kodak de 16 GB murió el 2026-11-01: contesta, pero no guarda lo que se le escribe
   (ni un formateo). Sin tarjeta el registrador no graba nada. **La primera.** Más de 32 GB
   viene en exFAT y hay que pasarla a FAT32.
+  Al llegar el lector, mirar la vieja en el PC: no la ve = chip muerto; la ve pero no
+  formatea = se bloqueó en solo lectura; formatea bien = revisar el módulo SD.
+  Se calentó estando en reposo: fallo interno. Causas probables: cortes de corriente
+  grabando (muchos reinicios ese día), meterla o sacarla en caliente, estática.
 
 - [ ] **IMU GY-LSM6DS3 ×1 (o ×2, por si acaso)** · ~5 € cada una
   Buscar: `GY-LSM6DS3`

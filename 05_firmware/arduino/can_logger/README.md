@@ -58,6 +58,9 @@ filesystem gone.
 
 
 - **BOOT** starts a recording; press again to stop. One file per recording.
+- **Protect the card:** stop with BOOT before cutting power; insert or remove the card
+  only with everything off. A power cut mid-write can kill a cheap card's controller
+  (the Kodak 16 GB died on 2026-11-01 after many resets while recording).
 - **LED:** short blink every 2 s = idle · steady = recording · fast blink = error (SD missing, unreadable or write failed).
 - **Serial, 921600:** `start`, `stop`, `ls`, `cat log_017.csv`. A status line per second.
 - **Live view:** `monitor.ps1` (Windows). Waits for COM4, highlights SPI errors.
