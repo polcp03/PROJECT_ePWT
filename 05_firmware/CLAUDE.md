@@ -28,6 +28,10 @@ explica primero cómo se reparten las responsabilidades y por qué.
 
 Nada de un `.ino` gigante. Módulos con una responsabilidad cada uno.
 
+**Cómo aprendo software: skill `software-con-ia`.** Yo escribo el contrato de cada módulo
+(en la cabecera del `.h`) y elijo la prueba con su número; la IA escribe el código; en cada
+cambio aprendo una trampa de C en mi propio código.
+
 ## Cómo se compila y se ve (el Arduino IDE no funciona)
 
 Skill `esp32`: el código abierto en el panel de ficheros y el monitor serie en una

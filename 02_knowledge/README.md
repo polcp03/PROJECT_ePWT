@@ -6,6 +6,7 @@ Aquí no se copia teoría: la teoría está en los libros y en las lecciones. Aq
 | Archivo | Qué es | Quién escribe |
 |---|---|---|
 | `motor-inversor.md` (y uno por tema) | Mis explicaciones, en mis palabras, ya corregidas | Claude copia de mis respuestas; yo reescribo lo que no me suene a mí |
+| `software.md` | Cómo verifico y guío el código que escribe la IA | Claude, al corregir |
 | `errores.md` | Cada fallo que he tenido, con la versión correcta y cuándo volver a preguntármelo | Claude, al corregir |
 | `fuentes.md` | Qué libro y qué capítulo para cada tema | Claude |
 | `_metodo/` | Herramientas: Git, sesiones de Claude Code | — |
