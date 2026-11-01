@@ -49,7 +49,9 @@ Debe entregar **fuentes + preguntas**, no conclusiones.
 | **EXP-001 (bucle de tierra) sin medir** | Sigue sin día. El registrador lo esquiva flotando (DEC-004); vuelve a importar si el ESP32 manda par al VESC |
 | **Velocidad de rueda: método de filtrado** | Datos del `can_logger` con el quad rodando (hace falta tarjeta nueva). Comparar media de una vuelta, calibración por hueco y filtro; solo entonces se pasa al ESP32 (Pol, 2026-11-01) |
 | **IMU al registrador** | Que llegue la GY-LSM6DS3 nueva. I2C en GPIO 21/22, 10 kΩ a 3V3, dirección 0x6A |
-| **BMS por CAN** | Solo si hace falta la tensión o la temperatura por celda. La tensión y la corriente del pack ya llegan del VESC, y el foco es motor e inversor (Pol, 2026-11-01) |
+| **BMS por CAN** | Solo si hace falta la tensión o la temperatura por celda. La tensión y la corriente del pack ya llegan del VESC, y el foco es motor e inversor (Pol, 2026-11-01). El BMS queda de respaldo pasivo, sin tocar ([DEC-005](../08_decisions/DEC-005-arquitectura-vcu.md)) |
+| **NTC en el motor, al puerto de temperatura del VESC** (~1 €) | Pol decide. Único hueco para validar `R(T)` y reactivar los límites térmicos del VESC (DEC-005, Riesgo 4) |
+| **Interruptores de freno a la VCU** | Con la unidad de control v0. Antes, medir con multímetro que son contacto seco y si son NA o NC (DEC-005) |
 
 ---
 

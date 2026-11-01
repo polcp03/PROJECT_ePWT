@@ -8,3 +8,8 @@ Solo arquitectura y trade-offs, no detalles menores.
 - **Razonamiento:** por qué esta
 - **Asunciones:** qué doy por hecho (y podría ser falso)
 - **Consecuencias:** qué me cierra y qué me abre
+
+| | Decisión |
+|---|---|
+| DEC-004 | CAN sin aislar, con el registrador flotante |
+| DEC-005 | Arquitectura de la VCU y sensores: acelerador y freno a la VCU, BMS sin tocar |

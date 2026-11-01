@@ -32,13 +32,15 @@ que el eslabón de los datos ya está. Orden acordado con Pol:
 1. **C03 sin cambios:** modelo dq y lazo PI en Simulink. Inversor y motor.
 2. **Validar el motor con los logs:** corriente, erpm, ciclo de trabajo y tensión del VESC
    contra el modelo (p. ej. ciclo × tensión frente a erpm debe dar λm).
-3. **Unidad de control v0** (dic–ene): acelerador → ESP32 → orden de corriente por CAN →
-   VESC. Sin control, con las protecciones en el código. Revisar DEC-004 antes.
+3. **Unidad de control v0** (dic–ene): acelerador y freno → ESP32 → orden de corriente por
+   CAN → VESC. Sin control, con las protecciones en el código (freno + gas = par cero,
+   timeout de CAN en el VESC). Arquitectura y sensores en [DEC-005](../08_decisions/DEC-005-arquitectura-vcu.md);
+   revisar DEC-004 antes.
 4. **IMU y velocidad de rueda** registradas en la SD.
 5. **Control de tracción:** primero en Simulink, después en el ESP32.
 
 **Fuera, por decisión de Pol:** el BMS por CAN (el VESC ya da tensión y corriente del pack;
-el foco es motor e inversor). Recordatorio: la unidad de control enseña control de vehículo
+el foco es motor e inversor) y la sonda de temperatura del pack (DEC-005, 1-nov). Recordatorio: la unidad de control enseña control de vehículo
 y C embebido, no inversor; el inversor se aprende en el modelo.
 
 **Fin de 2026: modelo validado contra el vehículo real.** Ese es el objetivo del año.

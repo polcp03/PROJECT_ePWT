@@ -17,8 +17,10 @@ Picos de batería observados de **~40 A** contra una asunción de diseño de 25 
 
 **Mitigación mientras no haya medida:** el limitador primario es el límite de corriente
 configurado en el propio VESC, con margen por debajo de la capacidad real del pack y
-del rating del BMS. Instrumentar temperatura del pack directamente: en un grupo 5P las
-celdas exteriores se calientan más de lo que ve el termistor interno del BMS.
+del rating del BMS. ~~Instrumentar temperatura del pack directamente~~ — **descartado por
+Pol el 2026-11-01** ([DEC-005](../08_decisions/DEC-005-arquitectura-vcu.md)): se acepta la
+protección del BMS. Riesgo aceptado: en un grupo 5P las celdas exteriores se calientan más
+de lo que ven las sondas del BMS. Queda la comprobación a mano al terminar cada ensayo.
 
 **Experimento pendiente:** caída de tensión bajo carga para estimar la capacidad real
 de corriente del pack.
@@ -98,7 +100,8 @@ de corriente en el VESC y comprobación manual al terminar el ensayo.
 
 **Barato:** el VESC ya soporta NTC 10 k / KTY / PT1000 en el puerto de temperatura.
 Un NTC pegado a la carcasa no da temperatura de bobinado, pero da tendencia y
-reactiva el fold-back.
+reactiva el fold-back. Es el único hueco de sensores para validar el modelo
+([DEC-005](../08_decisions/DEC-005-arquitectura-vcu.md)): pendiente de que Pol decida.
 
 ## Auditoría de configuración del VESC — 2026-09-06
 
