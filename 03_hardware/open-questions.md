@@ -101,7 +101,7 @@ de corriente en el VESC y comprobación manual al terminar el ensayo.
 **Barato:** el VESC ya soporta NTC 10 k / KTY / PT1000 en el puerto de temperatura.
 Un NTC pegado a la carcasa no da temperatura de bobinado, pero da tendencia y
 reactiva el fold-back. Es el único hueco de sensores para validar el modelo
-([DEC-005](../08_decisions/DEC-005-arquitectura-vcu.md)): pendiente de que Pol decida.
+([DEC-005](../08_decisions/DEC-005-arquitectura-vcu.md)): **se compra** (Pol, 2026-11-01).
 
 ## Auditoría de configuración del VESC — 2026-09-06
 

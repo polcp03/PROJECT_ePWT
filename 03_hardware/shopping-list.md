@@ -25,6 +25,14 @@ mover al inventario de `baseline.md`.
   Uno junto a cada sensor (Hall, IMU), entre VCC y GND. El de 220 µF que hay no filtra
   el ruido rápido.
 
+- [ ] **Termistor NTC 10 kΩ con cable ×2** (uno de repuesto) · ~2 €
+  Buscar: `NTC 10K 3950 termistor cable`
+  Temperatura del motor, al pin `TEMP` del conector de los Hall del **VESC** (no a la VCU;
+  comprobar el pin en la placa). Pegado a la carcasa con cinta kapton o epoxi térmico.
+  En VESC Tool: tipo NTC y la beta de la pieza comprada (3950 o 3380). Reactiva los límites
+  de 85/100 °C y da `R(T)` para validar el modelo ([DEC-005](../08_decisions/DEC-005-arquitectura-vcu.md)).
+  Decidido por Pol el 2026-11-01.
+
 - [ ] **Lector microSD USB ×1** · ~5 €
   Buscar: `lector tarjetas microSD USB`
   El PC no tiene ranura SD. Descargar por el USB del ESP32 funciona pero mete basura en
@@ -50,8 +58,9 @@ mover al inventario de `baseline.md`.
 
 ## Cuando toque la unidad de control del vehículo
 
-Nada todavía. Lo que haga falta (corte de emergencia, adaptar el acelerador de 5 V a la
-entrada de 3,3 V del ESP32) se decide al diseñarla, no antes.
+Pinout decidido: [`05_firmware/docs/vcu-pinout.md`](../05_firmware/docs/vcu-pinout.md). Las
+resistencias (10 k, 12 k) salen del inventario y los condensadores, del surtido de 100 nF
+de arriba. Lo único por decidir es el corte de emergencia.
 
 ## Descartado o aplazado
 

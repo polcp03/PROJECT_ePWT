@@ -51,7 +51,7 @@ la IMU, el roll-out de 10 m y las básculas por eje.
 importa justo donde el ciclo de trabajo ya va al límite. Además, sin sensor, los límites
 de 85/100 °C del VESC son código muerto (Riesgo 4 de `open-questions.md`). Un NTC de 10 k
 pegado a la carcasa, al puerto de temperatura del **VESC** (no de la VCU): ~1 €.
-**Pendiente de que Pol decida;** no bloquea C04 si los ensayos son cortos y en frío.
+**Decidido por Pol el mismo día: se compra** (`shopping-list.md`).
 
 ## Consecuencias
 
@@ -70,8 +70,8 @@ Lo que hay que hacer **antes** de que el acelerador pase por la ESP32 (gas por c
 5. **Bucle de tierra:** la VCU sigue flotando en su batería de 12 V ([DEC-004](DEC-004-can-sin-aislar-logger-flotante.md)).
    Con la VCU mandando par, EXP-001 vuelve a importar.
 
-Pines libres en la placa del registrador (propuesta, se confirma al cablear): acelerador
-GPIO 35, frenos GPIO 32 y 33, IMU GPIO 21/22 (ya previsto).
+Pinout completo, con las condiciones de cada pin: [`05_firmware/docs/vcu-pinout.md`](../05_firmware/docs/vcu-pinout.md).
+Acelerador GPIO 35, frenos GPIO 32 y 33, IMU GPIO 21/22.
 
 ## Asunciones
 
