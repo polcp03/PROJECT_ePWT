@@ -62,3 +62,6 @@ desktop.ini
 
 # Third-party books and course material (copyrighted, ~300 MB)
 BOOKS/
+
+# Estado local del monitor del ESP32 (05_firmware/esp32.py): log, pausa, cola de envio
+05_firmware/.monitor/

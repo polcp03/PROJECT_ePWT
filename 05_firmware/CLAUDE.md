@@ -28,6 +28,12 @@ explica primero cómo se reparten las responsabilidades y por qué.
 
 Nada de un `.ino` gigante. Módulos con una responsabilidad cada uno.
 
+## Cómo se compila y se ve (el Arduino IDE no funciona)
+
+Skill `esp32`: el código abierto en el panel de ficheros y el monitor serie en una
+pestaña visible del Terminal, con `esp32.py` (compilar, flashear, monitor, enviar).
+Nunca flashear a ciegas en segundo plano: Pol tiene que verlo.
+
 ## Estructura de la carpeta
 
 ```
