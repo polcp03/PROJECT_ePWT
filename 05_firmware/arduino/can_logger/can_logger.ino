@@ -1,9 +1,10 @@
-// can_logger - records every CAN frame on the bus to the microSD.
+// can_logger - records every CAN frame on the bus and every wheel magnet to the microSD.
 // Press BOOT to start a recording, press again to stop. Each recording is a new file.
 //
 // Modules, one job each:
 //   can_rx   reads the MCP2515 into a RAM queue (own task, core 0)
-//   sd_log   writes frames to a CSV file on the microSD
+//   wheel_rx stamps each front-wheel magnet into a RAM queue (interrupt)
+//   sd_log   writes frames and magnets to a CSV file on the microSD
 //   control  button and LED
 //   this file  the state machine that connects them; knows nothing about SPI or files
 //
@@ -11,6 +12,7 @@
 // card without a card reader.
 
 #include "can_rx.h"
+#include "wheel_rx.h"
 #include "sd_log.h"
 #include "control.h"
 
@@ -87,6 +89,7 @@ void setup() {
     Serial.println("MCP2515 init FAILED - check SPI wiring, divider and 5 V supply");
     while (true) { control_led(LedMode::Error); }
   }
+  wheel_rx_begin();
   sdReady = sd_log_begin();
   const char *reason = resetReasonName(esp_reset_reason());
   if (sdReady) {
@@ -106,15 +109,21 @@ void loop() {
   }
   handleSerial();
 
-  // Always drain the queue; while not recording the frames are simply dropped.
+  // Always drain both queues; while not recording the data is simply dropped.
+  bool writeOk = true;
   CanFrame f;
   while (can_rx_pop(f)) {
-    if (state == State::Recording && !sd_log_frame(f)) {
-      sd_log_close();
-      sdReady = false;
-      state = State::Error;
-      Serial.println("SD write FAILED - recording stopped");
-    }
+    if (state == State::Recording) writeOk &= sd_log_frame(f);
+  }
+  int64_t magnet;
+  while (wheel_rx_pop(magnet)) {
+    if (state == State::Recording) writeOk &= sd_log_wheel(magnet);
+  }
+  if (state == State::Recording && !writeOk) {
+    sd_log_close();
+    sdReady = false;
+    state = State::Error;
+    Serial.println("SD write FAILED - recording stopped");
   }
 
   // Once a second: health line in the file and on serial, then flush.
@@ -122,13 +131,17 @@ void loop() {
   if (state == State::Recording && millis() - lastSecond >= 1000) {
     lastSecond += 1000;
     CanStats s = can_rx_stats();
-    sd_log_stats(s, esp_timer_get_time());
+    WheelStats w = wheel_rx_stats();
+    int64_t now = esp_timer_get_time();
+    sd_log_stats(s, now);
+    sd_log_wheel_stats(w.pulses, w.rejected, w.queue_drops, now);
     sd_log_flush();
     Serial.printf("%s  frames %lu  queue drops %lu  hw overflows %lu  RX err %u  TX err %u"
-                  "  SPI err %lu\n",
+                  "  SPI err %lu  |  wheel %lu  rejected %lu  drops %lu\n",
                   sd_log_name(), (unsigned long)s.frames, (unsigned long)s.queue_drops,
                   (unsigned long)s.hw_overflows, s.rx_err, s.tx_err,
-                  (unsigned long)s.spi_errors);
+                  (unsigned long)s.spi_errors, (unsigned long)w.pulses,
+                  (unsigned long)w.rejected, (unsigned long)w.queue_drops);
   }
 
   control_led(state == State::Recording ? LedMode::Recording
