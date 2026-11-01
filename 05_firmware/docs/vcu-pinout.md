@@ -5,7 +5,20 @@ records and, later, sends the torque request. Architecture and the reasons behin
 [DEC-005](../../08_decisions/DEC-005-arquitectura-vcu.md). Current logger wiring:
 [can_logger/README](../arduino/can_logger/README.md).
 
-![VCU pinout](vcu-pinout.svg)
+| Sheet | What it shows |
+|---|---|
+| [1 · Vehicle architecture](vehicle-architecture.svg) | Power path, mechanics, sensors, the two ground domains, CAN as the only link between them |
+| [2 · VCU schematic](vcu-schematic.svg) | Every wire of the VCU, with reference designators (U, R, C, J, SW) used in the table below |
+
+![Sheet 1](vehicle-architecture.svg)
+
+![Sheet 2](vcu-schematic.svg)
+
+Regenerate both: `python draw_sheets.py <out>` then `python build_sheets.py <out> <page.html> .`
+(the page is the published artifact, https://claude.ai/artifact/FaUSu6HwdwUUkRSe6dvWig).
+
+**Motor NTC** (bought 2026-11-01): 10 kΩ on the **VESC** Hall plug, pins TEMP and GND (check
+the pin on the board), beta set in VESC Tool. It never touches the VCU.
 
 ## Every pin
 
