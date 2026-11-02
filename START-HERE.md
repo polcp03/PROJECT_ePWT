@@ -7,16 +7,23 @@ que lo demuestre.
 
 ## Hoy
 
-**C02 — Motor + inversor, solo modelo · review vie 30 oct.** Detalle en [C02](01_plan/C02.md).
+**C02 + C03 — Motor, inversor y primer lazo de corriente · review vie 13 nov.** Detalle en [C03](01_plan/C03.md).
 
-| Día | Tarea (45–60 min) | Abrir |
+Dos tareas al día hasta el 13, a las **07:00** y a las **14:00**.
+
+| Día | 07:00 | 14:00 |
 |---|---|---|
-| mar 27 | L1 · De la batería al par | [lección](https://claude.ai/artifact/F5pNX14PcUEVxtYv8zrwpN) |
-| mié 28 | L2 · El campo que gira | [lección](https://claude.ai/artifact/Fxcfde7icEog8iBLodXWTp) |
-| jue 29 | Examen L1+L2 y acordar slides | [examen](https://claude.ai/artifact/2o9NrZ6BgGsVTbg18AX3rZ) |
-| vie 30 | Review con mentores | deck en `01_plan/presentations/` |
+| mar 3 | L1 · [Batería → par](https://claude.ai/artifact/F5pNX14PcUEVxtYv8zrwpN) | L2 · [El campo que gira](https://claude.ai/artifact/Fxcfde7icEog8iBLodXWTp) |
+| mié 4 | [Examen L1+L2](https://claude.ai/artifact/2o9NrZ6BgGsVTbg18AX3rZ) | L3a · Park y dq |
+| jue 5 | L3b · Par y límites | Control 1 · Lazo abierto y cerrado |
+| vie 6 | Control 2 · El PI | — |
+| sáb 7 | Kp y Ki a mano (10:00) | Repaso de fallos |
+| mar 10 | Simulink A · Tu motor en dq | λm con tus logs |
+| mié 11 | Simulink B · Cierra el lazo | Hueco libre |
+| jue 12 | Examen C03 | Acordar slides |
+| vie 13 | **Review con mentores** | |
 
-Haz solo la fila de hoy. El día exacto también está en Google Calendar (07:00).
+Haz solo la fila de hoy. Los enlaces que faltan llegan al calendario el día antes.
 
 ## Dónde está cada cosa
 

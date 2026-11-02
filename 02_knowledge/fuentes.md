@@ -20,5 +20,15 @@ y cita sección y página. Esta tabla dice **dónde mirar**, no que haya que lee
 | Robótica, control no lineal | Tedrake, *Underactuated Robotics* | — | horizonte |
 | Material de ejemplo en MATLAB de Franklin | `../BOOKS/BOOK_FeedbackControl/` | — | C03 |
 
+## Vía B: electrónica, CAN y la placa (revisado el 2-nov)
+
+| Tema | Qué hay | Hueco |
+|---|---|---|
+| Leer datasheets y esquemas, E/S, temporizadores, interrupciones, máquinas de estados, watchdog | White, *Making Embedded Systems*: cap. 3, 4, 5 y 6 | — |
+| Periféricos, ADC, sensores | White, cap. 7 y 8 · Marwedel cap. 3.2 y 3.5 | — |
+| Kirchhoff y amplificadores operacionales | Marwedel, apéndice B (corto) | Para circuitos de verdad hace falta un libro de electrónica (abajo) |
+| **CAN: capa física, trama, arbitraje, errores** | **Nada en la biblioteca** (White no lo trata) | Documentos gratuitos: TI SLOA101 *Introduction to the Controller Area Network*, especificación Bosch CAN 2.0 y las hojas de datos del MCP2515 y del transceptor. No hace falta comprar libro |
+| Circuitos básicos, alimentación, protección, diseño de placa | `ELECTRONICS.pdf`, si es un libro de electrónica (está escaneado y no se puede leer el título) | Si no lo es: Scherz y Monk, *Practical Electronics for Inventors*, 4.ª ed. Es el único libro que habría que conseguir |
+
 **Sin identificar:** `ELECTRONICS.pdf` (731 pp, escaneado sin texto) y
 `Training Inverters.pptx`. Pol: ¿de dónde salen? Si no sirven, fuera.

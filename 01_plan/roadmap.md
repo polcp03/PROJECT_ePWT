@@ -17,10 +17,10 @@ Presupuesto: ~14 h por ciclo (1 h/día, desde el 20-oct; antes 2 h/día).
 | **C00** | 2 → 9 sep       | Kickoff con mentores + primeras medidas        | mar 8 o mié 9 sep |
 | —       | 10 → 27 sep     | *Vacaciones*                                   | —                 |
 | **C01** | 28 sep → 11 oct | Modelo longitudinal antes que datos (pivote 8-oct) — **hecho** | vie 9 oct |
-| **C02** | 20 → 30 oct     | Motor + inversor: **modelar y saber explicarlo**. Nada de validar. Ver [C02](C02.md) | **vie 30 oct** |
-| **C03** | 31 oct → 13 nov | Modelo dq (L3), primer control (lazo abierto/cerrado, PI) y el motor en Simulink (L4). Plan en Google Calendar (25-oct); artifacts aún sin construir | vie 13 nov        |
-| **C04** | 14 → 27 nov     | Dirección (1-nov): validar el modelo de motor con los logs CAN | vie 27 nov        |
-| **C05** | 28 nov → 11 dic | Dirección: validación del vehículo (coast-down, aceleración) con el registrador | vie 11 dic        |
+| **C02** | 20 → 30 oct     | Motor + inversor: **modelar y saber explicarlo**. Review cancelada; **se presenta con C03**. Ver [C02](C02.md) | ~~vie 30 oct~~ |
+| **C03** | 3 → 13 nov      | C02 entero + modelo dq + lazo de corriente con PI + λm de los logs. Dos tareas al día. Ver [C03](C03.md) | **vie 13 nov** |
+| **C04** | 14 → 27 nov     | Dirección (2-nov): **control digital** del lazo de corriente y validarlo con logs. Vía B: electrónica básica y CAN para la placa | vie 27 nov        |
+| **C05** | 28 nov → 11 dic | Dirección: **control del vehículo** (par/velocidad sobre el lazo de corriente) + coast-down. Vía B: la placa de la VCU | vie 11 dic        |
 | **C06** | 12 → 25 dic     | Dirección: cerrar el modelo validado; unidad de control v0 si cabe. Navidad: probablemente se mueve | vie 25 dic |
 
 **Secuencia decidida el 20-oct:** modelo de motor + inversor → data logger → validación
@@ -44,6 +44,21 @@ el foco es motor e inversor) y la sonda de temperatura del pack (DEC-005, 1-nov)
 y C embebido, no inversor; el inversor se aprende en el modelo.
 
 **Fin de 2026: modelo validado contra el vehículo real.** Ese es el objetivo del año.
+
+### Dos vías desde C04 (acordado el 2-nov)
+
+Pol avanza la VCU en paralelo, antes de lo previsto. En vez de frenarlo, cada ciclo tiene dos
+vías que se enseñan juntas en la review. Las dos, con lecciones del formato de siempre
+(libro filtrado con página, teoría corta, laboratorio, casos y examen).
+
+| Ciclo | Vía A · Control (lecciones, mar–jue) | Vía B · Electrónica y embebido para la placa (sábado) |
+|---|---|---|
+| **C04** | Control digital: muestreo, retardo, el PI dentro de un micro, saturación de tensión y anti-windup. Validar el lazo de corriente del VESC con logs. Franklin cap. 8 | Circuitos básicos para la placa (divisor, pull-up, filtro RC, desacoplo, ADC del acelerador) y CAN de verdad (par diferencial, terminación de 120 Ω, trama, arbitraje, errores) |
+| **C05** | Control del vehículo: lazo de par o velocidad en cascada sobre el de corriente, con el modelo longitudinal de C01. Coast-down con datos | La placa de la VCU: esquema, alimentación 12 → 5 → 3,3 V, protección de entradas, layout y por qué el SPI cogió ruido (EXP-002) |
+| **C06** | Control de tracción en Simulink: deslizamiento trasera frente a delantera | C embebido de la VCU: interrupciones, máquina de estados, watchdog y timeout de CAN (skill `software-con-ia`) |
+
+Regla: la vía B **no se come las horas de la vía A.** Si un ciclo va justo, la B espera.
+El detalle de cada fila se escribe al abrir su ciclo, no antes.
 
 Después de C06 (no antes): control de tracción, launch control, y **entonces** MPC —
 que requiere exactamente lo que C06 produce, un modelo validado.
