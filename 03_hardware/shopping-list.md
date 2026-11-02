@@ -1,7 +1,7 @@
 # Lista de compra — hardware pendiente
 
-Actualizada 2026-11-01 (noche): velocidad de rueda montada, tarjeta e IMU rotas. Marcar `[x]` al recibir y
-mover al inventario de `baseline.md`.
+Actualizada 2026-11-03: **todo lo de «Ahora» está pedido**, falta que llegue. Marcar `[x]` al
+recibir y mover al inventario de `baseline.md`.
 
 ## Ahora — para usar el registrador montado en el quad (~55 €)
 
@@ -21,7 +21,8 @@ mover al inventario de `baseline.md`.
   nueva: pines primero en la protoboard, punta fina y poco tiempo.
 
 - [ ] **Condensadores cerámicos 100 nF ("104"), surtido** · ~3 €
-  Buscar: `condensador ceramico 100nF 104 pack`
+  Buscar: `condensador ceramico 104 50V`. Cerámicos de disco, no de película ni X2 de red:
+  esos son grandes y con patas a 15 mm.
   Uno junto a cada sensor (Hall, IMU), entre VCC y GND. El de 220 µF que hay no filtra
   el ruido rápido.
 
@@ -57,10 +58,9 @@ no aguanta las vibraciones del quad, y los cables largos del SPI fueron la entra
 - [ ] **Bornas de tornillo paso 5,08 mm, 2 y 3 polos** · ~3 €
   Buscar: `borne tornillo 5.08 2P 3P`. Hacen falta 2 de 2 polos (J1 y la IMU, que va en 2+2)
   y 4 de 3 polos (rueda, acelerador, frenos y CAN al VESC). Comprar un paquete.
-- [ ] **Hilo de cobre estañado desnudo 0,6 mm** · ~2 €
-  Buscar: `hilo cobre estañado 0.6mm`. Solo para los buses de GND, +5 V y +3,3 V.
 - [ ] **Cable rígido aislado 22 AWG, caja de colores** · ~6 €
-  Buscar: `cable rigido 22AWG kit colores`. Todo lo demás: puede cruzar por encima de otro.
+  Buscar: `cable rigido 22AWG kit colores`. Todo, también los buses de GND, +5 V y +3,3 V
+  (pelado en ese tramo). Que sea rígido (solid), no flexible.
 - [ ] **Cable dupont hembra-hembra de 10 cm (tira de 40)** · ~2 €
   Del módulo CAN a la placa: sus pines salen hacia arriba, así que no se enchufa. Se separa una
   tira de 7 cables que van juntos, con una gota de cola caliente en cada extremo.
@@ -90,6 +90,9 @@ resistencias (10 k, 12 k) salen del inventario y los condensadores, del surtido 
 de arriba. Lo único por decidir es el corte de emergencia.
 
 ## Descartado o aplazado
+
+- **Hilo de cobre estañado desnudo:** descartado el 2026-11-03. Los buses se hacen con el
+  cable rígido de 22 AWG pelado; no hace falta otra bobina.
 
 - **Módulo CAN aislado ISO1050:** descartado el 2026-10-31. El registrador flota con su
   propia batería; ver [DEC-004](../08_decisions/DEC-004-can-sin-aislar-logger-flotante.md).

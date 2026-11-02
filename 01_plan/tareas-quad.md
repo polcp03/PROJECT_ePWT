@@ -1,10 +1,12 @@
 # El quad: qué comprar y qué hacer
 
-> Hoy, 1-nov-2026. Lo que bloquea todo es **una tarjeta microSD**: sin ella el registrador no
-> graba y no sale ni un dato. Pídela hoy con el lector. Todo lo de aquí sale del roadmap y de
+> 3-nov-2026: **todo pedido**. Lo que bloquea es que llegue la tarjeta microSD: sin ella el
+> registrador no graba y no sale ni un dato. Todo lo de aquí sale del roadmap y de
 > DEC-005, ya acordados contigo: no hay rumbo nuevo, solo ordenado.
 
-## Comprar
+## Comprar — todo pedido el 3-nov
+
+Falta que llegue. Al recibir cada cosa, márcala en `03_hardware/shopping-list.md`.
 
 ### Ya, porque bloquea (≈ 25 €)
 
@@ -27,12 +29,11 @@ Todo sale del [plano de la placa](https://claude.ai/artifact/1iWNCiLEPZMBHst7gng
    la SD (va de pie) y la IMU.
 3. **Bornas de tornillo 5,08 mm** (`borne tornillo 5.08 2P 3P`) · ~3 €: 2 de 2 polos y 4 de 3.
    Son los conectores del borde: el cable se atornilla y no se suelta con la vibración.
-4. **Hilo de cobre estañado desnudo 0,6 mm** · ~2 €, para los buses.
-5. **Cable rígido aislado 22 AWG, kit de colores** · ~6 €, para todo lo demás.
-6. **Cable dupont hembra-hembra de 10 cm, tira de 40** · ~2 €: del módulo CAN a la placa.
-7. **Separadores de nylon M3, kit** · ~4 €: CAN sobre la placa, placa en la caja, IMU en el chasis.
-8. **Cable apantallado de 4 hilos, 1 m** · ~2 €: de la placa a la IMU.
-9. **Caja estanca ABS ~150×110×70 mm** · ~8 €. 60 mm de alto por dentro como mínimo.
+4. **Cable rígido aislado 22 AWG, kit de colores** · ~6 €, para todo, también los buses (pelado).
+5. **Cable dupont hembra-hembra de 10 cm, tira de 40** · ~2 €: del módulo CAN a la placa.
+6. **Separadores de nylon M3, kit** · ~4 €: CAN sobre la placa, placa en la caja, IMU en el chasis.
+7. **Cable apantallado de 4 hilos, 1 m** · ~2 €: de la placa a la IMU.
+8. **Caja estanca ABS ~150×110×70 mm** · ~8 €. 60 mm de alto por dentro como mínimo.
 
 ### Para medir el vehículo (préstamo mejor que compra)
 
