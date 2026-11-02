@@ -1,5 +1,7 @@
 # ePWT — Electric Powertrain Learning Bench
 
+![The quad, its architecture, the measured back-EMF and a CAN log under throttle](docs/cover.png)
+
 An electric mini-quad used as a hands-on learning platform for power electronics,
 electric machines, control and model-based development.
 
@@ -17,8 +19,6 @@ This repository is published from the author's private workspace and is updated 
 each reviewed change, with its full commit history.
 
 ## What has been shown so far
-
-![Open-circuit back-EMF of the motor and the flux linkage measured at two speeds](01_plan/presentations/assets/figures/fig_backemf.png)
 
 | Result | Number | Evidence |
 |---|---|---|
