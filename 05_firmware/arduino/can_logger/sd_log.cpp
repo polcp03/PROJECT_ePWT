@@ -86,6 +86,21 @@ void sd_log_stats(const CanStats &s, int64_t t_us) {
               (unsigned long)s.spi_errors);
 }
 
+// Same clock and same file as the CAN frames, so wheel speed and VESC data line up.
+bool sd_log_wheel(int64_t t_us) {
+  if (t_us < t0) {
+    return true;
+  }
+  char line[32];
+  int n = snprintf(line, sizeof(line), "#wheel,%lld\n", (long long)(t_us - t0));
+  return file.write((const uint8_t *)line, n) == (size_t)n;
+}
+
+void sd_log_wheel_stats(uint32_t pulses, uint32_t rejected, uint32_t queue_drops, int64_t t_us) {
+  file.printf("#wstat,%lld,%lu,%lu,%lu\n", (long long)(t_us - t0), (unsigned long)pulses,
+              (unsigned long)rejected, (unsigned long)queue_drops);
+}
+
 void sd_log_flush() {
   file.flush();
 }
