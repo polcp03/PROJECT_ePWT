@@ -29,8 +29,8 @@ the pin on the board), beta set in VESC Tool. It never touches the VCU.
 | 3V3 | 3.3 V out | power | ESP32 regulator | Pull-ups and the IMU only. **Never** pull an input up to 5 V | wired |
 | 34 | wheel speed | digital in, interrupt on falling edge | 3144 Hall, front wheel | Open collector: external 10 kΩ to 3V3 (GPIO 34 has no internal pull-up) | wired |
 | 35 | throttle | **analog** in, ADC1 ch 7, 11 dB | 5 V Hall grip | Divider 10 kΩ top / 12 kΩ bottom (× 0.545) + 100 nF pin → GND | planned |
-| 32 | brake, left lever | digital in, active low | on/off switch | Switch to GND. External 10 kΩ to 3V3 + 100 nF → GND; debounce 10–20 ms in code | planned |
-| 33 | brake, right lever | digital in, active low | on/off switch | Same as GPIO 32 | planned |
+| 32 | brake, front | digital in, active low | on/off switch, normally open | Switch to GND. External 10 kΩ to 3V3 + 100 nF → GND; debounce 10–20 ms in code | planned |
+| 33 | brake, rear | digital in, active low | on/off switch | Same as GPIO 32. **Not wired:** the rear switch is faulty (2026-11-02). Pin and holes stay reserved | reserved |
 | 21 | IMU SDA | I2C | GY-LSM6DS3, 0x6A | 10 kΩ to 3V3 (check first whether the module already has them) | planned |
 | 22 | IMU SCL | I2C | GY-LSM6DS3 | Same | planned |
 | 14 / 13 / 27 / 26 | CAN SCK / SI / SO / CS | SPI (HSPI), 4 MHz | MCP2515 + TJA1050 | SO swings 0–5 V: 1 kΩ / 2 kΩ divider into GPIO 27 | wired |
@@ -62,8 +62,10 @@ to the driver.
 
 **Brakes on GPIO 32 and 33.** Digital inputs with an internal pull-up as backup. The
 internal one (~45 kΩ) is too weak for a long wire running next to the VESC, so an
-external 10 kΩ sets the level and the 100 nF filters spikes. One pin per lever, so the
-log tells which brake was used.
+external 10 kΩ sets the level and the 100 nF filters spikes. One pin per brake, so the
+log tells which brake was used. Only the front one is wired for now: the rear switch
+does not work reliably. A rear wheel lock still shows in the log, because the rear wheel
+is the motor and its speed comes from the VESC erpm.
 
 **IMU on GPIO 21 / 22.** The ESP32's default I2C pins: no remapping in code.
 
@@ -71,14 +73,16 @@ log tells which brake was used.
 
 1. **Throttle:** measure its output at rest and at full throttle. Unplug it from the VESC
    ADC connector completely: if it stays tied to both, there are two ground paths.
-2. **Brakes:** with the multimeter on continuity, check that each switch is a dry contact
-   (no voltage from the original 36 V system) and whether it is normally open or closed.
-   Normally open is assumed above. Then a cut wire reads "not braking" and the
-   brake + throttle check is lost without any sign; a normally closed switch would fail safe.
+2. **Brakes:** measured 2026-11-02 with the multimeter on continuity. The switches are
+   **normally open**: no continuity at rest, continuity while braking (the cable holds the
+   microswitch pressed at rest and releases it when the lever is pulled). So a cut wire
+   reads "not braking" and the brake + throttle check is lost without any sign. Known
+   limitation, accepted for v0; a normally closed contact would fail safe. Still to check:
+   no voltage left on the switch wires from the original 36 V system.
 3. **VESC:** set the CAN timeout and test it with the wheel in the air **before** the
    throttle stops going to the VESC.
 4. **5 V budget:** the DC-DC's rating is not recorded. Check it covers the ESP32 with
    Wi-Fi (~250 mA peaks) plus the modules before adding loads.
 
-Unknowns: the throttle's full-scale voltage, the brake switch contact type, the DC-DC
+Unknowns: the throttle's full-scale voltage, the DC-DC
 current rating, whether the new IMU module carries its own pull-ups.

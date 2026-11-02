@@ -84,6 +84,7 @@ Acelerador GPIO 35, frenos GPIO 32 y 33, IMU GPIO 21/22.
 
 ## Por saber
 
-- ¿Qué ruedas frena cada maneta? Cambia qué significa la referencia delantera al frenar.
+- ~~¿Qué ruedas frena cada maneta?~~ Medido el 2-nov: freno delantero y trasero, interruptores
+  normalmente abiertos. El trasero falla: solo se cablea el delantero (GPIO 32).
 - Pregunta abierta para Pol: si frenas fuerte y la rueda delantera se bloquea, ¿qué le
   pasa a la referencia de velocidad y qué haría el control de tracción con ella?

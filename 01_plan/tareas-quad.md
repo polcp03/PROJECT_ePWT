@@ -100,10 +100,12 @@ Báscula bajo cada eje en llano, con y sin ti. Para la altura, levantar un eje u
 conocida y ver cuánto peso pasa al otro. **La fórmula la deduces tú** antes de medir: es
 un equilibrio de momentos.
 
-### Frenos
+### Frenos — hecho el 2-nov
 
-Qué ruedas frena cada maneta, y con el multímetro si cada interruptor es un contacto seco
-y si es normalmente abierto o cerrado. Lo pide la unidad de control.
+Normalmente abiertos: hay continuidad solo al frenar. El interruptor del freno trasero
+falla, así que solo se cablea el **delantero** (GPIO 32); el GPIO 33 queda reservado. Un
+bloqueo de la trasera se verá igual, porque su velocidad es la del motor. Falta comprobar
+que en los cables no queda tensión del sistema original de 36 V.
 
 ## Paso 3 · Ensayos que dan información
 
@@ -155,7 +157,8 @@ la orden con protecciones. Antes de que el gas pase por la ESP32:
    reenvía continuamente, no una vez. Probarlo con la rueda en el aire.
 2. **Acelerador**: divisor (su salida pasa de 3,3 V) y un pin de ADC1 (GPIO 32–39). Fuera
    de rango → par cero.
-3. **Freno**: GPIO 32 y 33 con pull-up interno; freno + gas → par cero, desde la v0.
+3. **Freno**: el delantero en el GPIO 32 (el trasero no se cablea); freno + gas → par cero,
+   desde la v0. Como es normalmente abierto, un cable cortado se lee como «sin frenar».
 4. **Bucle de tierra**: con la ESP32 mandando par, EXP-001 vuelve a importar.
 
 ## Después

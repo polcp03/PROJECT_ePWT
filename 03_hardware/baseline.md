@@ -124,8 +124,9 @@ Target wiring (DEC-005, 2026-11-01): throttle, brake switches, wheel speed and I
 to the vehicle control unit (the logger ESP32); the rotor Halls stay on the VESC.
 
 - Throttle: 3-wire 5 V Hall, wired directly to VESC ADC. **Moves to the VCU.**
-- Brake switches: original, on/off, disconnected. **Go to the VCU.** Contact type
-  (dry? normally open?) not yet checked.
+- Brake switches: original, on/off, disconnected. **Go to the VCU.** Measured 2026-11-02:
+  **normally open** (continuity only while braking). The rear switch is faulty, so only
+  the front brake is wired (GPIO 32); GPIO 33 stays reserved for the rear.
 - Wheel speed: **fitted 2026-11-01** on the front wheel. One 3144 Hall on GPIO 34 of the
   logger ESP32, 10 neodymium magnets on a 160 mm diameter circle, ~5 mm gap. Spacing
   redone with a compass; residual ±8 % gap-to-gap error that repeats every turn, and a
