@@ -1,0 +1,3 @@
+# Lessons and generated pages are HTML artifacts, not the project's code.
+# Keep them out of GitHub's language bar so it shows the C/C++, Python and MATLAB.
+*.html linguist-generated
