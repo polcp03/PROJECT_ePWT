@@ -1,0 +1,486 @@
+<title>Control 2 · El PI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: one reading column like a lab notebook; phase colours U/V/W are the identity, teal is the UI accent. */
+:root{
+  --bg:#F4F7F6; --surface:#FFFFFF; --sunk:#E9EFEC; --ink:#14201B; --muted:#56675F; --line:#D5DEDA;
+  --accent:#0E6E62; --accent-soft:#D8EEEA; --u:#D1495B; --v:#C98A00; --w:#2F6FDE; --warn:#A8500B; --warn-soft:#FBEBDD;
+  --magN:#0E6E62; --magS:#7A5FA8; --steel:#B9C4BF;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1412; --surface:#161F1C; --sunk:#1D2925; --ink:#E4ECE8; --muted:#94A69E; --line:#2B3833;
+  --accent:#3DB6A3; --accent-soft:#163A34; --u:#F06A7A; --v:#F0B53A; --w:#73A0FF; --warn:#F0A060; --warn-soft:#3A2715; --magN:#3DB6A3; --magS:#9C86D0; --steel:#3A4843; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1412; --surface:#161F1C; --sunk:#1D2925; --ink:#E4ECE8; --muted:#94A69E; --line:#2B3833;
+  --accent:#3DB6A3; --accent-soft:#163A34; --u:#F06A7A; --v:#F0B53A; --w:#73A0FF; --warn:#F0A060; --warn-soft:#3A2715; --magN:#3DB6A3; --magS:#9C86D0; --steel:#3A4843; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:760px;margin:0 auto;padding-block:28px 80px;display:grid;gap:36px}
+h1,h2,h3{font-family:var(--display);font-stretch:85%;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(2rem,6vw,2.9rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.6rem;font-weight:750}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0}
+.stack{display:grid;gap:14px}
+.eyebrow{font:500 .78rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:1.1rem;color:var(--muted);max-width:62ch}
+.phasebar{display:flex;height:5px;border-radius:3px;overflow:hidden;width:120px}
+.phasebar i{flex:1}.phasebar i:nth-child(1){background:var(--u)}.phasebar i:nth-child(2){background:var(--v)}.phasebar i:nth-child(3){background:var(--w)}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px))}
+nav.toc div{max-width:760px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}nav.toc div::-webkit-scrollbar{display:none}nav.toc a{flex:none}
+nav.toc a{font:500 .85rem/1 var(--body);color:var(--ink);text-decoration:none;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--accent);outline:none}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font:.9rem/1.4 var(--mono);color:var(--muted)}
+.attempt{border:2px dashed var(--accent);border-radius:12px;padding:18px 20px;background:var(--accent-soft)}
+.attempt ol{margin:8px 0 0;padding-left:1.3em;display:grid;gap:6px}
+.idea{display:grid;grid-template-columns:2.4rem 1fr;gap:4px 14px;padding-top:18px;border-top:1px solid var(--line)}
+.idea>.n{font:800 1.5rem/1 var(--display);color:var(--accent);font-stretch:75%}
+.idea>div{min-width:0;display:grid;gap:10px}
+.eq{font:500 1.05rem/1.5 var(--mono);background:var(--sunk);border-radius:8px;padding:10px 14px;overflow-x:auto;white-space:nowrap}
+.eq small{font-size:.8rem;color:var(--muted);white-space:normal;display:block}
+.src{font:.8rem/1.4 var(--mono);color:var(--muted)}
+.key{border-left:3px solid var(--accent);padding-left:12px}
+.mine{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:.95rem}
+.mine b{font-family:var(--mono);font-weight:500}
+.lab{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:14px}
+.lab h3{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;align-items:center}.two>*{min-width:0}
+.legrow{display:grid;grid-template-columns:4.2em repeat(3,1fr);gap:6px;align-items:center}.legrow button{padding:9px 6px}
+.lab h3 span{font:500 .75rem/1 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px}
+.ctl{display:grid;gap:2px;min-width:0}
+.ctl label{display:flex;justify-content:space-between;font-size:.88rem;gap:8px}
+.ctl output{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+canvas{width:100%;display:block;border-radius:8px;background:var(--sunk)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px}
+.readout div{background:var(--sunk);border-radius:8px;padding:8px 10px;min-width:0}
+.readout dt{font-size:.75rem;color:var(--muted)}
+.readout dd{margin:0;font:500 1.05rem/1.3 var(--mono);font-variant-numeric:tabular-nums}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+button{font:500 .9rem/1 var(--body);padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent)}
+.try{font-size:.92rem;background:var(--sunk);border-radius:8px;padding:10px 14px}
+.try ul{margin:4px 0 0;padding-left:1.2em;display:grid;gap:4px}
+.case{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:8px}
+.case .tag{font:500 .75rem/1 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.q{display:grid;grid-template-columns:3rem 1fr;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.q .pts{font:500 .8rem/1.4 var(--mono);color:var(--muted)}
+.q b.id{font:700 1rem/1.4 var(--mono)}
+.q>div{min-width:0;display:grid;gap:6px}
+details.exam{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 18px}
+details.exam>summary{cursor:pointer;padding:14px 0;font:700 1.1rem/1.3 var(--display);font-stretch:85%;list-style:none}
+details.exam>summary::after{content:" ▸";color:var(--accent)}
+details.exam[open]>summary::after{content:" ▾"}
+.warn{background:var(--warn-soft);border-radius:10px;padding:12px 14px;font-size:.93rem}
+.warn b{color:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 .8rem/1.3 var(--body);color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+svg text{font-family:var(--mono)}
+footer{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.mm{margin:0;display:grid;gap:8px;justify-items:center;background:var(--sunk);border-radius:14px;padding:18px 12px}.mm svg{width:100%;max-width:440px;height:auto;display:block}.mm figcaption{font:.85rem var(--mono);color:var(--muted);text-align:center}
+/* theory v2: laws grid, illustrated steps, retrieval checks, worked examples */
+.method{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.howto{margin:0;padding-left:1.3em;display:grid;gap:6px}
+.laws{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.law{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px;align-content:start;min-width:0}
+.law h3{font-size:1.05rem}
+.law p{font-size:.93rem}
+.law .eq{font-size:.92rem;white-space:normal}
+.pic{width:100%;max-width:200px;height:auto;display:block;background:var(--sunk);border-radius:8px}
+.where{color:var(--muted);font-size:.88rem!important}
+.where b{color:var(--ink)}
+details.check{background:var(--accent-soft);border-radius:10px;padding:10px 14px}
+details.check>summary{cursor:pointer;font-weight:600;color:var(--accent);font-size:.93rem}
+details.check p{margin-top:8px;font-size:.93rem}
+details.check .ans{border-top:1px dashed var(--accent);padding-top:8px}
+.step{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding-top:22px;border-top:1px solid var(--line)}
+.step>div{display:grid;gap:10px;min-width:0}
+.step h3 .n{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--accent);color:var(--surface);font-size:.9rem;margin-right:8px;vertical-align:2px}
+.dg{width:100%;max-width:480px;height:auto;display:block;margin:0 auto;background:var(--sunk);border-radius:12px}
+.worked{background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:16px 18px}
+.sol{margin:0;padding-left:1.3em;display:grid;gap:4px;font-variant-numeric:tabular-nums}
+.review{background:var(--surface);border:2px dashed var(--line);border-radius:12px;padding:16px 18px}
+.review ol{margin:6px 0 0;padding-left:1.3em;display:grid;gap:6px}
+/* svg paint classes, all theme tokens */
+.s-ink{stroke:var(--ink)}.s-mut{stroke:var(--muted)}.s-acc{stroke:var(--accent)}.s-warn{stroke:var(--warn)}
+.s-u{stroke:var(--u)}.s-v{stroke:var(--v)}.s-w{stroke:var(--w)}.s-steel{stroke:var(--steel)}.s-magN{stroke:var(--magN)}.s-magS{stroke:var(--magS)}
+.f-ink{fill:var(--ink)}.f-mut{fill:var(--muted)}.f-acc{fill:var(--accent)}.f-warn{fill:var(--warn)}.f-surf{fill:var(--surface)}.f-sunk{fill:var(--sunk)}
+.f-u{fill:var(--u)}.f-v{fill:var(--v)}.f-w{fill:var(--w)}.f-magN{fill:var(--magN)}.f-magS{fill:var(--magS)}
+svg .t{fill:var(--ink);font:13px var(--mono)}svg .tm{fill:var(--muted);font:12px var(--mono)}svg .ta{fill:var(--accent);font:600 13px var(--mono)}
+svg .tw2{fill:var(--warn);font:600 13px var(--mono)}svg .tu{fill:var(--u);font:700 14px var(--mono)}svg .tv{fill:var(--v);font:700 14px var(--mono)}
+svg .tv-w{fill:var(--w);font:600 13px var(--mono)}svg .tv-u{fill:var(--u);font:600 13px var(--mono)}svg .tN{fill:var(--magN);font:800 18px var(--display)}svg .tS{fill:var(--magS);font:800 18px var(--display)}
+@media (min-width:720px){.step{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:start}.step .dg{position:sticky;top:64px}}
+/* answer boxes: attempt first, then the solution; answers saved to the artifact db for Claude to correct */
+.qa{background:var(--accent-soft);border-radius:10px;padding:12px 14px;display:grid;gap:8px}
+.qa>p{font-size:.95rem}
+.qa textarea{width:100%;min-height:96px;font:16px/1.5 var(--body);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);resize:vertical}
+.qa .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.qa .st{font:.8rem/1.3 var(--mono);color:var(--muted)}
+.qa .reveal{border-top:1px dashed var(--accent);padding-top:8px;font-size:.93rem;display:grid;gap:6px}
+.qa .fb{border-left:3px solid var(--warn);background:var(--warn-soft);border-radius:0 8px 8px 0;padding:8px 10px;font-size:.93rem}
+.qa .fb b{color:var(--warn)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.part{display:grid;gap:14px}
+details.annex{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 18px}
+details.annex>summary{cursor:pointer;padding:14px 0;font:700 1.1rem/1.3 var(--display);font-stretch:85%;list-style:none}
+details.annex>summary::after{content:" ▸";color:var(--accent)}
+details.annex[open]>summary::after{content:" ▾"}
+details.annex>div{display:grid;gap:22px;padding-bottom:18px}
+main>*{min-width:0}
+</style>
+
+<main data-lesson="C2">
+<header class="stack">
+  <div class="phasebar"><i></i><i></i><i></i></div>
+  <p class="eyebrow">C03 · Control 2 · viernes 6 nov, 07:00</p>
+  <h1>El PI: el error, el ancho de banda y el techo de tensión</h1>
+  <p class="lede">Ayer, el proporcional se quedaba corto y la back-EMF le robaba amperios. Hoy le añades memoria: el integrador. Con eso, y dos números bien elegidos, tienes el lazo de corriente de tu VESC.</p>
+  <div class="meta"><span>Una sesión · 55 min</span><span>Escribe en cada cuadro: la solución se abre después, y Claude corrige lo que guardes</span></div>
+</header>
+
+<nav class="toc" aria-label="Secciones"><div>
+  <a href="#predice">1 · Predice</a><a href="#nucleo">2 · Núcleo</a><a href="#lab">3 · Laboratorio</a><a href="#criterio">4 · Criterio</a><a href="#cierre">5 · Cierre</a>
+</div></nav>
+
+<section id="predice" class="attempt stack">
+  <p class="eyebrow">1 · Predice · 5 min, sin mirar nada</p>
+  <h2>Antes de leer</h2>
+  <div class="qa" data-q="p1"><p>Un controlador suma (integra) el error a lo largo del tiempo. Cuando el error llega a cero, ¿qué pasa con su salida: vuelve a cero, se queda donde estaba o sigue creciendo?</p>
+    <template class="sol"><p><b>Solución:</b> <b>se queda donde estaba</b>. Ha acumulado justo la tensión que hacía falta. Por eso puede dar tensión con error cero, que es lo que al P le faltaba.</p></template></div>
+  <div class="qa" data-q="p2"><p>El motor gira tan rápido que, ni con toda la tensión del inversor, llega a los 120 A que pides. Tú sigues pidiéndolos. ¿Qué crees que hace la parte integral mientras tanto? ¿Y qué pasa cuando sueltas el gas?</p>
+    <template class="sol"><p><b>Solución:</b> el error no baja, así que el integrador <b>sigue creciendo</b> sin parar (windup). Al soltar el gas, tiene que «desacumular» todo eso antes de bajar la tensión, y el motor <b>sigue tirando</b> un rato. Lo verás en el laboratorio.</p></template></div>
+  <div class="review stack">
+    <p class="eyebrow">Repaso espaciado · ayer y errores.md</p>
+    <div class="qa" data-q="r1"><p>(Control 1) Con solo un P, ¿cuánta corriente roba la back-EMF en régimen? Escribe la expresión y el número a 1000 rpm con Kp = 0,2119 V/A.</p>
+      <template class="sol"><p><b>Solución:</b> E/(R + Kp) = 5,30/0,240 ≈ <b>22 A</b>.</p></template></div>
+    <div class="qa" data-q="r2"><p>(Error 2) Con el VESC en control de corriente, ¿quién decide la corriente, y cuándo no la consigue?</p>
+      <template class="sol"><p><b>Solución:</b> la pide el puño y el lazo la regula; no la consigue cuando no queda tensión para empujarla contra la back-EMF. Hoy ese «cuando no queda tensión» tiene nombre: saturación.</p></template></div>
+  </div>
+</section>
+
+<section id="nucleo" class="part">
+  <p class="eyebrow">2 · Núcleo · 25 min</p>
+  <h2>Seis ideas, cada una con su dibujo</h2>
+  <p class="lede">Filtrado de Franklin §4.2–4.4 y de Åström &amp; Murray, <i>Feedback Systems</i>, 2.ª ed., cap. 11, que explica el PI más claro. Planta: el eje q de tu motor, G(s) = 1/(Lq·s + R).</p>
+
+  <article class="step">
+    <svg viewBox="0 0 320 180" class="dg" role="img" aria-label="El error decae a cero mientras el área bajo él, el integral, sube y se queda fija">
+      <path d="M40 150 H305 M40 150 V15" class="s-mut" stroke-width="1"/>
+      <path d="M40 40 C 80 120, 120 145, 300 150" class="s-warn" fill="none" stroke-width="2.5"/>
+      <path d="M40 40 C 80 120, 120 145, 300 150 L300 150 L40 150 Z" class="f-warn" opacity=".15"/>
+      <text x="80" y="60" class="tw2">error e(t)</text>
+      <path d="M40 150 C 80 90, 140 62, 300 58" class="s-acc" fill="none" stroke-width="3"/>
+      <text x="300" y="50" class="ta" text-anchor="end">∫e: se queda fijo</text>
+      <text x="300" y="168" class="tm" text-anchor="end">t</text>
+    </svg>
+    <div>
+      <h3><span class="n">1</span> El integrador mata el error</h3>
+      <p>La parte integral da una salida proporcional al <b>área</b> bajo el error: toda su historia. Mientras quede algo de error, sigue cambiando; solo se para cuando el error es exactamente cero, y entonces se queda con la tensión que hacía falta.</p>
+      <p>En el lenguaje de Franklin, un integrador en el lazo pasa el sistema de <b>tipo 0</b> a <b>tipo 1</b>: error cero ante referencias y perturbaciones constantes. La back-EMF a velocidad constante es justo eso: una perturbación constante.</p>
+      <div class="qa" data-q="i1"><p>A 1000 rpm y con 60 A pedidos, en régimen y con un PI, ¿cuánta tensión aporta la parte integral y cuánta la proporcional? ¿De dónde sale cada voltio?</p>
+        <template class="sol"><p><b>Solución:</b> en régimen el error es cero, así que la proporcional aporta <b>0 V</b>. La integral pone todo: R·i + E = 0,028·60 + 5,30 = <b>6,98 V</b>. Ha «aprendido» la back-EMF y la caída del cobre.</p></template></div>
+      <p class="src">Franklin §4.2 (tipo de sistema) y §4.3.2, fig. 4.8 · Åström §11.1</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 165" class="dg" role="img" aria-label="Bloque del PI: Kp y Ki entre s sumados, equivalentes a Kp por s más Ki entre Kp, todo entre s">
+      <defs><marker id="c2a" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7z" class="f-ink"/></marker></defs>
+      <path d="M10 70 H40" class="s-ink" stroke-width="2"/><text x="10" y="60" class="t">e</text>
+      <path d="M40 40 V100" class="s-ink" stroke-width="2"/>
+      <path d="M40 40 H76" class="s-ink" stroke-width="2" marker-end="url(#c2a)"/><path d="M40 100 H76" class="s-ink" stroke-width="2" marker-end="url(#c2a)"/>
+      <rect x="78" y="24" width="60" height="32" rx="6" class="s-ink f-surf" stroke-width="2"/><text x="108" y="45" class="t" text-anchor="middle">Kp</text>
+      <rect x="78" y="84" width="60" height="32" rx="6" class="s-acc f-surf" stroke-width="2"/><text x="108" y="105" class="ta" text-anchor="middle">Ki / s</text>
+      <path d="M138 40 H170 V58" class="s-ink" fill="none" stroke-width="2" marker-end="url(#c2a)"/><path d="M138 100 H170 V82" class="s-ink" fill="none" stroke-width="2" marker-end="url(#c2a)"/>
+      <circle cx="170" cy="70" r="11" class="s-ink f-surf" stroke-width="2"/><text x="170" y="75" class="t" text-anchor="middle">Σ</text>
+      <path d="M181 70 H230" class="s-ink" stroke-width="2" marker-end="url(#c2a)"/><text x="244" y="75" class="t">v</text>
+      <text x="10" y="138" class="ta">D(s) = Kp·(s + Ki/Kp) / s</text>
+      <text x="10" y="156" class="tm">polo en el origen, cero en −Ki/Kp</text>
+    </svg>
+    <div>
+      <h3><span class="n">2</span> Qué es un PI</h3>
+      <p class="eq">v = Kp·e + Ki·∫e dt<br>D(s) = Kp + Ki/s = Kp·(s + Ki/Kp)/s</p>
+      <p>Dos perillas. <b>Kp</b> reacciona al error de ahora; <b>Ki</b>, al acumulado. Escrito como fracción, el PI tiene un <b>polo en el origen</b> (el integrador) y un <b>cero</b> en −Ki/Kp. Åström llama Ti = Kp/Ki al tiempo integral: lo que tarda el integrador en igualar a la parte proporcional con un error constante.</p>
+      <div class="mine">Tu VESC: Kp = <b>0,2119 V/A</b>, Ki = <b>56,20 V/(A·s)</b>. En el código es <span style="font-family:var(--mono)">v_int += err·ki·dt; v = v_int + err·kp</span>.</div>
+      <div class="qa" data-q="i2"><p>Con las ganancias de tu VESC, ¿dónde está el cero del PI (en rad/s) y cuánto vale Ti? Compara el cero con el polo de tu bobina, −R/L. ¿Qué observas?</p>
+        <template class="sol"><p><b>Solución:</b> Ki/Kp = 56,20/0,2119 = <b>265 rad/s</b>, así que el cero está en −265 rad/s, y Ti = 1/265 = <b>3,8 ms</b>. El polo de la bobina está en −R/L = −264 rad/s (con la L media de 106 µH). <b>Coinciden</b>: no es casualidad, es la idea 3.</p></template></div>
+      <p class="src">Franklin §4.3, ec. 4.55 · Åström §11.1 (Ti) · código: <span style="font-family:var(--mono)">motor_params.m</span>, sección 3</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 170" class="dg" role="img" aria-label="El cero del PI cancela el polo de la bobina y queda un integrador: el lazo cerrado es de primer orden con constante 1 entre omega c">
+      <path d="M20 90 H300" class="s-mut" stroke-width="1"/><path d="M240 20 V150" class="s-mut" stroke-width="1"/>
+      <text x="300" y="108" class="tm" text-anchor="end">Re(s)</text>
+      <text x="140" y="96" class="t" text-anchor="middle" font-size="22">×</text>
+      <circle cx="140" cy="88" r="9" class="s-acc" fill="none" stroke-width="2.5"/>
+      <text x="140" y="122" class="ta" text-anchor="middle">−R/L ≈ −Ki/Kp</text>
+      <text x="240" y="96" class="t" text-anchor="middle" font-size="22">×</text><text x="240" y="122" class="tm" text-anchor="middle">integrador</text>
+      <text x="20" y="30" class="t">polo de la bobina (×) tapado por</text><text x="20" y="48" class="ta">el cero del PI (○)</text>
+      <text x="20" y="160" class="t">lazo cerrado: 1 / (s/ωc + 1)</text>
+    </svg>
+    <div>
+      <h3><span class="n">3</span> El truco: cancelar el polo de la bobina</h3>
+      <p>Si eliges Ki/Kp = R/L, el cero del PI cae justo encima del polo de la bobina y se anulan. La ganancia del lazo queda en un integrador puro:</p>
+      <p class="eq">G·D = Kp·(s + R/L)/s · 1/(L·(s + R/L)) = Kp / (L·s)<br>T(s) = 1 / (s/ωc + 1) &nbsp;&nbsp; con &nbsp;&nbsp; ωc = Kp/L</p>
+      <p class="key">El lazo cerrado es de <b>primer orden</b>: sin sobreoscilación, error cero y una sola perilla, ωc. Por eso el VESC no deja tocar Kp y Ki por separado en su detección: elige un ancho de banda y calcula las dos.</p>
+      <div class="qa" data-q="i3"><p>Si te equivocas con R (el motor está 40 K más caliente que cuando se midió), la cancelación deja de ser exacta. ¿Se rompe el lazo? ¿Qué error final queda? Razónalo con lo que hace el integrador.</p>
+        <template class="sol"><p><b>Solución:</b> no se rompe. El cero y el polo quedan algo separados, la respuesta se deforma un poco (una cola lenta pequeña), pero el integrador sigue ahí y el error final sigue siendo <b>cero</b>. La cancelación decide la forma; el integrador garantiza el resultado. Lo compruebas en el laboratorio.</p></template></div>
+      <p class="src">Franklin §4.1.2 (cancelar polos estables, y su riesgo si se mueven) · Åström §11.3 (ajuste)</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 180" class="dg" role="img" aria-label="Escala de frecuencias: polo de la bobina 248, ancho de banda 2000, límite práctico 9400 y muestreo 94 000 radianes por segundo">
+      <path d="M20 90 H305" class="s-ink" stroke-width="2"/>
+      <g class="s-ink" stroke-width="2"><path d="M40 82 v16"/><path d="M120 82 v16"/><path d="M210 82 v16"/><path d="M290 82 v16"/></g>
+      <text x="40" y="70" class="t" text-anchor="middle">248</text><text x="40" y="120" class="tm" text-anchor="middle">bobina</text>
+      <text x="120" y="70" class="ta" text-anchor="middle">2000</text><text x="120" y="120" class="ta" text-anchor="middle">tu lazo</text>
+      <text x="210" y="70" class="tw2" text-anchor="middle">≈ 9400</text><text x="210" y="120" class="tw2" text-anchor="middle">ωs/10</text>
+      <text x="290" y="70" class="t" text-anchor="middle">94 000</text><text x="290" y="120" class="tm" text-anchor="middle">15 kHz</text>
+      <text x="20" y="160" class="tm">rad/s, escala logarítmica</text>
+    </svg>
+    <div>
+      <h3><span class="n">4</span> Ancho de banda: Kp = ωc·L y Ki = ωc·R</h3>
+      <p>Con la cancelación, el diseño entero es elegir ωc y calcular:</p>
+      <p class="eq">Kp = ωc·L &nbsp;&nbsp;&nbsp; Ki = ωc·R &nbsp;&nbsp;&nbsp; τ<sub>lazo</sub> = 1/ωc</p>
+      <p>¿Cuánto de rápido? Por arriba manda el micro: el lazo corre a 15 kHz (ωs ≈ 94 000 rad/s), y con muestreo y retardo, la regla práctica es quedarse por debajo de una décima parte. Por abajo, tiene que ser bastante más rápido que todo lo que el lazo de fuera le pida. Y Franklin avisa: un lazo más rápido pide más tensión, y tu inversor tiene techo.</p>
+      <div class="mine">Tu VESC: ωc = <b>2000 rad/s</b> (318 Hz), τ = 0,5 ms. Unas 8 veces más rápido que la bobina sola, y casi 5 veces por debajo del límite práctico.</div>
+      <div class="qa" data-q="i4"><p>Diseña tú: con ωc = 1000 rad/s, ¿cuánto valen Kp y Ki para tu eje q (Lq = 112,8 µH, R = 28,0 mΩ)? ¿Y la constante de tiempo del lazo? ¿Por qué no pondrías ωc = 50 000 rad/s?</p>
+        <template class="sol"><p><b>Solución:</b> Kp = 1000·112,8 µH = <b>0,113 V/A</b>; Ki = 1000·0,028 = <b>28,0 V/(A·s)</b>; τ = <b>1 ms</b>. A 50 000 rad/s estarías por encima de ωs/10: el retardo del muestreo lo haría oscilar. Además, un escalón de 60 A pediría Kp·60 = 338 V de golpe, y el ruido de los shunts entraría muy amplificado.</p></template></div>
+      <p class="src">Franklin §4.1.2 (no pedir una respuesta irreal) · Åström §11.3 · bw del VESC: <span style="font-family:var(--mono)">motor_params.m</span></p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 190" class="dg" role="img" aria-label="Windup: la tensión pedida por el PI sigue subiendo por encima del techo mientras la aplicada se queda en el techo; al soltar, tarda en bajar">
+      <path d="M40 160 H305 M40 160 V15" class="s-mut" stroke-width="1"/>
+      <path d="M40 70 H300" class="s-warn" stroke-width="1.5" stroke-dasharray="6 4"/><text x="300" y="64" class="tw2" text-anchor="end">techo 28,5 V</text>
+      <path d="M40 120 L80 70 L170 70 L215 70 L235 120" class="s-acc" fill="none" stroke-width="3"/>
+      <path d="M80 70 L170 22 L230 70" class="s-ink" fill="none" stroke-width="1.8" stroke-dasharray="4 3"/>
+      <text x="120" y="20" class="t">lo que pide el PI</text><text x="96" y="92" class="ta">lo que da el inversor</text>
+      <path d="M170 160 V22" class="s-mut" stroke-width="1" stroke-dasharray="2 3"/><text x="170" y="176" class="tm" text-anchor="middle">sueltas el gas</text>
+    </svg>
+    <div>
+      <h3><span class="n">5</span> Saturación y windup: cuando el PI pide más de lo que hay</h3>
+      <p>El inversor no da más de 28,5 V (Vdc/√3 por el duty máximo). Si el motor gira tan rápido que ni con eso llega la corriente, el error no baja y el integrador <b>sigue acumulando</b> una tensión que nadie va a aplicar. Eso es el <b>windup</b>.</p>
+      <p>El problema aparece al cambiar la petición: antes de bajar la tensión, el integrador tiene que vaciar todo lo acumulado. Åström lo enseña con un control de crucero en una cuesta. En tu quad: <b>sueltas el gas y el motor sigue tirando</b>.</p>
+      <p class="key">La cura es el <b>anti-windup</b>: cuando la salida está en el techo, el integrador deja de acumular (o se le resta el exceso). Cuesta tres líneas de código y es obligatorio.</p>
+      <div class="qa" data-q="i5"><p>A 5000 rpm (E = 26,5 V), ¿cuál es la corriente máxima que tu inversor puede meter en el eje q en régimen? Si pides 120 A, ¿a qué valor tiende el integrador sin anti-windup?</p>
+        <template class="sol"><p><b>Solución:</b> i máx = (28,5 − 26,5)/0,028 ≈ <b>73 A</b> (ignorando el acoplamiento con d). Sin anti-windup, el integrador <b>no tiende a nada</b>: crece sin límite mientras el error siga siendo positivo, porque los 120 A nunca llegan. En el laboratorio lo verás pasar de 50 V en pocos milisegundos.</p></template></div>
+      <p class="src">Åström §11.4, fig. 11.10 (windup y anti-windup) · Franklin §4.1.2</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 170" class="dg" role="img" aria-label="Tabla de los parámetros del lazo de corriente de tu VESC">
+      <rect x="10" y="10" width="300" height="150" rx="10" class="f-sunk"/>
+      <text x="24" y="36" class="t">foc_current_kp</text><text x="296" y="36" class="ta" text-anchor="end">0,2119 = L·2000</text>
+      <text x="24" y="62" class="t">foc_current_ki</text><text x="296" y="62" class="ta" text-anchor="end">56,20 ≈ R·2000</text>
+      <text x="24" y="88" class="t">ancho de banda</text><text x="296" y="88" class="ta" text-anchor="end">2000 rad/s · 318 Hz</text>
+      <text x="24" y="114" class="t">foc_cc_decoupling</text><text x="296" y="114" class="tw2" text-anchor="end">apagado</text>
+      <text x="24" y="140" class="t">foc_f_zv</text><text x="296" y="140" class="t" text-anchor="end">30 kHz (lazo a 15 kHz?)</text>
+    </svg>
+    <div>
+      <h3><span class="n">6</span> Cómo leer las ganancias de tu VESC</h3>
+      <p>Con todo lo anterior, los números de la configuración se leen solos. Kp/L = 0,2119/106 µH = <b>1999 rad/s</b> y Ki/R = 56,20/28,0 mΩ = <b>2006 rad/s</b>: la detección del VESC eligió ωc = 2000 rad/s y aplicó Kp = L·ωc, Ki = R·ωc, la cancelación de la idea 3.</p>
+      <p><b>Desacoplamiento apagado.</b> Los términos ±ωe·L·i de la L3a mezclan los ejes d y q; el VESC puede restarlos por adelantado (es un <i>feedforward</i>, Franklin §4.4), pero está apagado. El integrador los acaba absorbiendo en régimen, pero en un acelerón llega tarde.</p>
+      <div class="mine"><b>Pregunta abierta de tu hardware:</b> ¿el lazo corre a 15 kHz (una muestra cada dos periodos de PWM) o a 30 kHz? En <span style="font-family:var(--mono)">motor_params.m</span> está como supuesto. Importa en C04.</div>
+      <div class="qa" data-q="i6"><p>El VESC usa la L media (106 µH) para calcular Kp, pero el eje q tiene Lq = 112,8 µH. ¿Qué ancho de banda real tiene tu lazo en q? ¿Es un problema?</p>
+        <template class="sol"><p><b>Solución:</b> ωc real = Kp/Lq = 0,2119/112,8 µH = <b>1879 rad/s</b>, un 6 % más lento de lo diseñado; en d, con Ld = 99,2 µH, un 7 % más rápido. Y el cero queda en R/L media, no exactamente sobre el polo de q. No es un problema: el integrador mantiene el error cero y un 6 % de ancho de banda no se nota. Saber que existe sí importa cuando compares el modelo con los logs.</p></template></div>
+      <p class="src">Configuración: <span style="font-family:var(--mono)">motor_params.m</span> (MOTOR_1.9.xml) · Franklin §4.4 (feedforward)</p>
+    </div>
+  </article>
+</section>
+
+<section id="lab" class="part">
+  <p class="eyebrow">3 · Laboratorio · 15 min</p>
+  <h2>Ajusta tu PI y rómpelo</h2>
+  <p class="lede">El eje q de tu motor con un PI. Mueves ωc y el PI se ajusta cancelando el polo del eje q (con Lq, por eso aquí Kp = 0,2255 y no el 0,2119 del VESC, que usa la L media); el segundo slider desajusta Ki para ver qué pasa si la cancelación no es exacta. El motor ya gira a la velocidad que elijas antes del escalón. Escribe la predicción <b>antes</b>.</p>
+  <div class="lab">
+    <div class="controls">
+      <div class="ctl"><label for="c2_wc">Ancho de banda ωc <output id="o_c2wc"></output></label><input id="c2_wc" type="range" min="500" max="8000" step="100" value="2000"></div>
+      <div class="ctl"><label for="c2_ratio">Ki respecto a la cancelación <output id="o_c2ratio"></output></label><input id="c2_ratio" type="range" min="0.25" max="4" step="0.05" value="1"></div>
+      <div class="ctl"><label for="c2_ir">Corriente pedida i* <output id="o_c2ir"></output></label><input id="c2_ir" type="range" min="10" max="120" step="5" value="100"></div>
+      <div class="ctl"><label for="c2_rpm">Velocidad del motor <output id="o_c2rpm"></output></label><input id="c2_rpm" type="range" min="0" max="5500" step="100" value="0"></div>
+      <div class="ctl"><label for="c2_dt">Calentamiento del cobre <output id="o_c2dt"></output></label><input id="c2_dt" type="range" min="0" max="60" step="5" value="0"></div>
+    </div>
+    <div class="btnrow"><button type="button" id="c2_sat" aria-pressed="false">Techo de tensión 28,5 V: apagado</button><button type="button" id="c2_aw" aria-pressed="false">Anti-windup: apagado</button><button type="button" id="c2_prof" aria-pressed="false">Perfil: escalón</button></div>
+    <canvas id="c2_plot" height="300" aria-label="Corriente pedida, corriente medida y tensión aplicada frente al tiempo"></canvas>
+    <dl class="readout" id="c2_r"></dl>
+    <div class="qa" data-q="l1"><p>Con ωc = 2000 y la cancelación exacta: ¿qué constante de tiempo esperas, y hay sobreoscilación? Mira. Después pon el motor a 2000 rpm y el cobre a +40 K: ¿cambia el valor final?</p>
+      <template class="sol"><p><b>Solución:</b> τ = 1/2000 = <b>0,5 ms</b>, sin sobreoscilación: primer orden. A 2000 rpm la respuesta es <b>idéntica</b> (0,50 ms, 100 A): el integrador ya tenía cargados los 10,6 V de back-EMF antes del escalón. Con el cobre a +40 K la cancelación deja de ser exacta y va algo más lenta (0,53 ms, 99,8 A al final del escalón, y 100 A si esperas): el integrador absorbe la R nueva.</p></template></div>
+    <div class="qa" data-q="l2"><p>Desajusta Ki: × 0,25 y luego × 4. ¿Cuál deja una cola lenta y cuál sobreoscila? ¿En los dos casos llega a 100 A al final?</p>
+      <template class="sol"><p><b>Solución:</b> × 0,25: el cero queda a la derecha del polo y aparece una <b>cola lenta</b> (al final del escalón aún va por unos 95 A). × 4: <b>sobreoscila</b> un 13 %. Los dos llegan a 100 A si esperas: el integrador manda. La cancelación decide la forma, no el resultado.</p></template></div>
+    <div class="qa" data-q="l3"><p>Enciende el techo de tensión, perfil «subir y soltar», motor a 5000 rpm, 120 A. Primero sin anti-windup y luego con él. ¿Qué pasa con la corriente después de soltar el gas en cada caso? ¿Cómo se sentiría en el quad?</p>
+      <template class="sol"><p><b>Solución:</b> durante el escalón la tensión se queda en el techo y la corriente no pasa de unos 55 A. Sin anti-windup, el integrador llega a unos 54 V acumulados y, al soltar, <b>la corriente sigue por encima de 40 A</b> varios milisegundos: el motor sigue empujando sin gas. Con anti-windup cae por debajo de 5 A en menos de 1 ms. En un control de velocidad o de tracción, ese retraso puede ser de cientos de milisegundos: peligroso.</p></template></div>
+  </div>
+</section>
+
+<section id="criterio" class="part">
+  <p class="eyebrow">4 · Criterio · 7 min</p>
+  <h2>Piensa tú</h2>
+  <div class="case"><span class="tag">Caso · Escribes tú el PI de la VCU</span>
+    <div class="qa" data-q="c1"><p>En unos meses, la VCU (tu ESP32) tendrá un PI de velocidad que pide corriente al VESC por CAN, con un límite de 120 A. Le pasas a la IA el contrato del PI. ¿Qué tres cosas tienen que estar escritas en ese contrato sí o sí, y qué prueba harías para comprobar la del windup?</p>
+      <template class="sol"><p><b>Solución:</b> (1) Los límites de la salida (±120 A, y el de regeneración). (2) <b>Anti-windup</b>: el integrador no acumula mientras la salida está en el límite. (3) El periodo de muestreo fijo, y qué hace si un ciclo llega tarde. Más: estado inicial y reset al soltar el freno. Prueba: referencia imposible (velocidad que no alcanza) durante 5 s y luego referencia cero; criterio con número: la salida baja de 120 A a menos de 5 A en un ciclo o dos, no en segundos.</p></template></div></div>
+  <div class="case"><span class="tag">Encuentra el error</span>
+    <div class="qa" data-q="c2"><p>Un compañero dice: <i>"Mi lazo de corriente tiene 318 Hz de ancho de banda, así que sigue sin error cualquier cosa por debajo de 318 Hz. Y como el motor a 5000 rpm va a 250 Hz eléctricos, podría controlar las corrientes de fase directamente, sin Park."</i> Encuentra los dos errores.</p>
+      <template class="sol"><p><b>Solución:</b> (1) El ancho de banda es donde la respuesta ya ha caído a −3 dB (un 71 %), con 45° de retraso: a 250 Hz seguiría la senoide con mucho error de amplitud y de fase. «Sin error» solo es en continua, y gracias al integrador. (2) Por eso precisamente se usa Park: en dq la referencia es constante y el integrador consigue error cero. En el marco del estator, a 250 Hz, no. Es la pregunta 2 de «Predice» de L3a.</p></template></div></div>
+</section>
+
+<section id="cierre" class="part">
+  <p class="eyebrow">5 · Cierre · 3 min</p>
+  <h2>Explícalo en voz alta</h2>
+  <p>Sin mirar, en un minuto: <b>de dónde salen los 0,2119 y 56,20 de tu VESC, qué pasaría con un 10 % de error en R y por qué hace falta anti-windup.</b> Si lo explicas así, tienes la slide del lazo de corriente.</p>
+  <div class="qa" data-q="z1"><p>¿Qué no tienes claro todavía? Escríbelo tal cual. Va a la parte «lo que no entiendo» de la review del 13.</p>
+    <template class="sol"><p>Guardado. Claude lo lee antes del ejercicio del sábado: Kp y Ki a mano para tu motor.</p></template></div>
+</section>
+
+<footer>Fuentes: Franklin, G. F., Powell, J. D. y Emami-Naeini, A. <i>Feedback Control of Dynamic Systems</i>, 8.ª ed.: §4.1.2, §4.2, §4.3, §4.4 · Åström, K. J. y Murray, R. M. <i>Feedback Systems</i>, 2.ª ed.: §11.1, §11.3, §11.4. Parámetros y configuración: <span style="font-family:var(--mono)">04_model/params/motor_params.m</span>.</footer>
+</main>
+<script>
+/* Current-loop lab: q-axis coil of Pol's motor, v = R*i + Lq*di/dt + E, with an open-loop, P or PI controller.
+   Continuous-time (the controller is ideal here; sampling and delay come in C04). Parameters: 04_model/params/motor_params.m */
+(function(){
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const $=id=>document.getElementById(id);
+const fmt=(x,d=1)=>(Math.abs(x)<5e-10?0:x).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});
+const M={p:3,lam:0.016855,R:0.02802,Lq:112.77e-6,alphaCu:0.0039,Vmax:0.95*52/Math.sqrt(3)};
+function fitCanvas(c){const r=c.getBoundingClientRect();const dpr=window.devicePixelRatio||1;const h=+(c.dataset.h||(c.dataset.h=c.getAttribute('height')));c.style.height=h+'px';const w=Math.max(260,r.width);c.width=w*dpr;c.height=h*dpr;const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return {g,w,h};}
+function readout(el,rows){el.innerHTML=rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');}
+
+/* cfg: mode 'ol'|'p'|'pi', kp, ki, dT (K of copper heating), rpm, iref, sat (bool), aw (bool), prof 'step'|'updown', ff (bool), T (s) */
+function sim(cfg){
+  const R=M.R*(1+M.alphaCu*cfg.dT), E=cfg.rpm/60*2*Math.PI*M.p*M.lam, dt=1e-6, N=Math.round(cfg.T/dt), every=Math.max(1,Math.round(N/400));
+  /* start in steady state at that speed with zero current asked, as if the motor were already spinning */
+  let i=cfg.mode==='ol'?(cfg.ff?0:-E/R):cfg.mode==='p'?-E/(R+cfg.kp):0, integ=cfg.mode==='pi'?E:0;const out=[];
+  for(let k=0;k<=N;k++){const t=k*dt;
+    let r=t<0.001?0:cfg.iref;if(cfg.prof==='updown'&&t>=cfg.T*0.55)r=0;
+    const e=r-i;let v;
+    if(cfg.mode==='ol')v=M.R*r+(cfg.ff?E:0);
+    else if(cfg.mode==='p')v=cfg.kp*e;
+    else{const trial=integ+cfg.ki*e*dt;v=cfg.kp*e+trial;
+      const vs=Math.max(-M.Vmax,Math.min(M.Vmax,v));
+      if(!(cfg.sat&&cfg.aw&&vs!==v))integ=trial;
+      v=cfg.kp*e+integ;}
+    if(cfg.sat)v=Math.max(-M.Vmax,Math.min(M.Vmax,v));
+    i+=dt*(v-R*i-E)/M.Lq;
+    if(k%every===0)out.push({t,i,r,v});}
+  return {out,E,R};}
+
+function plot(c,res,cfg){
+  const {g,w,h}=fitCanvas(c);g.clearRect(0,0,w,h);
+  const ink=css('--ink'),mut=css('--muted'),line=css('--line'),acc=css('--accent'),warn=css('--warn');
+  const L=44,Rm=44,T=14,B=h-30;const tmax=cfg.T*1000;
+  const ys=res.out.map(o=>o.i).concat(res.out.map(o=>o.r));let ymax=Math.max(20,...ys)*1.1,ymin=Math.min(0,...ys)*1.1;if(ymin<-1.5*ymax)ymin=-1.5*ymax;
+  const vs=res.out.map(o=>o.v);let vmax=Math.max(1,...vs.map(Math.abs))*1.1;
+  const X=t=>L+(w-L-Rm)*t/tmax,Y=y=>B-(B-T)*(y-ymin)/(ymax-ymin),YV=v=>B-(B-T)*(v+vmax)/(2*vmax);
+  g.strokeStyle=line;g.lineWidth=1;g.font='11px IBM Plex Mono, monospace';g.fillStyle=mut;
+  const stepT=tmax>12?2:1;for(let t=0;t<=tmax+1e-9;t+=stepT){g.beginPath();g.moveTo(X(t),T);g.lineTo(X(t),B);g.stroke();g.textAlign='center';g.fillText(String(t),X(t),B+14);}
+  const ny=4;for(let j=0;j<=ny;j++){const y=ymin+(ymax-ymin)*j/ny;g.beginPath();g.moveTo(L,Y(y));g.lineTo(w-Rm,Y(y));g.stroke();g.textAlign='right';g.fillText(fmt(y,0),L-4,Y(y)+4);g.textAlign='left';g.fillStyle=warn;g.fillText(fmt(-vmax+2*vmax*j/ny,1),w-Rm+4,YV(-vmax+2*vmax*j/ny)+4);g.fillStyle=mut;}
+  g.textAlign='left';g.fillText('ms',w-Rm-16,B+26);g.fillText('A',L-30,T+4);g.fillStyle=warn;g.fillText('V',w-Rm+8,T+4);
+  if(ymin<0){g.strokeStyle=mut;g.beginPath();g.moveTo(L,Y(0));g.lineTo(w-Rm,Y(0));g.stroke();}
+  const line2=(key,col,wid,dash,Yf)=>{g.strokeStyle=col;g.lineWidth=wid;g.setLineDash(dash);g.beginPath();res.out.forEach((o,k)=>{const x=X(o.t*1000),y=Yf(o[key]);k?g.lineTo(x,y):g.moveTo(x,y);});g.stroke();g.setLineDash([]);};
+  line2('v',warn,1.4,[],YV);line2('r',mut,1.6,[6,4],Y);line2('i',acc,2.8,[],Y);
+  g.font='12px IBM Plex Mono, monospace';g.fillStyle=acc;g.fillText('i medida',L+6,T+12);g.fillStyle=mut;g.fillText('i pedida',L+86,T+12);g.fillStyle=warn;g.fillText('v aplicada',L+166,T+12);}
+
+function tau63(res,cfg){const o=res.out;const fin=o.filter(p=>p.t>0.001&&(cfg.prof!=='updown'||p.t<cfg.T*0.55));if(!fin.length)return null;const iend=fin[fin.length-1].i;if(Math.abs(iend)<1e-6)return null;const tgt=0.632*iend;const hit=fin.find(p=>iend>0?p.i>=tgt:p.i<=tgt);return hit?(hit.t-0.001)*1000:null;}
+
+/* ---------- Control 1 lab ---------- */
+if($('c1_plot')){
+  let mode='ol';
+  const btns={ol:$('c1_ol'),p:$('c1_p')};
+  const set=m=>{mode=m;Object.entries(btns).forEach(([k,b])=>b.setAttribute('aria-pressed',String(k===m)));draw1();};
+  btns.ol.onclick=()=>set('ol');btns.p.onclick=()=>set('p');
+  function cfg1(){return {mode,kp:+$('c1_kp').value,ki:0,dT:+$('c1_dt').value,rpm:+$('c1_rpm').value,iref:+$('c1_ir').value,sat:false,aw:false,prof:'step',ff:false,T:0.025};}
+  function draw1(){const c=cfg1();$('o_c1kp').textContent=fmt(c.kp,3)+' V/A';$('o_c1dt').textContent='+'+c.dT+' K';$('o_c1rpm').textContent=c.rpm.toLocaleString('es-ES')+' rpm';$('o_c1ir').textContent=c.iref+' A';
+    $('c1_kp').disabled=mode!=='p';
+    const res=sim(c);plot($('c1_plot'),res,c);const iend=res.out[res.out.length-1].i;const t63=tau63(res,c);
+    readout($('c1_r'),[['Corriente final',fmt(iend,1)+' A'],['Error final',fmt((c.iref-iend)/c.iref*100,1)+' %'],['Tiempo al 63 %',t63==null?'—':fmt(t63,2)+' ms'],['R del cobre',fmt(res.R*1000,1)+' mΩ'],['Back-EMF E',fmt(res.E,2)+' V']]);}
+  ['c1_kp','c1_dt','c1_rpm','c1_ir'].forEach(id=>$(id).addEventListener('input',draw1));
+  window.addEventListener('resize',draw1);set('ol');
+}
+
+/* ---------- Control 2 lab ---------- */
+if($('c2_plot')){
+  let sat=false,aw=false,prof='step';
+  const tog=(id,get,setv,label)=>{$(id).onclick=e=>{setv(!get());e.target.setAttribute('aria-pressed',String(get()));e.target.textContent=label(get());draw2();};};
+  tog('c2_sat',()=>sat,v=>sat=v,v=>'Techo de tensión 28,5 V: '+(v?'encendido':'apagado'));
+  tog('c2_aw',()=>aw,v=>aw=v,v=>'Anti-windup: '+(v?'encendido':'apagado'));
+  tog('c2_prof',()=>prof==='updown',v=>prof=v?'updown':'step',v=>'Perfil: '+(v?'subir y soltar':'escalón'));
+  function cfg2(){const wc=+$('c2_wc').value,ratio=+$('c2_ratio').value;const kp=M.Lq*wc,ki=kp*(M.R/M.Lq)*ratio;return {mode:'pi',kp,ki,wc,ratio,dT:+$('c2_dt').value,rpm:+$('c2_rpm').value,iref:+$('c2_ir').value,sat,aw,prof,ff:false,T:0.012};}
+  function draw2(){const c=cfg2();$('o_c2wc').textContent=c.wc.toLocaleString('es-ES')+' rad/s';$('o_c2ratio').textContent='× '+fmt(c.ratio,2);$('o_c2dt').textContent='+'+c.dT+' K';$('o_c2rpm').textContent=c.rpm.toLocaleString('es-ES')+' rpm';$('o_c2ir').textContent=c.iref+' A';
+    const res=sim(c);plot($('c2_plot'),res,c);
+    const o=res.out;const hold=o.filter(p=>p.t>0.001&&(prof!=='updown'||p.t<c.T*0.55));const iend=hold[hold.length-1].i;const peak=Math.max(...hold.map(p=>p.i));const t63=tau63(res,c);
+    const after=prof==='updown'?o.filter(p=>p.t>=c.T*0.55):[];const minAfter=after.length?Math.min(...after.map(p=>p.i)):null;
+    readout($('c2_r'),[['Kp',fmt(c.kp,4)+' V/A'],['Ki',fmt(c.ki,1)+' V/(A·s)'],['Corriente al final del escalón',fmt(iend,1)+' A'],['Sobreoscilación',fmt(Math.max(0,(peak-c.iref)/c.iref*100),1)+' %'],['Tiempo al 63 %',t63==null?'—':fmt(t63,2)+' ms'],['Mínimo tras soltar',minAfter==null?'—':fmt(minAfter,1)+' A'],['Back-EMF E',fmt(res.E,2)+' V']]);}
+  ['c2_wc','c2_ratio','c2_dt','c2_rpm','c2_ir'].forEach(id=>$(id).addEventListener('input',draw2));
+  window.addEventListener('resize',draw2);draw2();
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>window.dispatchEvent(new Event('resize')));
+new MutationObserver(()=>window.dispatchEvent(new Event('resize'))).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+})();
+</script>
+<script>
+/* Answer boxes. Each .qa[data-q] gets a textarea; the solution stays hidden until the viewer writes an attempt and saves it.
+   Saved answers live in the db at answers/<lesson>-<q>; Claude writes a "feedback" field there and the page shows it. */
+(function(){
+const LESSON=document.body.dataset.lesson||document.querySelector('main').dataset.lesson;
+const MIN=12;
+const boxes=[...document.querySelectorAll('.qa[data-q]')];
+const key=q=>LESSON+'-'+q;
+const draftKey=q=>'draft:'+key(q);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let db=null;
+boxes.forEach(box=>{
+  const q=box.dataset.q,sol=box.querySelector('template.sol');
+  const ta=document.createElement('textarea');ta.placeholder='Tu respuesta, con tu razonamiento. Un "no lo sé, pero creo que…" vale.';ta.setAttribute('aria-label','Tu respuesta');
+  const row=document.createElement('div');row.className='row';
+  const btn=document.createElement('button');btn.type='button';btn.className='primary';btn.textContent='Guardar y ver la solución';btn.disabled=true;
+  const st=document.createElement('span');st.className='st';
+  row.append(btn,st);
+  const rev=document.createElement('div');rev.className='reveal';rev.hidden=true;
+  if(sol)rev.append(sol.content.cloneNode(true));
+  const fb=document.createElement('div');fb.className='fb';fb.hidden=true;
+  box.append(ta,row,rev,fb);
+  const d=store.get(draftKey(q));if(d)ta.value=d;
+  const sync=()=>{btn.disabled=ta.value.trim().length<MIN;if(rev.hidden)st.textContent=btn.disabled?'Escribe tu intento para desbloquear la solución':'';};
+  let tmr;ta.addEventListener('input',()=>{sync();clearTimeout(tmr);tmr=setTimeout(()=>store.set(draftKey(q),ta.value),400);});
+  btn.addEventListener('click',async()=>{
+    const text=ta.value.trim();if(text.length<MIN)return;
+    rev.hidden=false;btn.textContent='Guardar cambios';store.set(draftKey(q),ta.value);
+    if(!db){st.textContent='Guardado solo en este navegador';return;}
+    st.textContent='Guardando…';
+    try{const ref=db.doc('answers/'+key(q));const cur=await ref.get();
+      const body={lesson:LESSON,q,text,question:(box.querySelector('p')||{}).textContent||'',savedAt:new Date().toISOString()};
+      if(cur.exists)await ref.update(body);else await ref.set(body);
+      st.textContent='Guardado ✓ · Claude lo corrige';}
+    catch(e){st.textContent='No se pudo guardar ('+(e&&e.code||'error')+'). Queda en este navegador.';}
+  });
+  box._show=data=>{if(data.text&&!ta.value)ta.value=data.text;if(data.text){rev.hidden=false;btn.textContent='Guardar cambios';st.textContent='Guardado ✓';}
+    if(data.feedback){fb.hidden=false;fb.innerHTML='';const b=document.createElement('b');b.textContent='Corrección de Claude: ';fb.append(b,document.createTextNode(data.feedback));}
+    sync();};
+  sync();
+});
+// canvases inside a closed annex were sized at 0 width: redraw them when it opens
+document.querySelectorAll('details.annex').forEach(d=>d.addEventListener('toggle',()=>window.dispatchEvent(new Event('resize'))));
+(async()=>{
+  const c=window.claude;if(!c||!c.use)return;
+  try{db=await c.use('db');}catch(e){db=null}
+  if(!db)return;
+  try{const snap=await db.collection('answers').where('lesson','==',LESSON).get();
+    snap.docs.forEach(s=>{const v=s.data();const box=boxes.find(b=>b.dataset.q===v.q);if(box)box._show(v);});}
+  catch(e){}
+})();
+})();
+</script>

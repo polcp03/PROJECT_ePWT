@@ -1,0 +1,490 @@
+<title>L3a · Park y ecuaciones dq</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: one reading column like a lab notebook; phase colours U/V/W are the identity, teal is the UI accent. */
+:root{
+  --bg:#F4F7F6; --surface:#FFFFFF; --sunk:#E9EFEC; --ink:#14201B; --muted:#56675F; --line:#D5DEDA;
+  --accent:#0E6E62; --accent-soft:#D8EEEA; --u:#D1495B; --v:#C98A00; --w:#2F6FDE; --warn:#A8500B; --warn-soft:#FBEBDD;
+  --magN:#0E6E62; --magS:#7A5FA8; --steel:#B9C4BF;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1412; --surface:#161F1C; --sunk:#1D2925; --ink:#E4ECE8; --muted:#94A69E; --line:#2B3833;
+  --accent:#3DB6A3; --accent-soft:#163A34; --u:#F06A7A; --v:#F0B53A; --w:#73A0FF; --warn:#F0A060; --warn-soft:#3A2715; --magN:#3DB6A3; --magS:#9C86D0; --steel:#3A4843; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1412; --surface:#161F1C; --sunk:#1D2925; --ink:#E4ECE8; --muted:#94A69E; --line:#2B3833;
+  --accent:#3DB6A3; --accent-soft:#163A34; --u:#F06A7A; --v:#F0B53A; --w:#73A0FF; --warn:#F0A060; --warn-soft:#3A2715; --magN:#3DB6A3; --magS:#9C86D0; --steel:#3A4843; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:760px;margin:0 auto;padding-block:28px 80px;display:grid;gap:36px}
+h1,h2,h3{font-family:var(--display);font-stretch:85%;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(2rem,6vw,2.9rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.6rem;font-weight:750}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0}
+.stack{display:grid;gap:14px}
+.eyebrow{font:500 .78rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:1.1rem;color:var(--muted);max-width:62ch}
+.phasebar{display:flex;height:5px;border-radius:3px;overflow:hidden;width:120px}
+.phasebar i{flex:1}.phasebar i:nth-child(1){background:var(--u)}.phasebar i:nth-child(2){background:var(--v)}.phasebar i:nth-child(3){background:var(--w)}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px))}
+nav.toc div{max-width:760px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}nav.toc div::-webkit-scrollbar{display:none}nav.toc a{flex:none}
+nav.toc a{font:500 .85rem/1 var(--body);color:var(--ink);text-decoration:none;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--accent);outline:none}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font:.9rem/1.4 var(--mono);color:var(--muted)}
+.attempt{border:2px dashed var(--accent);border-radius:12px;padding:18px 20px;background:var(--accent-soft)}
+.attempt ol{margin:8px 0 0;padding-left:1.3em;display:grid;gap:6px}
+.idea{display:grid;grid-template-columns:2.4rem 1fr;gap:4px 14px;padding-top:18px;border-top:1px solid var(--line)}
+.idea>.n{font:800 1.5rem/1 var(--display);color:var(--accent);font-stretch:75%}
+.idea>div{min-width:0;display:grid;gap:10px}
+.eq{font:500 1.05rem/1.5 var(--mono);background:var(--sunk);border-radius:8px;padding:10px 14px;overflow-x:auto;white-space:nowrap}
+.eq small{font-size:.8rem;color:var(--muted);white-space:normal;display:block}
+.src{font:.8rem/1.4 var(--mono);color:var(--muted)}
+.key{border-left:3px solid var(--accent);padding-left:12px}
+.mine{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:.95rem}
+.mine b{font-family:var(--mono);font-weight:500}
+.lab{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:14px}
+.lab h3{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;align-items:center}.two>*{min-width:0}
+.legrow{display:grid;grid-template-columns:4.2em repeat(3,1fr);gap:6px;align-items:center}.legrow button{padding:9px 6px}
+.lab h3 span{font:500 .75rem/1 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px}
+.ctl{display:grid;gap:2px;min-width:0}
+.ctl label{display:flex;justify-content:space-between;font-size:.88rem;gap:8px}
+.ctl output{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+canvas{width:100%;display:block;border-radius:8px;background:var(--sunk)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px}
+.readout div{background:var(--sunk);border-radius:8px;padding:8px 10px;min-width:0}
+.readout dt{font-size:.75rem;color:var(--muted)}
+.readout dd{margin:0;font:500 1.05rem/1.3 var(--mono);font-variant-numeric:tabular-nums}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+button{font:500 .9rem/1 var(--body);padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent)}
+.try{font-size:.92rem;background:var(--sunk);border-radius:8px;padding:10px 14px}
+.try ul{margin:4px 0 0;padding-left:1.2em;display:grid;gap:4px}
+.case{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:8px}
+.case .tag{font:500 .75rem/1 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.q{display:grid;grid-template-columns:3rem 1fr;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.q .pts{font:500 .8rem/1.4 var(--mono);color:var(--muted)}
+.q b.id{font:700 1rem/1.4 var(--mono)}
+.q>div{min-width:0;display:grid;gap:6px}
+details.exam{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 18px}
+details.exam>summary{cursor:pointer;padding:14px 0;font:700 1.1rem/1.3 var(--display);font-stretch:85%;list-style:none}
+details.exam>summary::after{content:" ▸";color:var(--accent)}
+details.exam[open]>summary::after{content:" ▾"}
+.warn{background:var(--warn-soft);border-radius:10px;padding:12px 14px;font-size:.93rem}
+.warn b{color:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 .8rem/1.3 var(--body);color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+svg text{font-family:var(--mono)}
+footer{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.mm{margin:0;display:grid;gap:8px;justify-items:center;background:var(--sunk);border-radius:14px;padding:18px 12px}.mm svg{width:100%;max-width:440px;height:auto;display:block}.mm figcaption{font:.85rem var(--mono);color:var(--muted);text-align:center}
+/* theory v2: laws grid, illustrated steps, retrieval checks, worked examples */
+.method{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.howto{margin:0;padding-left:1.3em;display:grid;gap:6px}
+.laws{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.law{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px;align-content:start;min-width:0}
+.law h3{font-size:1.05rem}
+.law p{font-size:.93rem}
+.law .eq{font-size:.92rem;white-space:normal}
+.pic{width:100%;max-width:200px;height:auto;display:block;background:var(--sunk);border-radius:8px}
+.where{color:var(--muted);font-size:.88rem!important}
+.where b{color:var(--ink)}
+details.check{background:var(--accent-soft);border-radius:10px;padding:10px 14px}
+details.check>summary{cursor:pointer;font-weight:600;color:var(--accent);font-size:.93rem}
+details.check p{margin-top:8px;font-size:.93rem}
+details.check .ans{border-top:1px dashed var(--accent);padding-top:8px}
+.step{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding-top:22px;border-top:1px solid var(--line)}
+.step>div{display:grid;gap:10px;min-width:0}
+.step h3 .n{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--accent);color:var(--surface);font-size:.9rem;margin-right:8px;vertical-align:2px}
+.dg{width:100%;max-width:480px;height:auto;display:block;margin:0 auto;background:var(--sunk);border-radius:12px}
+.worked{background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:16px 18px}
+.sol{margin:0;padding-left:1.3em;display:grid;gap:4px;font-variant-numeric:tabular-nums}
+.review{background:var(--surface);border:2px dashed var(--line);border-radius:12px;padding:16px 18px}
+.review ol{margin:6px 0 0;padding-left:1.3em;display:grid;gap:6px}
+/* svg paint classes, all theme tokens */
+.s-ink{stroke:var(--ink)}.s-mut{stroke:var(--muted)}.s-acc{stroke:var(--accent)}.s-warn{stroke:var(--warn)}
+.s-u{stroke:var(--u)}.s-v{stroke:var(--v)}.s-w{stroke:var(--w)}.s-steel{stroke:var(--steel)}.s-magN{stroke:var(--magN)}.s-magS{stroke:var(--magS)}
+.f-ink{fill:var(--ink)}.f-mut{fill:var(--muted)}.f-acc{fill:var(--accent)}.f-warn{fill:var(--warn)}.f-surf{fill:var(--surface)}.f-sunk{fill:var(--sunk)}
+.f-u{fill:var(--u)}.f-v{fill:var(--v)}.f-w{fill:var(--w)}.f-magN{fill:var(--magN)}.f-magS{fill:var(--magS)}
+svg .t{fill:var(--ink);font:13px var(--mono)}svg .tm{fill:var(--muted);font:12px var(--mono)}svg .ta{fill:var(--accent);font:600 13px var(--mono)}
+svg .tw2{fill:var(--warn);font:600 13px var(--mono)}svg .tu{fill:var(--u);font:700 14px var(--mono)}svg .tv{fill:var(--v);font:700 14px var(--mono)}
+svg .tv-w{fill:var(--w);font:600 13px var(--mono)}svg .tv-u{fill:var(--u);font:600 13px var(--mono)}svg .tN{fill:var(--magN);font:800 18px var(--display)}svg .tS{fill:var(--magS);font:800 18px var(--display)}
+@media (min-width:720px){.step{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:start}.step .dg{position:sticky;top:64px}}
+/* answer boxes: attempt first, then the solution; answers saved to the artifact db for Claude to correct */
+.qa{background:var(--accent-soft);border-radius:10px;padding:12px 14px;display:grid;gap:8px}
+.qa>p{font-size:.95rem}
+.qa textarea{width:100%;min-height:96px;font:16px/1.5 var(--body);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);resize:vertical}
+.qa .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.qa .st{font:.8rem/1.3 var(--mono);color:var(--muted)}
+.qa .reveal{border-top:1px dashed var(--accent);padding-top:8px;font-size:.93rem;display:grid;gap:6px}
+.qa .fb{border-left:3px solid var(--warn);background:var(--warn-soft);border-radius:0 8px 8px 0;padding:8px 10px;font-size:.93rem}
+.qa .fb b{color:var(--warn)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.part{display:grid;gap:14px}
+details.annex{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 18px}
+details.annex>summary{cursor:pointer;padding:14px 0;font:700 1.1rem/1.3 var(--display);font-stretch:85%;list-style:none}
+details.annex>summary::after{content:" ▸";color:var(--accent)}
+details.annex[open]>summary::after{content:" ▾"}
+details.annex>div{display:grid;gap:22px;padding-bottom:18px}
+main>*{min-width:0}
+</style>
+
+<main data-lesson="L3a">
+<header class="stack">
+  <div class="phasebar"><i></i><i></i><i></i></div>
+  <p class="eyebrow">C03 · Lección 3a · miércoles 4 nov, 14:00</p>
+  <h1>Súbete al rotor: Park y las ecuaciones dq</h1>
+  <p class="lede">Desde el estator, tu motor es un lío de tres senoides de cientos de hercios. Desde el rotor, son dos números quietos. Esta lección es ese cambio de punto de vista, y las dos ecuaciones que salen de él.</p>
+  <div class="meta"><span>Una sesión · 55 min</span><span>Escribe en cada cuadro: la solución se abre después, y Claude corrige lo que guardes</span></div>
+</header>
+
+<nav class="toc" aria-label="Secciones"><div>
+  <a href="#predice">1 · Predice</a><a href="#nucleo">2 · Núcleo</a><a href="#lab">3 · Laboratorio</a><a href="#criterio">4 · Criterio</a><a href="#cierre">5 · Cierre</a>
+</div></nav>
+
+<section id="predice" class="attempt stack">
+  <p class="eyebrow">1 · Predice · 5 min, sin mirar nada</p>
+  <h2>Antes de leer</h2>
+  <div class="qa" data-q="p1"><p>Te subes al rotor, que gira a velocidad constante, y miras el vector de corriente del estator. ¿Cómo lo ves: girando, quieto, cambiando de largo? ¿Por qué?</p>
+    <template class="sol"><p><b>Solución:</b> quieto. El campo del estator gira sincronizado con el rotor (es un motor síncrono): si giras con él, el vector no se mueve. Solo cambia de largo o de ángulo si cambias el par pedido.</p></template></div>
+  <div class="qa" data-q="p2"><p>Un controlador PI tiene que seguir una senoide de 250 Hz. ¿Crees que lo hará bien? ¿Qué le pasa a un PI con una referencia que no para de moverse?</p>
+    <template class="sol"><p><b>Solución:</b> mal. Un PI elimina el error con referencias constantes gracias al integrador; con una senoide siempre va por detrás, con un error de fase y de amplitud que crece con la frecuencia. Por eso se cambia de marco: en dq la referencia es constante y el PI trabaja en su terreno. Lo verás en Control 2.</p></template></div>
+
+  <div class="review stack">
+    <p class="eyebrow">Repaso espaciado · errores abiertos de errores.md</p>
+    <div class="qa" data-q="r7"><p>(Error 7) ¿Qué te da tener más pares de polos? ¿Hace el motor más suave?</p>
+      <template class="sol"><p><b>Solución:</b> más par por amperio (Te = 3/2·p·λm·iq) y una frecuencia eléctrica más alta a la misma velocidad (ωe = p·ωm). La suavidad viene de la forma de onda y de las ranuras, no del número de polos.</p></template></div>
+    <div class="qa" data-q="r6"><p>(Error 6) Un brazo del inversor, ¿puede poner su fase a −52 V? ¿De dónde sale entonces la alterna?</p>
+      <template class="sol"><p><b>Solución:</b> no. Un brazo pone su fase a +Vbus o a 0. La alterna aparece en la <b>diferencia</b> entre fases.</p></template></div>
+  </div>
+</section>
+
+<section id="nucleo" class="part">
+  <p class="eyebrow">2 · Núcleo · 25 min</p>
+  <h2>Seis ideas, cada una con su dibujo</h2>
+  <p class="lede">Filtrado de Hughes &amp; Drury, §8.2 y §9.5. Hughes lo razona con fasores; las ecuaciones son las de tu modelo (<span style="font-family:var(--mono)">motor_params.m</span>), verificadas contra el firmware del VESC.</p>
+
+  <article class="step">
+    <svg viewBox="0 0 320 190" class="dg" role="img" aria-label="Tres corrientes de fase senoidales a la izquierda y dos líneas planas id e iq a la derecha">
+      <text x="10" y="18" class="tm">desde el estator</text><text x="180" y="18" class="tm">desde el rotor</text>
+      <path d="M10 100 H150 M180 100 H310" class="s-mut" stroke-width="1"/>
+      <path d="M10.0 52.0 L12.0 52.4 L14.0 53.7 L16.0 55.9 L18.0 58.8 L20.0 62.5 L22.0 66.8 L24.0 71.8 L26.0 77.3 L28.0 83.1 L30.0 89.3 L32.0 95.7 L34.0 102.2 L36.0 108.6 L38.0 114.8 L40.0 120.8 L42.0 126.4 L44.0 131.6 L46.0 136.1 L48.0 140.1 L50.0 143.2 L52.0 145.7 L54.0 147.2 L56.0 148.0 L58.0 147.8 L60.0 146.8 L62.0 144.9 L64.0 142.3 L66.0 138.8 L68.0 134.7 L70.0 129.9 L72.0 124.6 L74.0 118.9 L76.0 112.8 L78.0 106.4 L80.0 100.0 L82.0 93.6 L84.0 87.2 L86.0 81.1 L88.0 75.4 L90.0 70.1 L92.0 65.3 L94.0 61.2 L96.0 57.7 L98.0 55.1 L100.0 53.2 L102.0 52.2 L104.0 52.0 L106.0 52.8 L108.0 54.3 L110.0 56.8 L112.0 59.9 L114.0 63.9 L116.0 68.4 L118.0 73.6 L120.0 79.2 L122.0 85.2 L124.0 91.4 L126.0 97.8 L128.0 104.3 L130.0 110.7 L132.0 116.9 L134.0 122.7 L136.0 128.2 L138.0 133.2 L140.0 137.5 L142.0 141.2 L144.0 144.1 L146.0 146.3 L148.0 147.6 L150.0 148.0" class="s-u" fill="none" stroke-width="2.2"/>
+      <path d="M10.0 124.0 L12.0 118.2 L14.0 112.1 L16.0 105.7 L18.0 99.3 L20.0 92.8 L22.0 86.5 L24.0 80.5 L26.0 74.8 L28.0 69.5 L30.0 64.8 L32.0 60.7 L34.0 57.4 L36.0 54.8 L38.0 53.0 L40.0 52.1 L42.0 52.1 L44.0 52.9 L46.0 54.6 L48.0 57.1 L50.0 60.3 L52.0 64.3 L54.0 69.0 L56.0 74.2 L58.0 79.8 L60.0 85.9 L62.0 92.1 L64.0 98.6 L66.0 105.0 L68.0 111.4 L70.0 117.5 L72.0 123.4 L74.0 128.8 L76.0 133.7 L78.0 138.0 L80.0 141.6 L82.0 144.4 L84.0 146.5 L86.0 147.7 L88.0 148.0 L90.0 147.5 L92.0 146.1 L94.0 143.9 L96.0 140.8 L98.0 137.1 L100.0 132.6 L102.0 127.6 L104.0 122.1 L106.0 116.2 L108.0 110.0 L110.0 103.6 L112.0 97.1 L114.0 90.7 L116.0 84.5 L118.0 78.5 L120.0 73.0 L122.0 67.9 L124.0 63.4 L126.0 59.5 L128.0 56.4 L130.0 54.1 L132.0 52.6 L134.0 52.0 L136.0 52.3 L138.0 53.4 L140.0 55.3 L142.0 58.1 L144.0 61.6 L146.0 65.8 L148.0 70.6 L150.0 76.0" class="s-v" fill="none" stroke-width="2.2"/>
+      <path d="M10.0 124.0 L12.0 129.4 L14.0 134.2 L16.0 138.4 L18.0 141.9 L20.0 144.7 L22.0 146.6 L24.0 147.7 L26.0 148.0 L28.0 147.4 L30.0 145.9 L32.0 143.6 L34.0 140.5 L36.0 136.6 L38.0 132.1 L40.0 127.0 L42.0 121.5 L44.0 115.5 L46.0 109.3 L48.0 102.9 L50.0 96.4 L52.0 90.0 L54.0 83.8 L56.0 77.9 L58.0 72.4 L60.0 67.4 L62.0 62.9 L64.0 59.2 L66.0 56.1 L68.0 53.9 L70.0 52.5 L72.0 52.0 L74.0 52.3 L76.0 53.5 L78.0 55.6 L80.0 58.4 L82.0 62.0 L84.0 66.3 L86.0 71.2 L88.0 76.6 L90.0 82.5 L92.0 88.6 L94.0 95.0 L96.0 101.4 L98.0 107.9 L100.0 114.1 L102.0 120.2 L104.0 125.8 L106.0 131.0 L108.0 135.7 L110.0 139.7 L112.0 142.9 L114.0 145.4 L116.0 147.1 L118.0 147.9 L120.0 147.9 L122.0 147.0 L124.0 145.2 L126.0 142.6 L128.0 139.3 L130.0 135.2 L132.0 130.5 L134.0 125.2 L136.0 119.5 L138.0 113.5 L140.0 107.2 L142.0 100.7 L144.0 94.3 L146.0 87.9 L148.0 81.8 L150.0 76.0" class="s-w" fill="none" stroke-width="2.2"/>
+      <path d="M180 52 H310" class="s-acc" stroke-width="3"/><text x="300" y="45" class="ta" text-anchor="end">iq = 80 A</text>
+      <path d="M180 100 H310" class="s-v" stroke-width="3" stroke-dasharray="1 0"/><text x="300" y="120" class="tv" text-anchor="end">id = 0</text>
+      <path d="M160 100 l10 0" class="s-ink" stroke-width="2"/><text x="165" y="92" class="t" text-anchor="middle">→</text>
+      <text x="10" y="182" class="tm">250 Hz a 5000 rpm</text><text x="180" y="182" class="tm">0 Hz: dos números</text>
+    </svg>
+    <div>
+      <h3><span class="n">1</span> Por qué cambiar de punto de vista</h3>
+      <p>En régimen, quien mire las corrientes del estator ve tres senoides, y no ve nada del control que hay detrás (Hughes lo dice así en §9.5). Para controlarlas hay que perseguir tres señales que se mueven a la frecuencia eléctrica.</p>
+      <p>El campo del estator gira sincronizado con el rotor. Si miras desde el rotor, ese campo está quieto: las tres senoides se convierten en <b>dos números constantes</b>, id e iq.</p>
+      <div class="mine">Tu motor: ωe = p·ωm, con p = <b>3</b>. A 5000 rpm, fe = 5000/60 · 3 = <b>250 Hz</b>.</div>
+      <div class="qa" data-q="i1"><p>A 3000 rpm de motor, ¿qué frecuencia eléctrica ves en las fases? ¿Y cuántas vueltas eléctricas da el campo por cada vuelta mecánica del rotor?</p>
+        <template class="sol"><p><b>Solución:</b> fe = 3000/60 · 3 = <b>150 Hz</b>. Por cada vuelta mecánica, <b>3 vueltas eléctricas</b>: una por par de polos.</p></template></div>
+      <p class="src">Hughes §9.5, p. 342</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 210" class="dg" role="img" aria-label="Ejes de las tres fases U V W a 120 grados y los ejes alfa y beta">
+      <defs><marker id="a2" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7z" class="f-ink"/></marker></defs>
+      <path d="M160 110 L290 110" class="s-u" stroke-width="2.5" marker-end="url(#a2)"/><text x="296" y="114" class="tu">U</text>
+      <path d="M160 110 L110 23.4" class="s-v" stroke-width="2.5" marker-end="url(#a2)"/><text x="96" y="22" class="tv">V</text>
+      <path d="M160 110 L110 196.6" class="s-w" stroke-width="2.5" marker-end="url(#a2)"/><text x="94" y="206" class="tv-w">W</text>
+      <path d="M160 110 H60" class="s-mut" stroke-width="1" stroke-dasharray="4 3"/>
+      <path d="M160 110 V20" class="s-acc" stroke-width="2" stroke-dasharray="6 4"/><text x="166" y="28" class="ta">β</text>
+      <text x="250" y="132" class="ta">α = eje de U</text>
+      <path d="M190 110 A30 30 0 0 0 145 84" class="s-mut" fill="none" stroke-width="1"/><text x="176" y="84" class="tm">120°</text>
+    </svg>
+    <div>
+      <h3><span class="n">2</span> Clarke: de tres fases a dos ejes</h3>
+      <p>Tu motor no tiene neutro conectado, así que iU + iV + iW = 0: con dos corrientes sabes la tercera. Tres corrientes con una ligadura son dos números. Clarke los escribe sobre dos ejes fijos y perpendiculares, α (el de la fase U) y β:</p>
+      <p class="eq">iα = ⅔·(iU − ½·iV − ½·iW)<br>iβ = (iV − iW)/√3<small>invariante en amplitud: el vector (iα, iβ) mide lo mismo que el pico de una fase. Es la que usa el VESC</small></p>
+      <p>Es el vector espacial de Hughes: la suma de los tres campos de fase como un solo vector que gira.</p>
+      <div class="qa" data-q="i2"><p>Calcula iα e iβ para iU = 0, iV = 86,6 A, iW = −86,6 A. ¿Dónde apunta el vector y cuánto mide?</p>
+        <template class="sol"><p><b>Solución:</b> iα = ⅔·(0 − 43,3 + 43,3) = <b>0</b>; iβ = (86,6 + 86,6)/√3 = <b>100 A</b>. Apunta por el eje β, a 90° de la fase U, y mide 100 A: el pico de fase.</p></template></div>
+      <p class="src">Hughes §8.2.1, figs. 8.1–8.2 · pp. 262–264</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 240" class="dg" role="img" aria-label="Corte de tu motor: estator ranurado exterior, rotor interior con seis imanes, eje d alineado con un norte, ángulo mecánico de 20 grados igual a 60 grados eléctricos">
+      <circle cx="160" cy="120" r="108" class="s-steel f-sunk" stroke-width="2"/>
+      <circle cx="160" cy="120" r="84" class="s-steel f-surf" stroke-width="2"/>
+      <g class="s-steel" stroke-width="5">
+        <path d="M160 36 v-14"/><path d="M202 47.3 l7 -12.1"/><path d="M232.7 78 l12.1 -7"/><path d="M244 120 h14"/><path d="M232.7 162 l12.1 7"/><path d="M202 192.7 l7 12.1"/><path d="M160 204 v14"/><path d="M118 192.7 l-7 12.1"/><path d="M87.3 162 l-12.1 7"/><path d="M76 120 h-14"/><path d="M87.3 78 l-12.1 -7"/><path d="M118 47.3 l-7 -12.1"/>
+      </g>
+      <text x="316" y="18" class="tm" text-anchor="end">ranuras: ilustrativo</text>
+      <circle cx="160" cy="120" r="70" class="s-steel f-surf" stroke-width="2"/>
+      <g stroke-width="14" fill="none">
+        <path d="M218.6 98.7 A62 62 0 0 1 218.6 141.3" class="s-magN"/>
+        <path d="M207.8 160.9 A62 62 0 0 1 171.1 181" class="s-magS"/>
+        <path d="M148.9 181 A62 62 0 0 1 112.2 160.9" class="s-magN"/>
+        <path d="M101.4 141.3 A62 62 0 0 1 101.4 98.7" class="s-magS"/>
+        <path d="M112.2 79.1 A62 62 0 0 1 148.9 59" class="s-magN"/>
+        <path d="M171.1 59 A62 62 0 0 1 207.8 79.1" class="s-magS"/>
+      </g>
+      <circle cx="160" cy="120" r="10" class="s-ink f-steel" stroke-width="2" style="fill:var(--steel)"/>
+      <path d="M160 120 L316 120" class="s-v" stroke-width="2" stroke-dasharray="6 4"/><text x="316" y="146" class="tv" text-anchor="end">eje d</text>
+      
+      
+      
+      <text x="8" y="18" class="t">p = 3: 6 imanes</text><text x="8" y="36" class="ta">θe = 3·θm</text><text x="8" y="228" class="tm">N→N: 120° mec. = 360° eléc.</text>
+    </svg>
+    <div>
+      <h3><span class="n">3</span> Park: girar los ejes con el rotor</h3>
+      <p>Toma los ejes α y β y gíralos el ángulo <b>eléctrico</b> del rotor, θe. El eje <b>d</b> (directo) apunta al norte del imán y el <b>q</b> (cuadratura) va 90° eléctricos por delante:</p>
+      <p class="eq">id = iα·cos θe + iβ·sin θe<br>iq = −iα·sin θe + iβ·cos θe</p>
+      <p>En tu motor hay seis imanes, así que de un norte al siguiente hay 120° mecánicos, que son 360° eléctricos. Girar el rotor 20° es girar el marco dq 60°. El ángulo lo dan los sensores Hall; un error en él se convierte en id e iq equivocadas.</p>
+      <div class="qa" data-q="i3"><p>θe = 30°, iα = 10 A, iβ = 0. Calcula id e iq. Dibuja los ejes y comprueba el signo de iq con el dibujo.</p>
+        <template class="sol"><p><b>Solución:</b> id = 10·cos 30° = <b>8,66 A</b>; iq = −10·sin 30° = <b>−5 A</b>. El eje d se ha adelantado 30° al vector; visto desde dq, el vector queda 30° por detrás de d, hacia −q.</p></template></div>
+      <p class="src">Hughes §8.2.2, fig. 8.3 · pp. 265–266</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 200" class="dg" role="img" aria-label="Imán con eje d horizontal; corriente iq perpendicular produce par, corriente id paralela refuerza o debilita el flujo">
+      <defs><marker id="a4" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7z" class="f-acc"/></marker><marker id="a4w" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7z" class="f-warn"/></marker></defs>
+      <rect x="60" y="85" width="70" height="30" rx="4" class="f-magS"/><rect x="130" y="85" width="70" height="30" rx="4" class="f-magN"/>
+      <text x="95" y="106" class="t" text-anchor="middle" style="fill:var(--surface)">S</text><text x="165" y="106" class="t" text-anchor="middle" style="fill:var(--surface)">N</text>
+      <path d="M200 100 H300" class="s-v" stroke-width="2" stroke-dasharray="6 4"/><text x="300" y="92" class="tv" text-anchor="end">d</text>
+      <path d="M130 100 V16" class="s-acc" stroke-width="3.5" marker-end="url(#a4)"/><text x="138" y="26" class="ta">iq → par</text>
+      <path d="M210 130 H290" class="s-warn" stroke-width="3" marker-end="url(#a4w)"/><text x="210" y="150" class="tw2">id &gt; 0 refuerza</text>
+      <path d="M290 172 H210" class="s-warn" stroke-width="3" marker-end="url(#a4w)"/><text x="210" y="192" class="tw2">id &lt; 0 debilita</text>
+    </svg>
+    <div>
+      <h3><span class="n">4</span> Qué hace cada eje</h3>
+      <p><b>iq</b> es la corriente perpendicular al imán: la que hace par, como la I de B·I·l en L1. <b>id</b> es la alineada con el imán: sola no hace par, pero refuerza (id &gt; 0) o debilita (id &lt; 0) el flujo.</p>
+      <p class="eq">ψd = Ld·id + λm &nbsp;&nbsp;&nbsp; ψq = Lq·iq<small>el imán solo aparece en el eje d</small></p>
+      <p class="key">Hughes: con la corriente en fase con la back-EMF (id = 0) sacas el máximo par por amperio y las mínimas pérdidas en el cobre. Tu VESC trabaja así: MTPA apagado, id pedida = 0 siempre.</p>
+      <div class="qa" data-q="i4"><p>Pides 100 A de pico. Caso A: todo en iq. Caso B: id = −60 A e iq = 80 A, el mismo módulo. ¿Cuál calienta más el cobre? ¿Cuál da más par (ignora la reluctancia)?</p>
+        <template class="sol"><p><b>Solución:</b> el cobre calienta <b>igual</b>, porque depende del módulo: 3/2·R·(id² + iq²) = 3/2·R·100². El par es proporcional a iq: el caso A da un <b>25 % más</b> (100 frente a 80). Gastar corriente en id, a baja velocidad, es tirarla.</p></template></div>
+      <p class="src">Hughes §9.5.1, fig. 9.19 · pp. 342–344</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 230" class="dg" role="img" aria-label="Circuitos equivalentes de los ejes d y q">
+      <text x="10" y="18" class="tv">eje d</text>
+      <path d="M30 40 H290 V100 H30 Z" class="s-ink" fill="none" stroke-width="2"/>
+      <rect x="18" y="56" width="24" height="28" class="s-ink f-surf" stroke-width="2"/><text x="30" y="75" class="t" text-anchor="middle" font-size="11">vd</text>
+      <path d="M80 34 l5 12 l5 -12 l5 12 l5 -12 l5 12" class="s-ink" fill="none" stroke-width="2"/><text x="92" y="64" class="tm" text-anchor="middle">R</text>
+      <path d="M140 40 c0 -12 12 -12 12 0 c0 -12 12 -12 12 0 c0 -12 12 -12 12 0" class="s-w" fill="none" stroke-width="2.5"/><text x="158" y="64" class="tm" text-anchor="middle">Ld</text>
+      <circle cx="240" cy="40" r="14" class="s-warn f-surf" stroke-width="2"/><text x="240" y="44" class="tw2" text-anchor="middle" font-size="10">−</text><text x="240" y="74" class="tw2" text-anchor="middle">ωe·Lq·iq</text>
+      <text x="10" y="138" class="tv">eje q</text>
+      <path d="M30 160 H290 V220 H30 Z" class="s-ink" fill="none" stroke-width="2"/>
+      <rect x="18" y="176" width="24" height="28" class="s-ink f-surf" stroke-width="2"/><text x="30" y="195" class="t" text-anchor="middle" font-size="11">vq</text>
+      <path d="M80 154 l5 12 l5 -12 l5 12 l5 -12 l5 12" class="s-ink" fill="none" stroke-width="2"/><text x="92" y="184" class="tm" text-anchor="middle">R</text>
+      <path d="M130 160 c0 -12 12 -12 12 0 c0 -12 12 -12 12 0 c0 -12 12 -12 12 0" class="s-w" fill="none" stroke-width="2.5"/><text x="148" y="184" class="tm" text-anchor="middle">Lq</text>
+      <circle cx="205" cy="160" r="14" class="s-warn f-surf" stroke-width="2"/><text x="205" y="164" class="tw2" text-anchor="middle" font-size="10">+</text><text x="205" y="194" class="tw2" text-anchor="middle">ωe·Ld·id</text>
+      <circle cx="262" cy="160" r="14" class="s-acc f-surf" stroke-width="2.5"/><text x="262" y="164" class="ta" text-anchor="middle" font-size="10">E</text><text x="262" y="210" class="ta" text-anchor="middle">ωe·λm</text>
+    </svg>
+    <div>
+      <h3><span class="n">5</span> Las ecuaciones de tensión</h3>
+      <p class="eq">vd = R·id + Ld·did/dt − ωe·Lq·iq<br>vq = R·iq + Lq·diq/dt + ωe·(Ld·id + λm)</p>
+      <div class="tw"><table>
+        <thead><tr><th>Término</th><th>Qué es</th><th>De dónde</th></tr></thead>
+        <tbody>
+          <tr><td class="num">R·i</td><td>Caída en el cobre (y en los transistores)</td><td>L1</td></tr>
+          <tr><td class="num">L·di/dt</td><td>La bobina: la corriente no salta</td><td>L1</td></tr>
+          <tr><td class="num">ωe·λm</td><td><b>Back-EMF</b>, solo en q</td><td>El imán girando</td></tr>
+          <tr><td class="num">±ωe·L·i</td><td><b>Acoplamiento cruzado</b> entre ejes</td><td>Mirar desde un marco que gira</td></tr>
+        </tbody>
+      </table></div>
+      <p class="key">Con id = 0 y en régimen, la de q queda <b>vq = R·iq + ωe·λm</b>, que es V = I·R + E: el motor DC de L1. Tu motor, visto en dq, es un motor DC con un eje d y dos términos de acoplamiento.</p>
+      <div class="worked stack">
+        <p class="eyebrow">Ejemplo resuelto</p>
+        <p><b>1000 rpm, iq = 60 A, id = 0.</b> ωe = 1000·2π/60·3 = 314 rad/s. vd = −314·112,8 µH·60 = <b>−2,12 V</b>. vq = 0,028·60 + 314·0,01686 = 1,68 + 5,29 = <b>6,97 V</b>. |v| = <b>7,3 V</b>, muy lejos de los 30 V que da el inversor.</p>
+      </div>
+      <div class="qa" data-q="i5"><p>Ahora tú: 2000 rpm, iq = 50 A, id = 0. Calcula vd, vq y |v|. ¿Qué término de vq pesa más, y qué te dice eso de para qué se gasta la tensión a velocidad alta?</p>
+        <template class="sol"><p><b>Solución:</b> ωe = 628 rad/s. vd = −628·112,8 µH·50 = <b>−3,54 V</b>. vq = 0,028·50 + 628·0,016855 = 1,40 + 10,59 = <b>11,99 V</b>. |v| = <b>12,5 V</b>. Manda la back-EMF: casi toda la tensión se gasta en vencer la que genera el propio motor, y solo 1,4 V empujan corriente.</p></template></div>
+      <p class="src">Ecuaciones: <span style="font-family:var(--mono)">motor_params.m</span> (mcpwm_foc.c del VESC) · Hughes §9.5.1</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 200" class="dg" role="img" aria-label="Tensión necesaria frente a velocidad: la back-EMF sube en recta hasta el techo de 28,9 voltios del inversor">
+      <path d="M40 170 H305 M40 170 V15" class="s-mut" stroke-width="1"/>
+      <path d="M40 42 H300" class="s-warn" stroke-width="2" stroke-dasharray="6 4"/><text x="300" y="34" class="tw2" text-anchor="end">techo: 28,9 V</text>
+      <path d="M40 170 L285 42" class="s-acc" stroke-width="3"/>
+      <circle cx="285" cy="42" r="5" class="f-acc"/><text x="282" y="64" class="ta" text-anchor="end">vacío: 5480 rpm</text>
+      <text x="44" y="190" class="tm">0</text><text x="300" y="190" class="tm" text-anchor="end">rpm</text>
+      <text x="46" y="28" class="tm">|v| ≈ ωe·λm</text>
+    </svg>
+    <div>
+      <h3><span class="n">6</span> La tensión se acaba: la back-EMF manda a alta velocidad</h3>
+      <p>El inversor con SVPWM da como mucho |v| = Vdc/√3 por el ciclo de trabajo máximo (L2). Con la batería a 52,77 V y el duty a 0,9486, son <b>28,9 V</b>. La back-EMF crece en recta con la velocidad: cuando ωe·λm llega a ese techo, ya no queda tensión para empujar corriente, y el motor no pasa de ahí.</p>
+      <p class="key">Lo mediste tú el 7-sep: en vacío, con el duty en el techo, el VESC registró <b>16 440 ERPM</b> y |v| = 28,886 V. ERPM son rpm eléctricas: 16 440 / 3 = <b>5480 rpm</b> de motor.</p>
+      <div class="qa" data-q="i6"><p>Con λm = 16,855 mWb y |v| = 28,9 V, calcula la velocidad máxima en vacío ignorando R. Pásala a rpm de motor y a km/h del quad (transmisión 92/11, rueda de 0,155 m). ¿Cuadra con los 16 440 ERPM?</p>
+        <template class="sol"><p><b>Solución:</b> ωe = 28,9/0,016855 = 1715 rad/s → ωm = 572 rad/s → <b>5460 rpm</b>. Medido: 5480 rpm, un 0,4 % más (en vacío hay 1,9 A de iq y la caída es mínima). Rueda: 5480/8,364 = 655 rpm → 655·2π/60·0,155 = 10,6 m/s ≈ <b>38 km/h</b>.</p></template></div>
+      <p class="src">Hughes §9.5.2, p. 345 (la tensión máxima del inversor fija la velocidad base) · medida en <span style="font-family:var(--mono)">motor_params.m</span>, lambda_m_nl</p>
+    </div>
+  </article>
+</section>
+
+<section id="lab" class="part">
+  <p class="eyebrow">3 · Laboratorio · 15 min</p>
+  <h2>Dos marcos, la misma corriente</h2>
+  <p class="lede">Escribe tu predicción <b>antes</b> de tocar el slider.</p>
+  <div class="lab">
+    <h3>Park en vivo <span>estator frente a rotor</span></h3>
+    <div class="controls">
+      <div class="ctl"><label for="k_id">id pedida <output id="o_kid"></output></label><input id="k_id" type="range" min="-100" max="100" step="1" value="0"></div>
+      <div class="ctl"><label for="k_iq">iq pedida <output id="o_kiq"></output></label><input id="k_iq" type="range" min="-100" max="100" step="1" value="80"></div>
+      <div class="ctl"><label for="k_h">Armónicos 5.º y 7.º <output id="o_kh"></output></label><input id="k_h" type="range" min="0" max="15" step="0.5" value="0"></div>
+      <div class="ctl"><label for="k_sp">Velocidad de la animación <output id="o_ksp"></output></label><input id="k_sp" type="range" min="0" max="1" step="0.02" value="0.3"></div>
+    </div>
+    <div class="two">
+      <canvas id="k_stator" height="260" aria-label="Vector de corriente visto desde el estator"></canvas>
+      <canvas id="k_rotor" height="260" aria-label="Vector de corriente visto desde el rotor"></canvas>
+    </div>
+    <canvas id="k_time" height="200" aria-label="iα, iβ, id e iq frente al tiempo"></canvas>
+    <div class="btnrow"><button type="button" id="k_pause" aria-pressed="false">Pausa</button></div>
+    <div class="qa" data-q="l1"><p>Con id = 0 e iq = 80, ¿qué gira en cada marco y qué es constante en la gráfica de abajo? Predice y luego mira.</p>
+      <template class="sol"><p><b>Solución:</b> desde el estator, el vector gira e iα, iβ son senoides de 80 A de pico. Desde el rotor, el vector está quieto sobre el eje q: id = 0 e iq = 80, dos líneas planas.</p></template></div>
+    <div class="qa" data-q="l2"><p>Pon iq = 0 e id = 80. ¿Dónde queda la corriente respecto al imán y qué par sale?</p>
+      <template class="sol"><p><b>Solución:</b> alineada con el imán, sobre el eje d. Par cero (sin saliencia). Toda la corriente calienta y refuerza el flujo, sin mover nada.</p></template></div>
+    <div class="qa" data-q="l3"><p>Sube los armónicos al 8 %, como el 7.º medido en tu motor. ¿Qué aparece en id e iq? Cuenta las oscilaciones por vuelta eléctrica. ¿Qué notarías en el quad?</p>
+      <template class="sol"><p><b>Solución:</b> un rizado de <b>6 oscilaciones por vuelta eléctrica</b>: el 5.º gira al revés (−5 − 1 = −6) y el 7.º hacia delante (7 − 1 = 6). En el par es un rizado de 6.º orden, que a baja velocidad se nota como vibración o ruido.</p></template></div>
+  </div>
+</section>
+
+<section id="criterio" class="part">
+  <p class="eyebrow">4 · Criterio · 7 min</p>
+  <h2>Piensa tú</h2>
+  <div class="case"><span class="tag">Caso · El Hall mal colocado</span>
+    <div class="qa" data-q="c1"><p>Al montar el motor, la placa de sensores Hall queda girada 10° mecánicos. El VESC pide id = 0 e iq = 100 A. ¿Cuántos grados eléctricos de error son? ¿Qué id e iq hay de verdad, cuánto par pierdes y qué notarías?</p>
+      <template class="sol"><p><b>Solución:</b> 10° × 3 = <b>30° eléctricos</b>. La corriente real queda girada 30° respecto a donde crees: iq = 100·cos 30° = <b>86,6 A</b> e id = ±100·sin 30° = <b>±50 A</b>. Pierdes un <b>13 %</b> de par y el cobre calienta igual. Según el sentido de giro, la id refuerza o debilita el flujo, y el motor corre distinto hacia delante que hacia atrás. Por eso el VESC tiene una rutina de detección de los Hall.</p></template></div></div>
+  <div class="case"><span class="tag">Encuentra el error</span>
+    <div class="qa" data-q="c2"><p>Un compañero dice: <i>"Para medir iq, pongo la pinza amperimétrica en el cable de la fase q."</i> ¿Dónde está el error?</p>
+      <template class="sol"><p><b>Solución:</b> no hay cable de la fase q. id e iq son proyecciones matemáticas de las tres corrientes reales sobre unos ejes que giran con el rotor. Cada cable lleva una senoide; iq solo existe después de medir dos fases, aplicar Clarke y aplicar Park con el ángulo del rotor.</p></template></div></div>
+</section>
+
+<section id="cierre" class="part">
+  <p class="eyebrow">5 · Cierre · 3 min</p>
+  <h2>Explícalo en voz alta</h2>
+  <p>Sin mirar, explica en un minuto: <b>por qué el VESC controla id e iq y no las tres corrientes de fase, y qué limita la velocidad de tu motor.</b> Después escribe aquí lo que no te haya salido.</p>
+  <div class="qa" data-q="z1"><p>¿Qué no tienes claro todavía? Escríbelo tal cual. Va a la parte «lo que no entiendo» de la review del 13.</p>
+    <template class="sol"><p>Guardado. Claude lo lee antes de L3b de mañana.</p></template></div>
+</section>
+
+<footer>Fuente: Hughes, A. y Drury, B. <i>Electric Motors and Drives</i>, 5.ª ed., Newnes, 2019: §8.2.1–8.2.2, §9.5.1–9.5.2. Parámetros: <span style="font-family:var(--mono)">04_model/params/motor_params.m</span>. Mañana, L3b: el par, los límites y el plano id–iq.</footer>
+</main>
+<script>
+(function(){
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const $=id=>document.getElementById(id);
+const fmt=(x,d=1)=>(Math.abs(x)<5e-10?0:x).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});
+const D2R=Math.PI/180,TAU=Math.PI*2;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function fitCanvas(c){const r=c.getBoundingClientRect();const dpr=window.devicePixelRatio||1;const h=+(c.dataset.h||(c.dataset.h=c.getAttribute('height')));c.style.height=h+'px';const w=Math.max(260,r.width);c.width=w*dpr;c.height=h*dpr;const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return {g,w,h};}
+function readout(el,rows){el.innerHTML=rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');}
+function arrow(g,x0,y0,x1,y1,col,w){g.strokeStyle=col;g.fillStyle=col;g.lineWidth=w;g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();const a=Math.atan2(y1-y0,x1-x0),L=Math.hypot(x1-x0,y1-y0);if(L<4)return;const h=Math.min(10,L*.4);g.beginPath();g.moveTo(x1,y1);g.lineTo(x1-h*Math.cos(a-.4),y1-h*Math.sin(a-.4));g.lineTo(x1-h*Math.cos(a+.4),y1-h*Math.sin(a+.4));g.closePath();g.fill();}
+
+/* motor parameters: 04_model/params/motor_params.m */
+const M={p:3,lam:0.016855,R:0.02802,Ld:99.23e-6,Lq:112.77e-6};
+
+/* ---------- Park lab ---------- */
+let th=0,paused=false,hist=[];let lastT=performance.now();
+function kvals(){return {id:+$('k_id').value,iq:+$('k_iq').value,h:+$('k_h').value/100,sp:+$('k_sp').value};}
+function kcur(t){const v=kvals();const I=Math.hypot(v.id,v.iq);
+  // alpha-beta = (id + j iq) e^{j th} + h I e^{-j5 th} + h I e^{j7 th}
+  const ca=Math.cos(t),sa=Math.sin(t);let a=v.id*ca-v.iq*sa,b=v.id*sa+v.iq*ca;
+  a+=v.h*I*Math.cos(-5*t)+v.h*I*Math.cos(7*t);b+=v.h*I*Math.sin(-5*t)+v.h*I*Math.sin(7*t);
+  const d=a*ca+b*sa,q=-a*sa+b*ca;return {a,b,d,q};}
+function drawPark(){const v=kvals();$('o_kid').textContent=v.id+' A';$('o_kiq').textContent=v.iq+' A';$('o_kh').textContent=fmt(v.h*100,1)+' %';$('o_ksp').textContent=fmt(v.sp,2)+' ciclos/s';
+  const ink=css('--ink'),mut=css('--muted'),line=css('--line'),acc=css('--accent'),cu=css('--u'),cw=css('--w'),cv=css('--v');const c0=kcur(th);
+  const sc=(R)=>R/130;
+  // stator frame
+  {const {g,w,h}=fitCanvas($('k_stator'));g.clearRect(0,0,w,h);const cx=w/2,cy=h/2+6,R=Math.min(w,h)/2-30,s=sc(R);
+    g.font='11px IBM Plex Mono, monospace';g.fillStyle=mut;g.textAlign='center';g.fillText('visto desde el ESTATOR',cx,14);
+    g.strokeStyle=line;g.lineWidth=1;g.beginPath();g.moveTo(cx-R,cy);g.lineTo(cx+R,cy);g.moveTo(cx,cy-R);g.lineTo(cx,cy+R);g.stroke();g.fillText('α',cx+R+8,cy+4);g.fillText('β',cx,cy-R-6);
+    const dx=Math.cos(th),dy=Math.sin(th);g.setLineDash([5,4]);g.strokeStyle=cv;g.lineWidth=1.5;g.beginPath();g.moveTo(cx-dx*R,cy+dy*R);g.lineTo(cx+dx*R,cy-dy*R);g.moveTo(cx+dy*R,cy+dx*R);g.lineTo(cx-dy*R,cy-dx*R);g.stroke();g.setLineDash([]);
+    g.fillStyle=cv;g.fillText('d (imán)',cx+dx*(R-10),cy-dy*(R-10)-8);g.fillText('q',cx-dy*(R-10),cy-dx*(R-10)-6);
+    arrow(g,cx,cy,cx+c0.a*s,cy-c0.b*s,acc,3.5);}
+  // rotor frame
+  {const {g,w,h}=fitCanvas($('k_rotor'));g.clearRect(0,0,w,h);const cx=w/2,cy=h/2+6,R=Math.min(w,h)/2-30,s=sc(R);
+    g.font='11px IBM Plex Mono, monospace';g.fillStyle=mut;g.textAlign='center';g.fillText('visto desde el ROTOR (dq)',cx,14);
+    g.strokeStyle=cv;g.setLineDash([5,4]);g.lineWidth=1.5;g.beginPath();g.moveTo(cx-R,cy);g.lineTo(cx+R,cy);g.moveTo(cx,cy-R);g.lineTo(cx,cy+R);g.stroke();g.setLineDash([]);g.fillStyle=cv;g.fillText('d',cx+R+8,cy+4);g.fillText('q',cx,cy-R-6);
+    g.strokeStyle=mut;g.lineWidth=1;g.setLineDash([2,3]);g.beginPath();g.moveTo(cx+c0.d*s,cy-c0.q*s);g.lineTo(cx+c0.d*s,cy);g.moveTo(cx+c0.d*s,cy-c0.q*s);g.lineTo(cx,cy-c0.q*s);g.stroke();g.setLineDash([]);
+    arrow(g,cx,cy,cx+c0.d*s,cy-c0.q*s,acc,3.5);}
+  // time traces
+  {const {g,w,h}=fitCanvas($('k_time'));g.clearRect(0,0,w,h);const L=36,R=10,T=10,B=h-20;const span=2*TAU;const t1=th,t0=t1-span;
+    const X=t=>L+(w-L-R)*(t-t0)/span,Y=v=>T+(B-T)*(1-(v/140+1)/2);
+    g.strokeStyle=line;g.lineWidth=1;g.beginPath();g.moveTo(L,Y(0));g.lineTo(w-R,Y(0));g.stroke();g.font='11px IBM Plex Mono, monospace';g.fillStyle=mut;g.textAlign='right';g.fillText('+140',L-4,T+8);g.fillText('0',L-4,Y(0)+4);g.fillText('−140',L-4,B);
+    g.textAlign='left';g.fillText('últimas 2 vueltas eléctricas',L,h-4);
+    const series=[['a',cu,'iα'],['b',cw,'iβ'],['d',cv,'id'],['q',acc,'iq']];
+    series.forEach(([k,col,n],j)=>{g.strokeStyle=col;g.lineWidth=k==='d'||k==='q'?2.6:1.6;g.beginPath();for(let x=0;x<=200;x++){const t=t0+span*x/200;const y=Y(kcur(t)[k]);x?g.lineTo(X(t),y):g.moveTo(X(t),y);}g.stroke();g.fillStyle=col;g.fillText(n,w-R-150+j*36,T+10);});}
+}
+function loopPark(now){const dt=Math.min(.05,(now-lastT)/1000);lastT=now;if(!paused&&!reduce)th+=TAU*kvals().sp*dt;drawPark();requestAnimationFrame(loopPark);}
+$('k_pause').onclick=e=>{paused=!paused;e.target.setAttribute('aria-pressed',String(paused));e.target.textContent=paused?'Seguir':'Pausa';};
+if(reduce)th=40*D2R;
+requestAnimationFrame(loopPark);
+window.addEventListener("resize",drawPark);
+})();
+</script>
+<script>
+/* Answer boxes. Each .qa[data-q] gets a textarea; the solution stays hidden until the viewer writes an attempt and saves it.
+   Saved answers live in the db at answers/<lesson>-<q>; Claude writes a "feedback" field there and the page shows it. */
+(function(){
+const LESSON=document.body.dataset.lesson||document.querySelector('main').dataset.lesson;
+const MIN=12;
+const boxes=[...document.querySelectorAll('.qa[data-q]')];
+const key=q=>LESSON+'-'+q;
+const draftKey=q=>'draft:'+key(q);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let db=null;
+boxes.forEach(box=>{
+  const q=box.dataset.q,sol=box.querySelector('template.sol');
+  const ta=document.createElement('textarea');ta.placeholder='Tu respuesta, con tu razonamiento. Un "no lo sé, pero creo que…" vale.';ta.setAttribute('aria-label','Tu respuesta');
+  const row=document.createElement('div');row.className='row';
+  const btn=document.createElement('button');btn.type='button';btn.className='primary';btn.textContent='Guardar y ver la solución';btn.disabled=true;
+  const st=document.createElement('span');st.className='st';
+  row.append(btn,st);
+  const rev=document.createElement('div');rev.className='reveal';rev.hidden=true;
+  if(sol)rev.append(sol.content.cloneNode(true));
+  const fb=document.createElement('div');fb.className='fb';fb.hidden=true;
+  box.append(ta,row,rev,fb);
+  const d=store.get(draftKey(q));if(d)ta.value=d;
+  const sync=()=>{btn.disabled=ta.value.trim().length<MIN;if(rev.hidden)st.textContent=btn.disabled?'Escribe tu intento para desbloquear la solución':'';};
+  let tmr;ta.addEventListener('input',()=>{sync();clearTimeout(tmr);tmr=setTimeout(()=>store.set(draftKey(q),ta.value),400);});
+  btn.addEventListener('click',async()=>{
+    const text=ta.value.trim();if(text.length<MIN)return;
+    rev.hidden=false;btn.textContent='Guardar cambios';store.set(draftKey(q),ta.value);
+    if(!db){st.textContent='Guardado solo en este navegador';return;}
+    st.textContent='Guardando…';
+    try{const ref=db.doc('answers/'+key(q));const cur=await ref.get();
+      const body={lesson:LESSON,q,text,question:(box.querySelector('p')||{}).textContent||'',savedAt:new Date().toISOString()};
+      if(cur.exists)await ref.update(body);else await ref.set(body);
+      st.textContent='Guardado ✓ · Claude lo corrige';}
+    catch(e){st.textContent='No se pudo guardar ('+(e&&e.code||'error')+'). Queda en este navegador.';}
+  });
+  box._show=data=>{if(data.text&&!ta.value)ta.value=data.text;if(data.text){rev.hidden=false;btn.textContent='Guardar cambios';st.textContent='Guardado ✓';}
+    if(data.feedback){fb.hidden=false;fb.innerHTML='';const b=document.createElement('b');b.textContent='Corrección de Claude: ';fb.append(b,document.createTextNode(data.feedback));}
+    sync();};
+  sync();
+});
+// canvases inside a closed annex were sized at 0 width: redraw them when it opens
+document.querySelectorAll('details.annex').forEach(d=>d.addEventListener('toggle',()=>window.dispatchEvent(new Event('resize'))));
+(async()=>{
+  const c=window.claude;if(!c||!c.use)return;
+  try{db=await c.use('db');}catch(e){db=null}
+  if(!db)return;
+  try{const snap=await db.collection('answers').where('lesson','==',LESSON).get();
+    snap.docs.forEach(s=>{const v=s.data();const box=boxes.find(b=>b.dataset.q===v.q);if(box)box._show(v);});}
+  catch(e){}
+})();
+})();
+</script>

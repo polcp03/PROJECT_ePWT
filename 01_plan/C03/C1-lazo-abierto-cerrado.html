@@ -1,0 +1,482 @@
+<title>Control 1 · Lazo abierto y cerrado</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: one reading column like a lab notebook; phase colours U/V/W are the identity, teal is the UI accent. */
+:root{
+  --bg:#F4F7F6; --surface:#FFFFFF; --sunk:#E9EFEC; --ink:#14201B; --muted:#56675F; --line:#D5DEDA;
+  --accent:#0E6E62; --accent-soft:#D8EEEA; --u:#D1495B; --v:#C98A00; --w:#2F6FDE; --warn:#A8500B; --warn-soft:#FBEBDD;
+  --magN:#0E6E62; --magS:#7A5FA8; --steel:#B9C4BF;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1412; --surface:#161F1C; --sunk:#1D2925; --ink:#E4ECE8; --muted:#94A69E; --line:#2B3833;
+  --accent:#3DB6A3; --accent-soft:#163A34; --u:#F06A7A; --v:#F0B53A; --w:#73A0FF; --warn:#F0A060; --warn-soft:#3A2715; --magN:#3DB6A3; --magS:#9C86D0; --steel:#3A4843; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1412; --surface:#161F1C; --sunk:#1D2925; --ink:#E4ECE8; --muted:#94A69E; --line:#2B3833;
+  --accent:#3DB6A3; --accent-soft:#163A34; --u:#F06A7A; --v:#F0B53A; --w:#73A0FF; --warn:#F0A060; --warn-soft:#3A2715; --magN:#3DB6A3; --magS:#9C86D0; --steel:#3A4843; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:760px;margin:0 auto;padding-block:28px 80px;display:grid;gap:36px}
+h1,h2,h3{font-family:var(--display);font-stretch:85%;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(2rem,6vw,2.9rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.6rem;font-weight:750}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0}
+.stack{display:grid;gap:14px}
+.eyebrow{font:500 .78rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:1.1rem;color:var(--muted);max-width:62ch}
+.phasebar{display:flex;height:5px;border-radius:3px;overflow:hidden;width:120px}
+.phasebar i{flex:1}.phasebar i:nth-child(1){background:var(--u)}.phasebar i:nth-child(2){background:var(--v)}.phasebar i:nth-child(3){background:var(--w)}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px))}
+nav.toc div{max-width:760px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}nav.toc div::-webkit-scrollbar{display:none}nav.toc a{flex:none}
+nav.toc a{font:500 .85rem/1 var(--body);color:var(--ink);text-decoration:none;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--accent);outline:none}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font:.9rem/1.4 var(--mono);color:var(--muted)}
+.attempt{border:2px dashed var(--accent);border-radius:12px;padding:18px 20px;background:var(--accent-soft)}
+.attempt ol{margin:8px 0 0;padding-left:1.3em;display:grid;gap:6px}
+.idea{display:grid;grid-template-columns:2.4rem 1fr;gap:4px 14px;padding-top:18px;border-top:1px solid var(--line)}
+.idea>.n{font:800 1.5rem/1 var(--display);color:var(--accent);font-stretch:75%}
+.idea>div{min-width:0;display:grid;gap:10px}
+.eq{font:500 1.05rem/1.5 var(--mono);background:var(--sunk);border-radius:8px;padding:10px 14px;overflow-x:auto;white-space:nowrap}
+.eq small{font-size:.8rem;color:var(--muted);white-space:normal;display:block}
+.src{font:.8rem/1.4 var(--mono);color:var(--muted)}
+.key{border-left:3px solid var(--accent);padding-left:12px}
+.mine{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:.95rem}
+.mine b{font-family:var(--mono);font-weight:500}
+.lab{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:14px}
+.lab h3{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;align-items:center}.two>*{min-width:0}
+.legrow{display:grid;grid-template-columns:4.2em repeat(3,1fr);gap:6px;align-items:center}.legrow button{padding:9px 6px}
+.lab h3 span{font:500 .75rem/1 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px}
+.ctl{display:grid;gap:2px;min-width:0}
+.ctl label{display:flex;justify-content:space-between;font-size:.88rem;gap:8px}
+.ctl output{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+canvas{width:100%;display:block;border-radius:8px;background:var(--sunk)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px}
+.readout div{background:var(--sunk);border-radius:8px;padding:8px 10px;min-width:0}
+.readout dt{font-size:.75rem;color:var(--muted)}
+.readout dd{margin:0;font:500 1.05rem/1.3 var(--mono);font-variant-numeric:tabular-nums}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+button{font:500 .9rem/1 var(--body);padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent)}
+.try{font-size:.92rem;background:var(--sunk);border-radius:8px;padding:10px 14px}
+.try ul{margin:4px 0 0;padding-left:1.2em;display:grid;gap:4px}
+.case{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:8px}
+.case .tag{font:500 .75rem/1 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.q{display:grid;grid-template-columns:3rem 1fr;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.q .pts{font:500 .8rem/1.4 var(--mono);color:var(--muted)}
+.q b.id{font:700 1rem/1.4 var(--mono)}
+.q>div{min-width:0;display:grid;gap:6px}
+details.exam{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 18px}
+details.exam>summary{cursor:pointer;padding:14px 0;font:700 1.1rem/1.3 var(--display);font-stretch:85%;list-style:none}
+details.exam>summary::after{content:" ▸";color:var(--accent)}
+details.exam[open]>summary::after{content:" ▾"}
+.warn{background:var(--warn-soft);border-radius:10px;padding:12px 14px;font-size:.93rem}
+.warn b{color:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 .8rem/1.3 var(--body);color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+svg text{font-family:var(--mono)}
+footer{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.mm{margin:0;display:grid;gap:8px;justify-items:center;background:var(--sunk);border-radius:14px;padding:18px 12px}.mm svg{width:100%;max-width:440px;height:auto;display:block}.mm figcaption{font:.85rem var(--mono);color:var(--muted);text-align:center}
+/* theory v2: laws grid, illustrated steps, retrieval checks, worked examples */
+.method{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.howto{margin:0;padding-left:1.3em;display:grid;gap:6px}
+.laws{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.law{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px;align-content:start;min-width:0}
+.law h3{font-size:1.05rem}
+.law p{font-size:.93rem}
+.law .eq{font-size:.92rem;white-space:normal}
+.pic{width:100%;max-width:200px;height:auto;display:block;background:var(--sunk);border-radius:8px}
+.where{color:var(--muted);font-size:.88rem!important}
+.where b{color:var(--ink)}
+details.check{background:var(--accent-soft);border-radius:10px;padding:10px 14px}
+details.check>summary{cursor:pointer;font-weight:600;color:var(--accent);font-size:.93rem}
+details.check p{margin-top:8px;font-size:.93rem}
+details.check .ans{border-top:1px dashed var(--accent);padding-top:8px}
+.step{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding-top:22px;border-top:1px solid var(--line)}
+.step>div{display:grid;gap:10px;min-width:0}
+.step h3 .n{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--accent);color:var(--surface);font-size:.9rem;margin-right:8px;vertical-align:2px}
+.dg{width:100%;max-width:480px;height:auto;display:block;margin:0 auto;background:var(--sunk);border-radius:12px}
+.worked{background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:16px 18px}
+.sol{margin:0;padding-left:1.3em;display:grid;gap:4px;font-variant-numeric:tabular-nums}
+.review{background:var(--surface);border:2px dashed var(--line);border-radius:12px;padding:16px 18px}
+.review ol{margin:6px 0 0;padding-left:1.3em;display:grid;gap:6px}
+/* svg paint classes, all theme tokens */
+.s-ink{stroke:var(--ink)}.s-mut{stroke:var(--muted)}.s-acc{stroke:var(--accent)}.s-warn{stroke:var(--warn)}
+.s-u{stroke:var(--u)}.s-v{stroke:var(--v)}.s-w{stroke:var(--w)}.s-steel{stroke:var(--steel)}.s-magN{stroke:var(--magN)}.s-magS{stroke:var(--magS)}
+.f-ink{fill:var(--ink)}.f-mut{fill:var(--muted)}.f-acc{fill:var(--accent)}.f-warn{fill:var(--warn)}.f-surf{fill:var(--surface)}.f-sunk{fill:var(--sunk)}
+.f-u{fill:var(--u)}.f-v{fill:var(--v)}.f-w{fill:var(--w)}.f-magN{fill:var(--magN)}.f-magS{fill:var(--magS)}
+svg .t{fill:var(--ink);font:13px var(--mono)}svg .tm{fill:var(--muted);font:12px var(--mono)}svg .ta{fill:var(--accent);font:600 13px var(--mono)}
+svg .tw2{fill:var(--warn);font:600 13px var(--mono)}svg .tu{fill:var(--u);font:700 14px var(--mono)}svg .tv{fill:var(--v);font:700 14px var(--mono)}
+svg .tv-w{fill:var(--w);font:600 13px var(--mono)}svg .tv-u{fill:var(--u);font:600 13px var(--mono)}svg .tN{fill:var(--magN);font:800 18px var(--display)}svg .tS{fill:var(--magS);font:800 18px var(--display)}
+@media (min-width:720px){.step{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:start}.step .dg{position:sticky;top:64px}}
+/* answer boxes: attempt first, then the solution; answers saved to the artifact db for Claude to correct */
+.qa{background:var(--accent-soft);border-radius:10px;padding:12px 14px;display:grid;gap:8px}
+.qa>p{font-size:.95rem}
+.qa textarea{width:100%;min-height:96px;font:16px/1.5 var(--body);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);resize:vertical}
+.qa .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.qa .st{font:.8rem/1.3 var(--mono);color:var(--muted)}
+.qa .reveal{border-top:1px dashed var(--accent);padding-top:8px;font-size:.93rem;display:grid;gap:6px}
+.qa .fb{border-left:3px solid var(--warn);background:var(--warn-soft);border-radius:0 8px 8px 0;padding:8px 10px;font-size:.93rem}
+.qa .fb b{color:var(--warn)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.part{display:grid;gap:14px}
+details.annex{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 18px}
+details.annex>summary{cursor:pointer;padding:14px 0;font:700 1.1rem/1.3 var(--display);font-stretch:85%;list-style:none}
+details.annex>summary::after{content:" ▸";color:var(--accent)}
+details.annex[open]>summary::after{content:" ▾"}
+details.annex>div{display:grid;gap:22px;padding-bottom:18px}
+main>*{min-width:0}
+</style>
+
+<main data-lesson="C1">
+<header class="stack">
+  <div class="phasebar"><i></i><i></i><i></i></div>
+  <p class="eyebrow">C03 · Control 1 · jueves 5 nov, 14:00</p>
+  <h1>Lazo abierto y lazo cerrado: tu bobina</h1>
+  <p class="lede">Esta mañana viste que el par es iq. Esta tarde, cómo consigue el VESC que la iq sea la que pides: tu bobina como sistema, por qué no basta con calcular la tensión y qué arregla medir.</p>
+  <div class="meta"><span>Una sesión · 55 min</span><span>Escribe en cada cuadro: la solución se abre después, y Claude corrige lo que guardes</span></div>
+</header>
+
+<nav class="toc" aria-label="Secciones"><div>
+  <a href="#predice">1 · Predice</a><a href="#nucleo">2 · Núcleo</a><a href="#lab">3 · Laboratorio</a><a href="#criterio">4 · Criterio</a><a href="#cierre">5 · Cierre</a>
+</div></nav>
+
+<section id="predice" class="attempt stack">
+  <p class="eyebrow">1 · Predice · 5 min, sin mirar nada</p>
+  <h2>Antes de leer</h2>
+  <div class="qa" data-q="p1"><p>Rotor bloqueado. Aplicas de golpe 1 V a la bobina del eje q (R = 28 mΩ, Lq = 113 µH). ¿Qué corriente hay al final y cuánto tarda en llegar, a ojo?</p>
+    <template class="sol"><p><b>Solución:</b> al final, 1/0,028 = <b>35,7 A</b>. Sube como una exponencial con constante de tiempo τ = L/R = <b>4,0 ms</b>: el 63 % en 4 ms y casi todo en 12 ms.</p></template></div>
+  <div class="qa" data-q="p2"><p>Quieres 60 A. ¿Por qué no basta con calcular v = R·i = 1,7 V y aplicarla? Da al menos dos razones.</p>
+    <template class="sol"><p><b>Solución:</b> (1) R cambia con la temperatura (un 0,39 %/K) y no la conoces bien. (2) En cuanto el motor gira aparece la back-EMF, que se resta: a 1000 rpm son 5,3 V, más del triple de esos 1,7 V. (3) Tarda 4 ms en llegar, y no puedes acelerarlo. Lo verás todo en el laboratorio.</p></template></div>
+  <div class="review stack">
+    <p class="eyebrow">Repaso espaciado · errores abiertos de errores.md</p>
+    <div class="qa" data-q="r4"><p>(Error 4) ¿Por qué el inversor usa PWM y no una resistencia en serie para dar menos tensión?</p>
+      <template class="sol"><p><b>Solución:</b> eficiencia. Una resistencia quema (Vbat − Vmotor)·I. Un interruptor cerrado tiene V ≈ 0 y abierto I ≈ 0: casi no disipa. La bobina del motor suaviza la corriente.</p></template></div>
+    <div class="qa" data-q="r5"><p>(Error 5) Con el PWM, ¿qué se varía para cambiar la tensión media: la frecuencia o qué otra cosa?</p>
+      <template class="sol"><p><b>Solución:</b> el <b>ciclo de trabajo</b> (duty). La frecuencia es fija: 30 kHz en tu VESC. Hoy, el duty es la «v» que manda el controlador.</p></template></div>
+  </div>
+</section>
+
+<section id="nucleo" class="part">
+  <p class="eyebrow">2 · Núcleo · 25 min</p>
+  <h2>Seis ideas, cada una con su dibujo</h2>
+  <p class="lede">Filtrado de Franklin, Powell y Emami-Naeini, <i>Feedback Control of Dynamic Systems</i>, 8.ª ed.: §2.2–2.3, §3.3, §4.1 y §4.2–4.3.1. Todo sobre el eje q de tu motor; el d es igual, con Ld.</p>
+
+  <article class="step">
+    <svg viewBox="0 0 320 170" class="dg" role="img" aria-label="Bloque de la planta: entra la tensión v, se resta la back-EMF E, sale la corriente i a través de 1 entre L s más R">
+      <defs><marker id="c1a" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7z" class="f-ink"/></marker></defs>
+      <path d="M10 80 H70" class="s-ink" stroke-width="2" marker-end="url(#c1a)"/><text x="12" y="70" class="t">v (VESC)</text>
+      <circle cx="84" cy="80" r="12" class="s-ink f-surf" stroke-width="2"/><text x="84" y="85" class="t" text-anchor="middle">Σ</text><text x="64" y="100" class="t">+</text><text x="92" y="112" class="t">−</text>
+      <path d="M84 150 V96" class="s-warn" stroke-width="2" marker-end="url(#c1a)"/><text x="94" y="150" class="tw2">E = ωe·λm</text>
+      <path d="M96 80 H140" class="s-ink" stroke-width="2" marker-end="url(#c1a)"/>
+      <rect x="142" y="54" width="90" height="52" rx="8" class="s-acc f-surf" stroke-width="2"/><text x="187" y="77" class="t" text-anchor="middle">1</text><path d="M160 83 H214" class="s-ink" stroke-width="1"/><text x="187" y="99" class="t" text-anchor="middle">Lq·s + R</text>
+      <path d="M232 80 H300" class="s-ink" stroke-width="2" marker-end="url(#c1a)"/><text x="296" y="70" class="ta" text-anchor="end">i = iq</text>
+      <text x="142" y="128" class="tm">planta: tu bobina</text>
+    </svg>
+    <div>
+      <h3><span class="n">1</span> Tu bobina como sistema</h3>
+      <p>La ecuación de q de ayer, con id = 0, es v = R·i + Lq·di/dt + E. Pasada a Laplace, la bobina es un bloque que convierte tensión en corriente:</p>
+      <p class="eq">G(s) = I(s) / V(s) = 1 / (Lq·s + R)<small>la back-EMF entra como una perturbación que se resta a v</small></p>
+      <p>A este bloque se le llama <b>planta</b>: lo que quieres controlar. Lo que puedes tocar (la tensión, vía el duty) es la <b>entrada</b>; lo que quieres fijar (la corriente) es la <b>salida</b>.</p>
+      <div class="qa" data-q="i1"><p>¿Cuánto vale la ganancia en continua de tu planta, G(0)? ¿Dónde está su polo? Da los dos con unidades.</p>
+        <template class="sol"><p><b>Solución:</b> G(0) = 1/R = <b>35,7 A/V</b>. Polo en s = −R/Lq = <b>−248 rad/s</b>. La inversa del polo es la constante de tiempo: 4,0 ms.</p></template></div>
+      <p class="src">Franklin §2.2 (circuitos) y §2.3 (motor con inductancia)</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 190" class="dg" role="img" aria-label="Respuesta a un escalón de primer orden: la corriente sube como exponencial, 63 por ciento en tau igual a 4 milisegundos">
+      <path d="M40 160 H305 M40 160 V15" class="s-mut" stroke-width="1"/>
+      <path d="M40 30 H300" class="s-mut" stroke-width="1" stroke-dasharray="5 4"/><text x="300" y="24" class="tm" text-anchor="end">35,7 A</text>
+      <path id="c1exp" d="M40 160 C 70 85, 110 45, 160 36 S 260 30, 300 30" class="s-acc" fill="none" stroke-width="3"/>
+      <path d="M40 160 L104 30" class="s-mut" stroke-width="1" stroke-dasharray="3 3"/>
+      <path d="M104 160 V78" class="s-warn" stroke-width="1.5" stroke-dasharray="4 3"/><circle cx="104" cy="78" r="4" class="f-warn"/>
+      <text x="104" y="176" class="tw2" text-anchor="middle">τ = 4 ms</text><text x="110" y="74" class="tw2">63 %</text>
+      <text x="234" y="176" class="tm" text-anchor="middle">3τ: 95 %</text><text x="302" y="176" class="tm" text-anchor="end">t</text>
+    </svg>
+    <div>
+      <h3><span class="n">2</span> La respuesta a un escalón: una exponencial</h3>
+      <p>Un polo real da una respuesta exponencial. Con un escalón de tensión V y el rotor quieto:</p>
+      <p class="eq">i(t) = (V/R)·(1 − e<sup>−t/τ</sup>) &nbsp;&nbsp;&nbsp; τ = Lq/R</p>
+      <p>Llega al 63 % en τ y al 95 % en 3τ. La tangente en el origen corta el valor final justo en τ: es la forma rápida de leer τ en una gráfica.</p>
+      <div class="mine">Tu motor: τq = 112,8 µH / 28,0 mΩ = <b>4,0 ms</b>; τd = 3,5 ms.</div>
+      <div class="qa" data-q="i2"><p>Con 1 V de escalón, ¿cuánta corriente hay a los 4 ms y a los 12 ms? Si el motor estuviera 40 K más caliente (R +16 %), ¿cambiaría el valor final, τ o las dos cosas?</p>
+        <template class="sol"><p><b>Solución:</b> 4 ms: 0,632·35,7 = <b>22,6 A</b>. 12 ms: 0,95·35,7 = <b>33,9 A</b>. Más caliente cambian <b>las dos</b>: el final baja a 30,8 A (1/R) y τ baja a 3,5 ms (L/R).</p></template></div>
+      <p class="src">Franklin §3.3, fig. 3.14 (polo de primer orden y constante de tiempo)</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 130" class="dg" role="img" aria-label="Lazo abierto: la referencia entra en un bloque R que calcula la tensión, la tensión entra en la planta, nada vuelve">
+      <defs><marker id="c1b" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7z" class="f-ink"/></marker></defs>
+      <path d="M10 60 H58" class="s-ink" stroke-width="2" marker-end="url(#c1b)"/><text x="10" y="50" class="t">i pedida</text>
+      <rect x="60" y="40" width="64" height="40" rx="8" class="s-ink f-surf" stroke-width="2"/><text x="92" y="65" class="t" text-anchor="middle">× R</text>
+      <path d="M124 60 H168" class="s-ink" stroke-width="2" marker-end="url(#c1b)"/><text x="130" y="50" class="tm">v</text>
+      <rect x="170" y="40" width="70" height="40" rx="8" class="s-acc f-surf" stroke-width="2"/><text x="205" y="65" class="t" text-anchor="middle">bobina</text>
+      <path d="M240 60 H300" class="s-ink" stroke-width="2" marker-end="url(#c1b)"/><text x="296" y="50" class="ta" text-anchor="end">i</text>
+      <path d="M205 120 V82" class="s-warn" stroke-width="2" marker-end="url(#c1b)"/><text x="214" y="118" class="tw2">E, R real, calor…</text>
+      <text x="10" y="112" class="tm">nadie mira i</text>
+    </svg>
+    <div>
+      <h3><span class="n">3</span> Lazo abierto: calcular y aplicar</h3>
+      <p>La idea más simple: calculas la tensión que daría la corriente pedida y la aplicas. Funciona si el modelo es perfecto y nada molesta. Franklin lo escribe así: en lazo abierto, el error es</p>
+      <p class="eq">E = [1 − G·D]·R − G·W<small>R es la referencia y W la perturbación; la perturbación pasa entera a la salida</small></p>
+      <p>Nada corrige: si R real no es la que usaste, o si aparece la back-EMF, la corriente sale mal y nadie se entera.</p>
+      <div class="qa" data-q="i3"><p>En lazo abierto, pides 60 A con v = R·i = 1,68 V, y el motor gira a 1000 rpm. ¿Qué corriente sale en régimen? ¿Y con el rotor parado pero el cobre 40 K más caliente?</p>
+        <template class="sol"><p><b>Solución:</b> a 1000 rpm, E = 314·0,016855 = 5,30 V &gt; 1,68 V: i = (1,68 − 5,30)/0,028 = <b>−129 A</b>. ¡Frena en vez de empujar! Parado y caliente: 1,68/0,0325 = <b>51,7 A</b>, un 14 % menos. Ninguna de las dos se corrige sola.</p></template></div>
+      <p class="src">Franklin §4.1, ecs. 4.1–4.4 · §4.1.2 (seguimiento en lazo abierto)</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 170" class="dg" role="img" aria-label="Lazo cerrado: la referencia menos la medida da el error, que entra al controlador, a la planta, y la medida vuelve">
+      <defs><marker id="c1c" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7z" class="f-ink"/></marker><marker id="c1d" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7z" class="f-acc"/></marker></defs>
+      <path d="M8 60 H44" class="s-ink" stroke-width="2" marker-end="url(#c1c)"/><text x="6" y="50" class="t">i*</text>
+      <circle cx="58" cy="60" r="12" class="s-ink f-surf" stroke-width="2"/><text x="58" y="65" class="t" text-anchor="middle">Σ</text><text x="40" y="80" class="t">+</text><text x="64" y="92" class="t">−</text>
+      <path d="M70 60 H96" class="s-ink" stroke-width="2" marker-end="url(#c1c)"/><text x="74" y="50" class="tm">e</text>
+      <rect x="98" y="40" width="64" height="40" rx="8" class="s-ink f-surf" stroke-width="2"/><text x="130" y="65" class="t" text-anchor="middle">D(s)</text>
+      <path d="M162 60 H192" class="s-ink" stroke-width="2" marker-end="url(#c1c)"/><text x="168" y="50" class="tm">v</text>
+      <rect x="194" y="40" width="64" height="40" rx="8" class="s-acc f-surf" stroke-width="2"/><text x="226" y="65" class="t" text-anchor="middle">G(s)</text>
+      <path d="M258 60 H310" class="s-ink" stroke-width="2" marker-end="url(#c1c)"/><text x="306" y="50" class="ta" text-anchor="end">i</text>
+      <path d="M284 60 V130 H58 V74" class="s-acc" fill="none" stroke-width="2" marker-end="url(#c1d)"/><text x="150" y="148" class="ta" text-anchor="middle">medida: shunts del VESC + Clarke + Park</text>
+    </svg>
+    <div>
+      <h3><span class="n">4</span> Lazo cerrado: medir, comparar, corregir</h3>
+      <p>Mides la corriente, la comparas con la pedida y el controlador D(s) convierte el error en tensión. Con la realimentación, Franklin llega a dos funciones que lo resumen todo:</p>
+      <p class="eq">S = 1 / (1 + G·D) &nbsp;&nbsp;&nbsp; T = G·D / (1 + G·D)<small>E = S·R − G·S·W + T·V: S reparte el error y la perturbación, T el seguimiento (y el ruido del sensor)</small></p>
+      <p class="key">Donde G·D es grande, S es pequeña: el error y la perturbación se encogen por el factor 1 + G·D. Ese factor es todo lo que gana la realimentación, y lo que pagas por él es el ruido del sensor, que entra con T.</p>
+      <div class="qa" data-q="i4"><p>En el dibujo, ¿qué es físicamente cada bloque y cada flecha en tu VESC? Nombra al menos: quién calcula e, qué es v en el hardware y de dónde sale la medida.</p>
+        <template class="sol"><p><b>Solución:</b> e y D(s) son código en el micro del VESC. v es el duty de los tres brazos (SVPWM) que el inversor convierte en tensión. La planta es la bobina del motor. La medida sale de los shunts de corriente de fase, pasada por Clarke y Park con el ángulo de los Hall.</p></template></div>
+      <p class="src">Franklin §4.1, ecs. 4.5–4.13 (S y T)</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 190" class="dg" role="img" aria-label="Control proporcional: la corriente llega rápido pero se queda en el 88 por ciento de la pedida">
+      <path d="M40 160 H305 M40 160 V15" class="s-mut" stroke-width="1"/>
+      <path d="M40 30 H300" class="s-mut" stroke-width="1.5" stroke-dasharray="6 4"/><text x="300" y="24" class="tm" text-anchor="end">pedida</text>
+      <path d="M40 160 C 50 70, 62 46, 90 45 L300 45" class="s-acc" fill="none" stroke-width="3"/>
+      <path d="M270 30 V45" class="s-warn" stroke-width="2"/><text x="264" y="66" class="tw2" text-anchor="end">error: 11,7 %</text>
+      <text x="96" y="90" class="ta">τ = 0,47 ms</text>
+      <text x="302" y="176" class="tm" text-anchor="end">t</text>
+    </svg>
+    <div>
+      <h3><span class="n">5</span> Solo proporcional: rápido, pero se queda corto</h3>
+      <p>El controlador más simple: v = Kp·e. El lazo cerrado sigue siendo de primer orden, pero mucho más rápido, con el polo en −(R + Kp)/Lq. Y deja un error fijo: es un sistema de <b>tipo 0</b>.</p>
+      <p class="eq">i/i* = Kp / (R + Kp) &nbsp;&nbsp;&nbsp; e<sub>ss</sub> = 1 / (1 + Kp·G(0)) = R / (R + Kp)</p>
+      <p>Para que dé tensión tiene que haber error. Sin error, v = 0. Con la Kp de tu VESC (0,2119 V/A), Kp/R = 7,6: el lazo es 8,6 veces más rápido que la bobina, pero se queda un 11,7 % corto.</p>
+      <div class="qa" data-q="i5"><p>Con Kp = 0,2119 V/A, ¿cuál es la constante de tiempo del lazo cerrado? Y lo importante: a 1000 rpm, la back-EMF de 5,3 V es una perturbación. ¿Cuántos amperios te «roba» en régimen? (Pista: i = (Kp·i* − E)/(R + Kp).)</p>
+        <template class="sol"><p><b>Solución:</b> τ = Lq/(R + Kp) = 112,8 µH / 0,240 Ω = <b>0,47 ms</b>. La back-EMF roba E/(R + Kp) = 5,30/0,240 = <b>22 A</b>. Pidiendo 60 A tendrías 0,883·60 − 22 = 31 A. Un P solo no sirve para un motor que gira: falta algo que no necesite error para dar tensión. Eso es el integrador, mañana.</p></template></div>
+      <p class="src">Franklin §4.2.1 (tipo de sistema, ec. 4.32) y §4.3.1 (control proporcional)</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 170" class="dg" role="img" aria-label="Barras: con el cobre caliente, la corriente cae un 14 por ciento en lazo abierto y un 1,8 por ciento con el lazo proporcional">
+      <text x="10" y="22" class="t">cobre +40 K (R +16 %)</text>
+      <rect x="120" y="44" width="172" height="26" rx="4" class="f-warn"/><text x="112" y="62" class="t" text-anchor="end">lazo abierto</text><text x="286" y="62" class="t" text-anchor="end" style="fill:var(--surface)">−14 %</text>
+      <rect x="120" y="94" width="22" height="26" rx="4" class="f-acc"/><text x="112" y="112" class="t" text-anchor="end">lazo P</text><text x="150" y="112" class="ta">−1,8 %</text>
+      <text x="10" y="158" class="tm">mismo cambio de planta, 8 veces menos efecto</text>
+    </svg>
+    <div>
+      <h3><span class="n">6</span> Qué gana el lazo cerrado: no depender del modelo</h3>
+      <p>La planta cambia: el cobre se calienta, la L se satura con la corriente. En lazo abierto, cada cambio de la planta pasa entero a la salida. En lazo cerrado, se divide por 1 + G·D. Franklin lo llama <b>sensibilidad</b>: cuánto cambia la respuesta cuando cambia la planta.</p>
+      <p class="key">Por eso tu VESC no necesita conocer R al 1 %. Le basta un modelo razonable y una buena medida. La medida pasa a ser lo crítico: si los shunts mienten, el lazo obedece a la mentira.</p>
+      <div class="qa" data-q="i6"><p>Con el cobre 40 K más caliente (R de 28,0 a 32,5 mΩ), calcula cuánto cae la corriente en lazo abierto y cuánto con el lazo P de Kp = 0,2119. ¿Por qué tanta diferencia?</p>
+        <template class="sol"><p><b>Solución:</b> lazo abierto: i ∝ 1/R → 28,0/32,5 = 0,862, cae un <b>14 %</b>. Lazo P: Kp/(R + Kp) pasa de 0,883 a 0,867, cae un <b>1,8 %</b>. En lazo cerrado manda Kp, que no cambia con la temperatura; R pesa poco a su lado.</p></template></div>
+      <p class="src">Franklin §4.1.4 (sensibilidad)</p>
+    </div>
+  </article>
+</section>
+
+<section id="lab" class="part">
+  <p class="eyebrow">3 · Laboratorio · 15 min</p>
+  <h2>Pide una corriente y mira qué sale</h2>
+  <p class="lede">Simulación del eje q de tu motor, con tus parámetros. El controlador aquí es ideal y continuo: el muestreo y el retardo del micro llegan en C04. Escribe la predicción <b>antes</b> de mover nada.</p>
+  <div class="lab">
+    <div class="btnrow"><button type="button" id="c1_ol" aria-pressed="true">Lazo abierto (v = R·i*)</button><button type="button" id="c1_p" aria-pressed="false">Proporcional (v = Kp·e)</button></div>
+    <div class="controls">
+      <div class="ctl"><label for="c1_ir">Corriente pedida i* <output id="o_c1ir"></output></label><input id="c1_ir" type="range" min="10" max="120" step="5" value="60"></div>
+      <div class="ctl"><label for="c1_kp">Kp <output id="o_c1kp"></output></label><input id="c1_kp" type="range" min="0.02" max="1" step="0.0001" value="0.2119"></div>
+      <div class="ctl"><label for="c1_dt">Calentamiento del cobre <output id="o_c1dt"></output></label><input id="c1_dt" type="range" min="0" max="60" step="5" value="0"></div>
+      <div class="ctl"><label for="c1_rpm">Velocidad del motor <output id="o_c1rpm"></output></label><input id="c1_rpm" type="range" min="0" max="3000" step="50" value="0"></div>
+    </div>
+    <canvas id="c1_plot" height="300" aria-label="Corriente pedida, corriente medida y tensión aplicada frente al tiempo"></canvas>
+    <dl class="readout" id="c1_r"></dl>
+    <div class="qa" data-q="l1"><p>Lazo abierto, rotor parado. Mide τ en la gráfica y compárala con tu cálculo. Sube el calentamiento a +40 K: ¿cuánto cae la corriente final? Luego pon el motor a 1000 rpm. Predice antes cada vez.</p>
+      <template class="sol"><p><b>Solución:</b> τ ≈ <b>4,0 ms</b>. Con +40 K, la final baja un 14 % (51,7 A de 60). A 1000 rpm la corriente se va a negativo: la back-EMF manda.</p></template></div>
+    <div class="qa" data-q="l2"><p>Pasa a proporcional con Kp = 0,2119. Lee τ y el error final. Sube Kp a 1 V/A: ¿qué ganas y qué te dice la gráfica de la tensión al principio del escalón?</p>
+      <template class="sol"><p><b>Solución:</b> con 0,2119, τ ≈ 0,47 ms y error 11,7 %. Con 1 V/A, τ ≈ 0,11 ms y error 2,7 %, pero la tensión inicial pide Kp·60 = <b>60 V</b>, más del doble de los 28,5 V que da tu inversor. En el hardware, la tensión saturaría.</p></template></div>
+    <div class="qa" data-q="l3"><p>Proporcional, motor a 1000 rpm y luego a 2000 rpm. ¿Cuánta corriente sale de los 60 A pedidos? ¿Arregla esto subir Kp, y hasta dónde?</p>
+      <template class="sol"><p><b>Solución:</b> a 1000 rpm, unos 31 A; a 2000 rpm, casi nada (≈ 9 A). Subir Kp reduce el robo (E/(R + Kp)) pero nunca lo anula, y cada vez pide más tensión y amplifica más el ruido. Hace falta otro tipo de control.</p></template></div>
+  </div>
+</section>
+
+<section id="criterio" class="part">
+  <p class="eyebrow">4 · Criterio · 7 min</p>
+  <h2>Piensa tú</h2>
+  <div class="case"><span class="tag">Caso · 20 km/h con un lazo solo P</span>
+    <div class="qa" data-q="c1"><p>El quad va a 20 km/h y das gas pidiendo 100 A. Supón que el VESC tiene solo un P, con Kp = 0,2119. ¿Cuánta back-EMF hay (rueda de 0,155 m, transmisión 92/11, p = 3) y cuánta corriente sale? ¿Qué notarías al conducir?</p>
+      <template class="sol"><p><b>Solución:</b> 5,56 m/s / 0,155 = 35,8 rad/s de rueda → ×8,364 = 300 rad/s de motor → ωe = 899 rad/s → E = <b>15,2 V</b>. i = (0,2119·100 − 15,2)/0,240 = <b>25 A</b> de los 100 pedidos. Notarías que el quad «no tira» a velocidad, y que tira menos cuanto más rápido vas.</p></template></div></div>
+  <div class="case"><span class="tag">Encuentra el error</span>
+    <div class="qa" data-q="c2"><p>Un compañero dice: <i>"Para quitar el error del P, subo Kp a 10 V/A. Así el error baja al 0,3 % y listo."</i> ¿Qué se le escapa? Hay al menos dos cosas.</p>
+      <template class="sol"><p><b>Solución:</b> (1) El polo del lazo se iría a (R + 10)/Lq ≈ 89 000 rad/s, unos 14 kHz: tan rápido como el muestreo del VESC (15 kHz). Con el retardo del micro se volvería inestable (C04). (2) Un escalón de 60 A pediría 600 V: saturaría al instante y dejaría de ser lineal. Franklin lo avisa en §4.1.2: no seas codicioso con la velocidad, que el actuador tiene límites. (3) El ruido de los shunts entra multiplicado por Kp.</p></template></div></div>
+</section>
+
+<section id="cierre" class="part">
+  <p class="eyebrow">5 · Cierre · 3 min</p>
+  <h2>Explícalo en voz alta</h2>
+  <p>Sin mirar, en un minuto: <b>por qué el VESC no calcula la tensión y la aplica, qué gana midiendo, y qué le falta a un controlador solo proporcional.</b></p>
+  <div class="qa" data-q="z1"><p>¿Qué no tienes claro todavía? Escríbelo tal cual. Va a la parte «lo que no entiendo» de la review del 13.</p>
+    <template class="sol"><p>Guardado. Claude lo lee antes de Control 2, mañana a las 07:00.</p></template></div>
+</section>
+
+<footer>Fuente: Franklin, G. F., Powell, J. D. y Emami-Naeini, A. <i>Feedback Control of Dynamic Systems</i>, 8.ª ed., Pearson: §2.2–2.3, §3.3, §4.1–4.2, §4.3.1. Parámetros: <span style="font-family:var(--mono)">04_model/params/motor_params.m</span>. Mañana, Control 2: el PI.</footer>
+</main>
+<script>
+/* Current-loop lab: q-axis coil of Pol's motor, v = R*i + Lq*di/dt + E, with an open-loop, P or PI controller.
+   Continuous-time (the controller is ideal here; sampling and delay come in C04). Parameters: 04_model/params/motor_params.m */
+(function(){
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const $=id=>document.getElementById(id);
+const fmt=(x,d=1)=>(Math.abs(x)<5e-10?0:x).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});
+const M={p:3,lam:0.016855,R:0.02802,Lq:112.77e-6,alphaCu:0.0039,Vmax:0.95*52/Math.sqrt(3)};
+function fitCanvas(c){const r=c.getBoundingClientRect();const dpr=window.devicePixelRatio||1;const h=+(c.dataset.h||(c.dataset.h=c.getAttribute('height')));c.style.height=h+'px';const w=Math.max(260,r.width);c.width=w*dpr;c.height=h*dpr;const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return {g,w,h};}
+function readout(el,rows){el.innerHTML=rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');}
+
+/* cfg: mode 'ol'|'p'|'pi', kp, ki, dT (K of copper heating), rpm, iref, sat (bool), aw (bool), prof 'step'|'updown', ff (bool), T (s) */
+function sim(cfg){
+  const R=M.R*(1+M.alphaCu*cfg.dT), E=cfg.rpm/60*2*Math.PI*M.p*M.lam, dt=1e-6, N=Math.round(cfg.T/dt), every=Math.max(1,Math.round(N/400));
+  /* start in steady state at that speed with zero current asked, as if the motor were already spinning */
+  let i=cfg.mode==='ol'?(cfg.ff?0:-E/R):cfg.mode==='p'?-E/(R+cfg.kp):0, integ=cfg.mode==='pi'?E:0;const out=[];
+  for(let k=0;k<=N;k++){const t=k*dt;
+    let r=t<0.001?0:cfg.iref;if(cfg.prof==='updown'&&t>=cfg.T*0.55)r=0;
+    const e=r-i;let v;
+    if(cfg.mode==='ol')v=M.R*r+(cfg.ff?E:0);
+    else if(cfg.mode==='p')v=cfg.kp*e;
+    else{const trial=integ+cfg.ki*e*dt;v=cfg.kp*e+trial;
+      const vs=Math.max(-M.Vmax,Math.min(M.Vmax,v));
+      if(!(cfg.sat&&cfg.aw&&vs!==v))integ=trial;
+      v=cfg.kp*e+integ;}
+    if(cfg.sat)v=Math.max(-M.Vmax,Math.min(M.Vmax,v));
+    i+=dt*(v-R*i-E)/M.Lq;
+    if(k%every===0)out.push({t,i,r,v});}
+  return {out,E,R};}
+
+function plot(c,res,cfg){
+  const {g,w,h}=fitCanvas(c);g.clearRect(0,0,w,h);
+  const ink=css('--ink'),mut=css('--muted'),line=css('--line'),acc=css('--accent'),warn=css('--warn');
+  const L=44,Rm=44,T=14,B=h-30;const tmax=cfg.T*1000;
+  const ys=res.out.map(o=>o.i).concat(res.out.map(o=>o.r));let ymax=Math.max(20,...ys)*1.1,ymin=Math.min(0,...ys)*1.1;if(ymin<-1.5*ymax)ymin=-1.5*ymax;
+  const vs=res.out.map(o=>o.v);let vmax=Math.max(1,...vs.map(Math.abs))*1.1;
+  const X=t=>L+(w-L-Rm)*t/tmax,Y=y=>B-(B-T)*(y-ymin)/(ymax-ymin),YV=v=>B-(B-T)*(v+vmax)/(2*vmax);
+  g.strokeStyle=line;g.lineWidth=1;g.font='11px IBM Plex Mono, monospace';g.fillStyle=mut;
+  const stepT=tmax>12?2:1;for(let t=0;t<=tmax+1e-9;t+=stepT){g.beginPath();g.moveTo(X(t),T);g.lineTo(X(t),B);g.stroke();g.textAlign='center';g.fillText(String(t),X(t),B+14);}
+  const ny=4;for(let j=0;j<=ny;j++){const y=ymin+(ymax-ymin)*j/ny;g.beginPath();g.moveTo(L,Y(y));g.lineTo(w-Rm,Y(y));g.stroke();g.textAlign='right';g.fillText(fmt(y,0),L-4,Y(y)+4);g.textAlign='left';g.fillStyle=warn;g.fillText(fmt(-vmax+2*vmax*j/ny,1),w-Rm+4,YV(-vmax+2*vmax*j/ny)+4);g.fillStyle=mut;}
+  g.textAlign='left';g.fillText('ms',w-Rm-16,B+26);g.fillText('A',L-30,T+4);g.fillStyle=warn;g.fillText('V',w-Rm+8,T+4);
+  if(ymin<0){g.strokeStyle=mut;g.beginPath();g.moveTo(L,Y(0));g.lineTo(w-Rm,Y(0));g.stroke();}
+  const line2=(key,col,wid,dash,Yf)=>{g.strokeStyle=col;g.lineWidth=wid;g.setLineDash(dash);g.beginPath();res.out.forEach((o,k)=>{const x=X(o.t*1000),y=Yf(o[key]);k?g.lineTo(x,y):g.moveTo(x,y);});g.stroke();g.setLineDash([]);};
+  line2('v',warn,1.4,[],YV);line2('r',mut,1.6,[6,4],Y);line2('i',acc,2.8,[],Y);
+  g.font='12px IBM Plex Mono, monospace';g.fillStyle=acc;g.fillText('i medida',L+6,T+12);g.fillStyle=mut;g.fillText('i pedida',L+86,T+12);g.fillStyle=warn;g.fillText('v aplicada',L+166,T+12);}
+
+function tau63(res,cfg){const o=res.out;const fin=o.filter(p=>p.t>0.001&&(cfg.prof!=='updown'||p.t<cfg.T*0.55));if(!fin.length)return null;const iend=fin[fin.length-1].i;if(Math.abs(iend)<1e-6)return null;const tgt=0.632*iend;const hit=fin.find(p=>iend>0?p.i>=tgt:p.i<=tgt);return hit?(hit.t-0.001)*1000:null;}
+
+/* ---------- Control 1 lab ---------- */
+if($('c1_plot')){
+  let mode='ol';
+  const btns={ol:$('c1_ol'),p:$('c1_p')};
+  const set=m=>{mode=m;Object.entries(btns).forEach(([k,b])=>b.setAttribute('aria-pressed',String(k===m)));draw1();};
+  btns.ol.onclick=()=>set('ol');btns.p.onclick=()=>set('p');
+  function cfg1(){return {mode,kp:+$('c1_kp').value,ki:0,dT:+$('c1_dt').value,rpm:+$('c1_rpm').value,iref:+$('c1_ir').value,sat:false,aw:false,prof:'step',ff:false,T:0.025};}
+  function draw1(){const c=cfg1();$('o_c1kp').textContent=fmt(c.kp,3)+' V/A';$('o_c1dt').textContent='+'+c.dT+' K';$('o_c1rpm').textContent=c.rpm.toLocaleString('es-ES')+' rpm';$('o_c1ir').textContent=c.iref+' A';
+    $('c1_kp').disabled=mode!=='p';
+    const res=sim(c);plot($('c1_plot'),res,c);const iend=res.out[res.out.length-1].i;const t63=tau63(res,c);
+    readout($('c1_r'),[['Corriente final',fmt(iend,1)+' A'],['Error final',fmt((c.iref-iend)/c.iref*100,1)+' %'],['Tiempo al 63 %',t63==null?'—':fmt(t63,2)+' ms'],['R del cobre',fmt(res.R*1000,1)+' mΩ'],['Back-EMF E',fmt(res.E,2)+' V']]);}
+  ['c1_kp','c1_dt','c1_rpm','c1_ir'].forEach(id=>$(id).addEventListener('input',draw1));
+  window.addEventListener('resize',draw1);set('ol');
+}
+
+/* ---------- Control 2 lab ---------- */
+if($('c2_plot')){
+  let sat=false,aw=false,prof='step';
+  const tog=(id,get,setv,label)=>{$(id).onclick=e=>{setv(!get());e.target.setAttribute('aria-pressed',String(get()));e.target.textContent=label(get());draw2();};};
+  tog('c2_sat',()=>sat,v=>sat=v,v=>'Techo de tensión 28,5 V: '+(v?'encendido':'apagado'));
+  tog('c2_aw',()=>aw,v=>aw=v,v=>'Anti-windup: '+(v?'encendido':'apagado'));
+  tog('c2_prof',()=>prof==='updown',v=>prof=v?'updown':'step',v=>'Perfil: '+(v?'subir y soltar':'escalón'));
+  function cfg2(){const wc=+$('c2_wc').value,ratio=+$('c2_ratio').value;const kp=M.Lq*wc,ki=kp*(M.R/M.Lq)*ratio;return {mode:'pi',kp,ki,wc,ratio,dT:+$('c2_dt').value,rpm:+$('c2_rpm').value,iref:+$('c2_ir').value,sat,aw,prof,ff:false,T:0.012};}
+  function draw2(){const c=cfg2();$('o_c2wc').textContent=c.wc.toLocaleString('es-ES')+' rad/s';$('o_c2ratio').textContent='× '+fmt(c.ratio,2);$('o_c2dt').textContent='+'+c.dT+' K';$('o_c2rpm').textContent=c.rpm.toLocaleString('es-ES')+' rpm';$('o_c2ir').textContent=c.iref+' A';
+    const res=sim(c);plot($('c2_plot'),res,c);
+    const o=res.out;const hold=o.filter(p=>p.t>0.001&&(prof!=='updown'||p.t<c.T*0.55));const iend=hold[hold.length-1].i;const peak=Math.max(...hold.map(p=>p.i));const t63=tau63(res,c);
+    const after=prof==='updown'?o.filter(p=>p.t>=c.T*0.55):[];const minAfter=after.length?Math.min(...after.map(p=>p.i)):null;
+    readout($('c2_r'),[['Kp',fmt(c.kp,4)+' V/A'],['Ki',fmt(c.ki,1)+' V/(A·s)'],['Corriente al final del escalón',fmt(iend,1)+' A'],['Sobreoscilación',fmt(Math.max(0,(peak-c.iref)/c.iref*100),1)+' %'],['Tiempo al 63 %',t63==null?'—':fmt(t63,2)+' ms'],['Mínimo tras soltar',minAfter==null?'—':fmt(minAfter,1)+' A'],['Back-EMF E',fmt(res.E,2)+' V']]);}
+  ['c2_wc','c2_ratio','c2_dt','c2_rpm','c2_ir'].forEach(id=>$(id).addEventListener('input',draw2));
+  window.addEventListener('resize',draw2);draw2();
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>window.dispatchEvent(new Event('resize')));
+new MutationObserver(()=>window.dispatchEvent(new Event('resize'))).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+})();
+</script>
+<script>
+/* Answer boxes. Each .qa[data-q] gets a textarea; the solution stays hidden until the viewer writes an attempt and saves it.
+   Saved answers live in the db at answers/<lesson>-<q>; Claude writes a "feedback" field there and the page shows it. */
+(function(){
+const LESSON=document.body.dataset.lesson||document.querySelector('main').dataset.lesson;
+const MIN=12;
+const boxes=[...document.querySelectorAll('.qa[data-q]')];
+const key=q=>LESSON+'-'+q;
+const draftKey=q=>'draft:'+key(q);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let db=null;
+boxes.forEach(box=>{
+  const q=box.dataset.q,sol=box.querySelector('template.sol');
+  const ta=document.createElement('textarea');ta.placeholder='Tu respuesta, con tu razonamiento. Un "no lo sé, pero creo que…" vale.';ta.setAttribute('aria-label','Tu respuesta');
+  const row=document.createElement('div');row.className='row';
+  const btn=document.createElement('button');btn.type='button';btn.className='primary';btn.textContent='Guardar y ver la solución';btn.disabled=true;
+  const st=document.createElement('span');st.className='st';
+  row.append(btn,st);
+  const rev=document.createElement('div');rev.className='reveal';rev.hidden=true;
+  if(sol)rev.append(sol.content.cloneNode(true));
+  const fb=document.createElement('div');fb.className='fb';fb.hidden=true;
+  box.append(ta,row,rev,fb);
+  const d=store.get(draftKey(q));if(d)ta.value=d;
+  const sync=()=>{btn.disabled=ta.value.trim().length<MIN;if(rev.hidden)st.textContent=btn.disabled?'Escribe tu intento para desbloquear la solución':'';};
+  let tmr;ta.addEventListener('input',()=>{sync();clearTimeout(tmr);tmr=setTimeout(()=>store.set(draftKey(q),ta.value),400);});
+  btn.addEventListener('click',async()=>{
+    const text=ta.value.trim();if(text.length<MIN)return;
+    rev.hidden=false;btn.textContent='Guardar cambios';store.set(draftKey(q),ta.value);
+    if(!db){st.textContent='Guardado solo en este navegador';return;}
+    st.textContent='Guardando…';
+    try{const ref=db.doc('answers/'+key(q));const cur=await ref.get();
+      const body={lesson:LESSON,q,text,question:(box.querySelector('p')||{}).textContent||'',savedAt:new Date().toISOString()};
+      if(cur.exists)await ref.update(body);else await ref.set(body);
+      st.textContent='Guardado ✓ · Claude lo corrige';}
+    catch(e){st.textContent='No se pudo guardar ('+(e&&e.code||'error')+'). Queda en este navegador.';}
+  });
+  box._show=data=>{if(data.text&&!ta.value)ta.value=data.text;if(data.text){rev.hidden=false;btn.textContent='Guardar cambios';st.textContent='Guardado ✓';}
+    if(data.feedback){fb.hidden=false;fb.innerHTML='';const b=document.createElement('b');b.textContent='Corrección de Claude: ';fb.append(b,document.createTextNode(data.feedback));}
+    sync();};
+  sync();
+});
+// canvases inside a closed annex were sized at 0 width: redraw them when it opens
+document.querySelectorAll('details.annex').forEach(d=>d.addEventListener('toggle',()=>window.dispatchEvent(new Event('resize'))));
+(async()=>{
+  const c=window.claude;if(!c||!c.use)return;
+  try{db=await c.use('db');}catch(e){db=null}
+  if(!db)return;
+  try{const snap=await db.collection('answers').where('lesson','==',LESSON).get();
+    snap.docs.forEach(s=>{const v=s.data();const box=boxes.find(b=>b.dataset.q===v.q);if(box)box._show(v);});}
+  catch(e){}
+})();
+})();
+</script>

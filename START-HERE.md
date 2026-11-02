@@ -14,9 +14,9 @@ Dos tareas al día hasta el 13, a las **07:00** y a las **14:00**.
 | Día | 07:00 | 14:00 |
 |---|---|---|
 | mar 3 | L1 · [Batería → par](https://claude.ai/artifact/F5pNX14PcUEVxtYv8zrwpN) | L2 · [El campo que gira](https://claude.ai/artifact/Fxcfde7icEog8iBLodXWTp) |
-| mié 4 | [Examen L1+L2](https://claude.ai/artifact/2o9NrZ6BgGsVTbg18AX3rZ) | L3a · Park y dq |
-| jue 5 | L3b · Par y límites | Control 1 · Lazo abierto y cerrado |
-| vie 6 | Control 2 · El PI | — |
+| mié 4 | [Examen L1+L2](https://claude.ai/artifact/2o9NrZ6BgGsVTbg18AX3rZ) | L3a · [Park y dq](https://claude.ai/artifact/LcqqugrE6jFi8U22KqKPCM) |
+| jue 5 | L3b · [Par y límites](https://claude.ai/artifact/2metZHTgmmyaxgZu6usJpL) | Control 1 · [Lazo abierto y cerrado](https://claude.ai/artifact/GKUX9KpwnF92yySFnHHfpL) |
+| vie 6 | Control 2 · [El PI](https://claude.ai/artifact/Vu428jai3Yqk2PmyCk3epu) | — |
 | sáb 7 | Kp y Ki a mano (10:00) | Repaso de fallos |
 | mar 10 | Simulink A · Tu motor en dq | λm con tus logs |
 | mié 11 | Simulink B · Cierra el lazo | Hueco libre |

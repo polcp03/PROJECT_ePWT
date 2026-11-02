@@ -1,0 +1,467 @@
+<title>L3b · Par y límites</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: one reading column like a lab notebook; phase colours U/V/W are the identity, teal is the UI accent. */
+:root{
+  --bg:#F4F7F6; --surface:#FFFFFF; --sunk:#E9EFEC; --ink:#14201B; --muted:#56675F; --line:#D5DEDA;
+  --accent:#0E6E62; --accent-soft:#D8EEEA; --u:#D1495B; --v:#C98A00; --w:#2F6FDE; --warn:#A8500B; --warn-soft:#FBEBDD;
+  --magN:#0E6E62; --magS:#7A5FA8; --steel:#B9C4BF;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1412; --surface:#161F1C; --sunk:#1D2925; --ink:#E4ECE8; --muted:#94A69E; --line:#2B3833;
+  --accent:#3DB6A3; --accent-soft:#163A34; --u:#F06A7A; --v:#F0B53A; --w:#73A0FF; --warn:#F0A060; --warn-soft:#3A2715; --magN:#3DB6A3; --magS:#9C86D0; --steel:#3A4843; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1412; --surface:#161F1C; --sunk:#1D2925; --ink:#E4ECE8; --muted:#94A69E; --line:#2B3833;
+  --accent:#3DB6A3; --accent-soft:#163A34; --u:#F06A7A; --v:#F0B53A; --w:#73A0FF; --warn:#F0A060; --warn-soft:#3A2715; --magN:#3DB6A3; --magS:#9C86D0; --steel:#3A4843; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:760px;margin:0 auto;padding-block:28px 80px;display:grid;gap:36px}
+h1,h2,h3{font-family:var(--display);font-stretch:85%;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(2rem,6vw,2.9rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.6rem;font-weight:750}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0}
+.stack{display:grid;gap:14px}
+.eyebrow{font:500 .78rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:1.1rem;color:var(--muted);max-width:62ch}
+.phasebar{display:flex;height:5px;border-radius:3px;overflow:hidden;width:120px}
+.phasebar i{flex:1}.phasebar i:nth-child(1){background:var(--u)}.phasebar i:nth-child(2){background:var(--v)}.phasebar i:nth-child(3){background:var(--w)}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px))}
+nav.toc div{max-width:760px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}nav.toc div::-webkit-scrollbar{display:none}nav.toc a{flex:none}
+nav.toc a{font:500 .85rem/1 var(--body);color:var(--ink);text-decoration:none;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--accent);outline:none}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font:.9rem/1.4 var(--mono);color:var(--muted)}
+.attempt{border:2px dashed var(--accent);border-radius:12px;padding:18px 20px;background:var(--accent-soft)}
+.attempt ol{margin:8px 0 0;padding-left:1.3em;display:grid;gap:6px}
+.idea{display:grid;grid-template-columns:2.4rem 1fr;gap:4px 14px;padding-top:18px;border-top:1px solid var(--line)}
+.idea>.n{font:800 1.5rem/1 var(--display);color:var(--accent);font-stretch:75%}
+.idea>div{min-width:0;display:grid;gap:10px}
+.eq{font:500 1.05rem/1.5 var(--mono);background:var(--sunk);border-radius:8px;padding:10px 14px;overflow-x:auto;white-space:nowrap}
+.eq small{font-size:.8rem;color:var(--muted);white-space:normal;display:block}
+.src{font:.8rem/1.4 var(--mono);color:var(--muted)}
+.key{border-left:3px solid var(--accent);padding-left:12px}
+.mine{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:.95rem}
+.mine b{font-family:var(--mono);font-weight:500}
+.lab{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:14px}
+.lab h3{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;align-items:center}.two>*{min-width:0}
+.legrow{display:grid;grid-template-columns:4.2em repeat(3,1fr);gap:6px;align-items:center}.legrow button{padding:9px 6px}
+.lab h3 span{font:500 .75rem/1 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px}
+.ctl{display:grid;gap:2px;min-width:0}
+.ctl label{display:flex;justify-content:space-between;font-size:.88rem;gap:8px}
+.ctl output{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+canvas{width:100%;display:block;border-radius:8px;background:var(--sunk)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px}
+.readout div{background:var(--sunk);border-radius:8px;padding:8px 10px;min-width:0}
+.readout dt{font-size:.75rem;color:var(--muted)}
+.readout dd{margin:0;font:500 1.05rem/1.3 var(--mono);font-variant-numeric:tabular-nums}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+button{font:500 .9rem/1 var(--body);padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent)}
+.try{font-size:.92rem;background:var(--sunk);border-radius:8px;padding:10px 14px}
+.try ul{margin:4px 0 0;padding-left:1.2em;display:grid;gap:4px}
+.case{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:8px}
+.case .tag{font:500 .75rem/1 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.q{display:grid;grid-template-columns:3rem 1fr;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.q .pts{font:500 .8rem/1.4 var(--mono);color:var(--muted)}
+.q b.id{font:700 1rem/1.4 var(--mono)}
+.q>div{min-width:0;display:grid;gap:6px}
+details.exam{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 18px}
+details.exam>summary{cursor:pointer;padding:14px 0;font:700 1.1rem/1.3 var(--display);font-stretch:85%;list-style:none}
+details.exam>summary::after{content:" ▸";color:var(--accent)}
+details.exam[open]>summary::after{content:" ▾"}
+.warn{background:var(--warn-soft);border-radius:10px;padding:12px 14px;font-size:.93rem}
+.warn b{color:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 .8rem/1.3 var(--body);color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+svg text{font-family:var(--mono)}
+footer{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.mm{margin:0;display:grid;gap:8px;justify-items:center;background:var(--sunk);border-radius:14px;padding:18px 12px}.mm svg{width:100%;max-width:440px;height:auto;display:block}.mm figcaption{font:.85rem var(--mono);color:var(--muted);text-align:center}
+/* theory v2: laws grid, illustrated steps, retrieval checks, worked examples */
+.method{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.howto{margin:0;padding-left:1.3em;display:grid;gap:6px}
+.laws{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.law{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px;align-content:start;min-width:0}
+.law h3{font-size:1.05rem}
+.law p{font-size:.93rem}
+.law .eq{font-size:.92rem;white-space:normal}
+.pic{width:100%;max-width:200px;height:auto;display:block;background:var(--sunk);border-radius:8px}
+.where{color:var(--muted);font-size:.88rem!important}
+.where b{color:var(--ink)}
+details.check{background:var(--accent-soft);border-radius:10px;padding:10px 14px}
+details.check>summary{cursor:pointer;font-weight:600;color:var(--accent);font-size:.93rem}
+details.check p{margin-top:8px;font-size:.93rem}
+details.check .ans{border-top:1px dashed var(--accent);padding-top:8px}
+.step{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding-top:22px;border-top:1px solid var(--line)}
+.step>div{display:grid;gap:10px;min-width:0}
+.step h3 .n{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--accent);color:var(--surface);font-size:.9rem;margin-right:8px;vertical-align:2px}
+.dg{width:100%;max-width:480px;height:auto;display:block;margin:0 auto;background:var(--sunk);border-radius:12px}
+.worked{background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:16px 18px}
+.sol{margin:0;padding-left:1.3em;display:grid;gap:4px;font-variant-numeric:tabular-nums}
+.review{background:var(--surface);border:2px dashed var(--line);border-radius:12px;padding:16px 18px}
+.review ol{margin:6px 0 0;padding-left:1.3em;display:grid;gap:6px}
+/* svg paint classes, all theme tokens */
+.s-ink{stroke:var(--ink)}.s-mut{stroke:var(--muted)}.s-acc{stroke:var(--accent)}.s-warn{stroke:var(--warn)}
+.s-u{stroke:var(--u)}.s-v{stroke:var(--v)}.s-w{stroke:var(--w)}.s-steel{stroke:var(--steel)}.s-magN{stroke:var(--magN)}.s-magS{stroke:var(--magS)}
+.f-ink{fill:var(--ink)}.f-mut{fill:var(--muted)}.f-acc{fill:var(--accent)}.f-warn{fill:var(--warn)}.f-surf{fill:var(--surface)}.f-sunk{fill:var(--sunk)}
+.f-u{fill:var(--u)}.f-v{fill:var(--v)}.f-w{fill:var(--w)}.f-magN{fill:var(--magN)}.f-magS{fill:var(--magS)}
+svg .t{fill:var(--ink);font:13px var(--mono)}svg .tm{fill:var(--muted);font:12px var(--mono)}svg .ta{fill:var(--accent);font:600 13px var(--mono)}
+svg .tw2{fill:var(--warn);font:600 13px var(--mono)}svg .tu{fill:var(--u);font:700 14px var(--mono)}svg .tv{fill:var(--v);font:700 14px var(--mono)}
+svg .tv-w{fill:var(--w);font:600 13px var(--mono)}svg .tv-u{fill:var(--u);font:600 13px var(--mono)}svg .tN{fill:var(--magN);font:800 18px var(--display)}svg .tS{fill:var(--magS);font:800 18px var(--display)}
+@media (min-width:720px){.step{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:start}.step .dg{position:sticky;top:64px}}
+/* answer boxes: attempt first, then the solution; answers saved to the artifact db for Claude to correct */
+.qa{background:var(--accent-soft);border-radius:10px;padding:12px 14px;display:grid;gap:8px}
+.qa>p{font-size:.95rem}
+.qa textarea{width:100%;min-height:96px;font:16px/1.5 var(--body);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);resize:vertical}
+.qa .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.qa .st{font:.8rem/1.3 var(--mono);color:var(--muted)}
+.qa .reveal{border-top:1px dashed var(--accent);padding-top:8px;font-size:.93rem;display:grid;gap:6px}
+.qa .fb{border-left:3px solid var(--warn);background:var(--warn-soft);border-radius:0 8px 8px 0;padding:8px 10px;font-size:.93rem}
+.qa .fb b{color:var(--warn)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.part{display:grid;gap:14px}
+details.annex{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 18px}
+details.annex>summary{cursor:pointer;padding:14px 0;font:700 1.1rem/1.3 var(--display);font-stretch:85%;list-style:none}
+details.annex>summary::after{content:" ▸";color:var(--accent)}
+details.annex[open]>summary::after{content:" ▾"}
+details.annex>div{display:grid;gap:22px;padding-bottom:18px}
+main>*{min-width:0}
+</style>
+
+<main data-lesson="L3b">
+<header class="stack">
+  <div class="phasebar"><i></i><i></i><i></i></div>
+  <p class="eyebrow">C03 · Lección 3b · jueves 5 nov, 07:00</p>
+  <h1>Par, límites y el plano id–iq</h1>
+  <p class="lede">Ayer viste el motor desde el rotor. Hoy, cuánto par saca y qué te lo recorta: la corriente, la tensión y, antes que las dos, tu batería.</p>
+  <div class="meta"><span>Una sesión · 55 min</span><span>Escribe en cada cuadro: la solución se abre después, y Claude corrige lo que guardes</span></div>
+</header>
+
+<nav class="toc" aria-label="Secciones"><div>
+  <a href="#predice">1 · Predice</a><a href="#nucleo">2 · Núcleo</a><a href="#lab">3 · Laboratorio</a><a href="#criterio">4 · Criterio</a><a href="#cierre">5 · Cierre</a>
+</div></nav>
+
+<section id="predice" class="attempt stack">
+  <p class="eyebrow">1 · Predice · 5 min, sin mirar nada</p>
+  <h2>Antes de leer</h2>
+  <div class="qa" data-q="p1"><p>Das gas a fondo con el quad desde parado. A medida que sube la velocidad, ¿qué te recorta el par primero: la tensión de la batería, la corriente máxima del motor (120 A) o la corriente máxima de la batería (40 A)? Di a qué velocidad, a ojo.</p>
+    <template class="sol"><p><b>Solución:</b> arrancando manda la corriente del motor (120 A). La siguiente es la <b>batería</b>, hacia los <b>11 km/h</b>; la tensión no llegaría a recortar hasta unos 27 km/h. Lo calculas en la idea 6.</p></template></div>
+  <div class="qa" data-q="p2"><p>Subes el límite de corriente de fase de 120 A a 160 A en el VESC. ¿Acelera más el quad a 20 km/h? ¿Y a 3 km/h?</p>
+    <template class="sol"><p><b>Solución:</b> a 3 km/h, sí: más par. A 20 km/h, <b>no</b>: ahí ya manda la batería (40 A), que limita la potencia, no la corriente de fase. Más corriente de fase no te da más potencia.</p></template></div>
+  <div class="review stack">
+    <p class="eyebrow">Repaso espaciado · errores abiertos de errores.md</p>
+    <div class="qa" data-q="r2"><p>(Error 2) Con el VESC en control de corriente, ¿quién decide cuánta corriente circula por el motor?</p>
+      <template class="sol"><p><b>Solución:</b> la pide el puño (el VESC la regula), y solo circula si hay tensión de sobra para empujarla contra la back-EMF. Hoy verás ese «si hay tensión» como una elipse.</p></template></div>
+    <div class="qa" data-q="r3"><p>(Error 3) ¿Qué relación hay entre la corriente de batería y la de fase? ¿Es la de fase por tres?</p>
+      <template class="sol"><p><b>Solución:</b> no hay factor 3. Las une la potencia: Vbat·Ibat ≈ la potencia que entra al motor. A baja velocidad y par alto, la corriente de fase es mucho mayor que la de batería. Es exactamente la idea 6 de hoy.</p></template></div>
+  </div>
+</section>
+
+<section id="nucleo" class="part">
+  <p class="eyebrow">2 · Núcleo · 25 min</p>
+  <h2>Seis ideas, cada una con su dibujo</h2>
+  <p class="lede">Filtrado de Hughes &amp; Drury §9.5.2 y §9.6.3. Los números son los de tu motor (<span style="font-family:var(--mono)">motor_params.m</span>) y los límites, los que tienes configurados en el VESC.</p>
+
+  <article class="step">
+    <svg viewBox="0 0 320 170" class="dg" role="img" aria-label="Cadena del par: 120 amperios por 0,0758 da 9,1 newton metro en el motor, por 8,364 da 76 en la rueda, entre 0,155 metros da 491 newton">
+      <defs><marker id="b1" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7z" class="f-acc"/></marker></defs>
+      <rect x="8" y="30" width="70" height="44" rx="8" class="f-surf s-u" stroke-width="2"/><text x="43" y="50" class="t" text-anchor="middle">iq</text><text x="43" y="66" class="ta" text-anchor="middle">120 A</text>
+      <rect x="92" y="30" width="70" height="44" rx="8" class="f-surf s-acc" stroke-width="2"/><text x="127" y="50" class="t" text-anchor="middle">motor</text><text x="127" y="66" class="ta" text-anchor="middle">9,1 N·m</text>
+      <rect x="176" y="30" width="70" height="44" rx="8" class="f-surf s-v" stroke-width="2"/><text x="211" y="50" class="t" text-anchor="middle">rueda</text><text x="211" y="66" class="ta" text-anchor="middle">76 N·m</text>
+      <rect x="252" y="30" width="62" height="44" rx="8" class="f-surf s-w" stroke-width="2"/><text x="283" y="50" class="t" text-anchor="middle">suelo</text><text x="283" y="66" class="ta" text-anchor="middle">491 N</text>
+      <text x="85" y="100" class="tm" text-anchor="middle">× Kt</text><text x="169" y="100" class="tm" text-anchor="middle">× 92/11</text><text x="249" y="100" class="tm" text-anchor="middle">÷ r</text>
+      <text x="10" y="140" class="t">Kt = 3/2 · p · λm = 0,0758 N·m/A</text>
+      <text x="10" y="160" class="tm">r = 0,155 m · 110 kg → 4,5 m/s²</text>
+    </svg>
+    <div>
+      <h3><span class="n">1</span> El par, y de dónde sale el 3/2</h3>
+      <p class="eq">Te = 3/2 · p · [ λm·iq + (Ld − Lq)·id·iq ]<small>par del imán + par de reluctancia</small></p>
+      <p>El 3/2 viene de la potencia. Con la transformada invariante en amplitud, id e iq valen el <b>pico</b> de fase. Tres fases dan P = 3·Vrms·Irms = 3·(V̂/√2)·(Î/√2) = <b>3/2·V̂·Î</b>. Iguala la potencia que convierte la back-EMF, 3/2·ωe·λm·iq, con la mecánica, Te·ωm; con ωe = p·ωm sale el par.</p>
+      <div class="qa" data-q="i1"><p>Haz la demostración tú, en papel, de la potencia al par, y escribe aquí los pasos. Después: ¿cuánta fuerza en el suelo dan 60 A de iq?</p>
+        <template class="sol"><p><b>Solución:</b> 3/2·ωe·λm·iq = Te·ωm y ωe = p·ωm → Te = 3/2·p·λm·iq. Con 60 A: Te = 0,0758·60 = 4,55 N·m → ×8,364 = 38,1 N·m en la rueda → ÷0,155 = <b>246 N</b>.</p></template></div>
+      <p class="src">Hughes §9.5.1, p. 344 (P = E·Iq) · factor 3/2: transformada de <span style="font-family:var(--mono)">motor_params.m</span></p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 150" class="dg" role="img" aria-label="Barra del par: el término del imán ocupa casi todo, el de reluctancia un 2,4 por ciento">
+      <rect x="20" y="50" width="270" height="34" rx="4" class="f-acc"/><rect x="290" y="50" width="7" height="34" class="f-warn"/>
+      <text x="26" y="40" class="t">id = −30 A, iq = 100 A</text>
+      <text x="155" y="72" class="t" text-anchor="middle" style="fill:var(--surface)">imán: 7,58 N·m</text>
+      <text x="300" y="110" class="tw2" text-anchor="end">reluctancia: 0,18 N·m (2,4 %)</text>
+      <text x="20" y="140" class="tm">Lq − Ld = 13,5 µH · Lq/Ld = 1,14</text>
+    </svg>
+    <div>
+      <h3><span class="n">2</span> En tu motor, id = 0 casi basta</h3>
+      <p>Si Lq &gt; Ld, una id negativa suma par de reluctancia. Es lo que buscan los motores de imanes interiores, con Lq/Ld de 2 a 3. El tuyo tiene <b>1,14</b>: la saliencia es pequeña y el premio también.</p>
+      <p>Encima, el valor no es fijo: la saliencia sale distinta con la corriente de la detección (13,5 µH a 40 A), porque el hierro se satura. Una tabla de MTPA tendría que medirse a varias corrientes.</p>
+      <div class="qa" data-q="i2"><p>Con id = −30 A e iq = 100 A, calcula el par del imán y el de reluctancia por separado. ¿Cuánto calor de cobre extra pagas por esa id (3/2·R·id²)? ¿Lo harías?</p>
+        <template class="sol"><p><b>Solución:</b> imán: 1,5·3·0,016855·100 = <b>7,58 N·m</b>. Reluctancia: 1,5·3·(−13,54 µH)·(−30)·100 = <b>0,18 N·m</b>, un 2,4 %. Cobre extra: 1,5·0,028·30² = <b>38 W</b>, para ganar un 2,4 % de par. Además, el módulo pasa a 104 A y te acerca al límite de corriente. No compensa: por eso el VESC lleva el MTPA apagado.</p></template></div>
+      <p class="src">Hughes §9.6.5, p. 361 (motor de imanes con saliencia) · saturación: notas de <span style="font-family:var(--mono)">motor_params.m</span></p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 220" class="dg" role="img" aria-label="Plano id iq con el círculo de 120 amperios">
+      <path d="M10 180 H310 M210 215 V10" class="s-mut" stroke-width="1"/><text x="304" y="196" class="tm" text-anchor="end">id</text><text x="216" y="20" class="tm">iq</text>
+      <circle cx="210" cy="180" r="120" class="s-ink" fill="none" stroke-width="2.5"/>
+      <circle cx="210" cy="60" r="6" class="f-acc"/><text x="220" y="54" class="ta">id = 0, iq = 120</text>
+      <text x="96" y="110" class="t">|i| ≤ 120 A</text>
+    </svg>
+    <div>
+      <h3><span class="n">3</span> Límite de corriente: un círculo</h3>
+      <p class="eq">id² + iq² ≤ Imax²</p>
+      <p>El calor del cobre y lo que aguantan los transistores dependen del <b>módulo</b> de la corriente, no del eje. Todo punto de trabajo vive dentro de un círculo. En tu VESC, Imax = <b>120 A</b> (l_current_max); el corte absoluto es 160 A.</p>
+      <div class="qa" data-q="i3"><p>Pides iq = 120 A y, además, id = −50 A para debilitar campo. ¿Cabe dentro del círculo? Si no, ¿cuánta iq te queda con id = −50 A?</p>
+        <template class="sol"><p><b>Solución:</b> no cabe: √(120² + 50²) = 130 A. Con id = −50 A, iq máxima = √(120² − 50²) = <b>109 A</b>: un 9 % menos de par. La id del debilitamiento se paga con par.</p></template></div>
+      <p class="src">Límites: <span style="font-family:var(--mono)">motor_params.m</span>, sección 4</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 230" class="dg" role="img" aria-label="Plano id iq con el círculo de corriente y dos elipses de tensión a baja y alta velocidad, centradas en menos lambda entre Ld">
+      <path d="M10 170 H310 M230 220 V10" class="s-mut" stroke-width="1"/><text x="302" y="186" class="tm" text-anchor="end">id</text><text x="236" y="20" class="tm">iq</text>
+      <circle cx="230" cy="170" r="96" class="s-ink" fill="none" stroke-width="2.5"/><text x="306" y="140" class="t" text-anchor="end">120 A</text>
+      <ellipse cx="94" cy="170" rx="200" ry="176" class="s-w" fill="none" stroke-width="2" stroke-dasharray="6 4"/>
+      <ellipse cx="94" cy="170" rx="122" ry="107" class="s-warn" fill="none" stroke-width="2" stroke-dasharray="6 4"/>
+      <circle cx="94" cy="170" r="4" class="f-w"/><text x="94" y="190" class="tv-w" text-anchor="middle">−170 A</text>
+      <text x="12" y="24" class="tv-w">baja velocidad</text><text x="12" y="40" class="tw2">alta velocidad</text>
+    </svg>
+    <div>
+      <h3><span class="n">4</span> Límite de tensión: una elipse que encoge</h3>
+      <p>El inversor no da más de |v| = Vdc/√3 por el duty máximo (0,95): con 52 V, <b>28,5 V</b>. En régimen y sin R:</p>
+      <p class="eq">(Lq·iq)² + (Ld·id + λm)² ≤ (Vmax / ωe)²</p>
+      <p>Es una elipse con centro en <b>id = −λm/Ld</b>, y su tamaño va como 1/ωe: a baja velocidad es enorme; al subir, encoge hacia su centro. Solo vale lo que está dentro del círculo <b>y</b> dentro de la elipse.</p>
+      <div class="mine">Tu motor: −λm/Ld = −0,016855 / 99,23 µH = <b>−170 A</b>. El centro queda <b>fuera</b> del círculo de 120 A.</div>
+      <div class="qa" data-q="i4"><p>¿Qué significa que el centro de la elipse (−170 A) quede fuera del círculo de corriente (120 A)? Piensa qué pasa a velocidad muy alta, cuando la elipse es un punto.</p>
+        <template class="sol"><p><b>Solución:</b> que no puedes anular del todo el flujo del imán con la corriente permitida. A velocidad muy alta, la elipse se encoge hacia −170 A y llega un momento en que ya no toca el círculo: no queda ningún punto de trabajo, ni siquiera con par cero. <b>Tu motor tiene una velocidad máxima finita incluso con debilitamiento de campo.</b></p></template></div>
+      <p class="src">Hughes §9.5.2, figs. 9.20–9.22 · pp. 345–349</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 200" class="dg" role="img" aria-label="Curva par velocidad: par constante hasta la velocidad base, después cae">
+      <path d="M40 170 H305 M40 170 V15" class="s-mut" stroke-width="1"/>
+      <path d="M40 40 H190 C 220 60, 250 110, 300 150" class="s-acc" fill="none" stroke-width="3"/>
+      <path d="M190 170 V40" class="s-mut" stroke-width="1" stroke-dasharray="4 3"/><text x="190" y="186" class="t" text-anchor="middle">base</text>
+      <text x="44" y="32" class="ta">9,1 N·m (120 A)</text>
+      <text x="200" y="76" class="tw2">debilitamiento</text>
+      <text x="300" y="186" class="tm" text-anchor="end">rpm</text>
+    </svg>
+    <div>
+      <h3><span class="n">5</span> Velocidad base y debilitamiento de campo</h3>
+      <p>La <b>velocidad base</b> es aquella en la que la elipse pasa justo por (id = 0, iq = Imax): hasta ahí, par máximo. Por encima, para seguir teniendo par hay que meter <b>id negativa</b>, que lleva el punto hacia el centro de la elipse.</p>
+      <p class="key">Hughes: en el debilitamiento, buena parte de la corriente se gasta en oponerse al imán, así que en un motor de imanes suele ser solo intermitente. Y si el control falla en pleno debilitamiento, la back-EMF completa vuelve de golpe y puede reventar el inversor (§9.6.3).</p>
+      <div class="mine">En tu VESC, el debilitamiento está <b>apagado</b> (fw_current = 0): por encima de la base, tu par cae y punto.</div>
+      <div class="qa" data-q="i5"><p>Calcula tu velocidad base con id = 0, iq = 120 A y Vmax = 28,5 V, primero sin R y después con R. Pásala a km/h.</p>
+        <template class="sol"><p><b>Solución:</b> sin R: |v| = ωe·√((Lq·120)² + λm²) = ωe·0,02162 → ωe = 1319 rad/s → <b>4200 rpm</b>. Con R (vq lleva además 0,028·120 = 3,4 V), resolviendo: <b>≈ 3800 rpm</b>. La R se come un 10 %. En el quad: 3800/8,364 = 454 rpm de rueda → <b>≈ 26,6 km/h</b>.</p></template></div>
+      <p class="src">Hughes §9.5.2, pp. 347–349 · §9.6.3, pp. 358–360</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <svg viewBox="0 0 320 200" class="dg" role="img" aria-label="Potencia frente a velocidad: la potencia a 120 amperios crece en recta y corta el techo de 2080 vatios de la batería hacia los 11 kilómetros por hora">
+      <path d="M40 170 H305 M40 170 V15" class="s-mut" stroke-width="1"/>
+      <path d="M40 60 H300" class="s-warn" stroke-width="2" stroke-dasharray="6 4"/><text x="300" y="52" class="tw2" text-anchor="end">batería: 52 V × 40 A = 2080 W</text>
+      <path d="M40 130 L300 20" class="s-acc" stroke-width="3"/>
+      <circle cx="134" cy="60" r="5" class="f-acc"/><text x="140" y="84" class="ta">≈ 11 km/h</text>
+      <text x="46" y="124" class="tm">605 W de cobre</text>
+      <text x="300" y="186" class="tm" text-anchor="end">velocidad</text>
+    </svg>
+    <div>
+      <h3><span class="n">6</span> El tercer límite, que no sale en los libros de motores: tu batería</h3>
+      <p>Todo lo que entra al motor sale de la batería. Con el inversor ideal:</p>
+      <p class="eq">Vbat·Ibat = Te·ωm + 3/2·R·(id² + iq²)<small>potencia mecánica + cobre · Ibat ≤ 40 A (l_in_current_max, que es el límite continuo del BMS)</small></p>
+      <p>A par máximo, la potencia mecánica crece en recta con la velocidad. Al cobre se le van ya 605 W a 120 A. El techo de 2080 W llega muy pronto.</p>
+      <div class="mine">Y no es 52 V: con la R interna que mediste el 31-oct (<b>0,18 Ω</b>), a 40 A la batería cae 7,2 V, hasta <b>≈ 45 V</b>. Eso también encoge la elipse de tensión.</div>
+      <div class="qa" data-q="i6"><p>Con 52 V y 40 A, inversor ideal e iq = 120 A: ¿a qué rpm de motor deja de poder mantenerse el par máximo? Pásalo a km/h. ¿Qué límite manda primero en tu quad: tensión, corriente del motor o batería?</p>
+        <template class="sol"><p><b>Solución:</b> 2080 = 9,10·ωm + 605 → ωm = 162 rad/s → <b>1550 rpm</b> → <b>≈ 10,8 km/h</b>. Manda la <b>batería</b>, muy por delante de la tensión (≈ 26,6 km/h). Desde 11 km/h tu quad va limitado en potencia: más corriente de fase no ayuda, más batería sí. Este es tu número para la review.</p></template></div>
+      <p class="src">Modelo propio: balance de potencia con <span style="font-family:var(--mono)">motor_params.m</span> · R interna: EXP-002</p>
+    </div>
+  </article>
+</section>
+
+<section id="lab" class="part">
+  <p class="eyebrow">3 · Laboratorio · 15 min</p>
+  <h2>El plano id–iq de tu motor</h2>
+  <p class="lede">Modelo en régimen, con R, tus parámetros y un inversor ideal. La zona coloreada es donde se puede trabajar a esa velocidad; el punto es el par máximo posible dentro de los límites activos. Escribe la predicción <b>antes</b> de mover nada.</p>
+  <div class="lab">
+    <div class="controls">
+      <div class="ctl"><label for="z_rpm">Velocidad del motor <output id="o_zrpm"></output></label><input id="z_rpm" type="range" min="0" max="7000" step="50" value="1500"></div>
+      <div class="ctl"><label for="z_vdc">Tensión del bus Vdc <output id="o_zvdc"></output></label><input id="z_vdc" type="range" min="40" max="60" step="0.5" value="52"></div>
+      <div class="ctl"><label for="z_imax">Corriente máx. de fase <output id="o_zimax"></output></label><input id="z_imax" type="range" min="40" max="160" step="5" value="120"></div>
+      <div class="ctl"><label for="z_lam">Flujo del imán λm <output id="o_zlam"></output></label><input id="z_lam" type="range" min="80" max="110" step="1" value="100"></div>
+    </div>
+    <div class="btnrow"><button type="button" id="z_bat" aria-pressed="false">Límite de batería 40 A: apagado</button></div>
+    <canvas id="z_plane" height="380" aria-label="Plano id iq con límites de corriente y tensión"></canvas>
+    <dl class="readout" id="r_plane"></dl>
+    <div class="qa" data-q="l1"><p>Sube la velocidad poco a poco, con la batería apagada. ¿A partir de qué rpm deja de caber el punto (id = 0, iq = 120)? ¿Cuadra con tu cálculo de la idea 5? Por encima, ¿hacia dónde se va el punto óptimo y por qué?</p>
+      <template class="sol"><p><b>Solución:</b> hacia las 4000 rpm (el lab usa Vdc/√3 sin el 0,95 del duty, por eso sale algo más que tus 3800). Por encima, el punto se va hacia <b>id negativa</b>, hacia el centro de la elipse: es el debilitamiento de campo que tu VESC tiene apagado.</p></template></div>
+    <div class="qa" data-q="l2"><p>Enciende el límite de batería. ¿A qué velocidad empieza a mandar? Baja Vdc a 45 V (la caída por la R interna a 40 A). ¿Qué cambia?</p>
+      <template class="sol"><p><b>Solución:</b> manda desde unas 1500 rpm, ≈ 11 km/h, mucho antes que la tensión. Con 45 V, el techo de potencia baja a 1800 W y la elipse encoge: los dos límites llegan antes.</p></template></div>
+    <div class="qa" data-q="l3"><p>Baja λm al 90 % (imán caliente). ¿Qué pasa con el par a baja velocidad y con la velocidad base? ¿Lo notarías más arrancando o en punta?</p>
+      <template class="sol"><p><b>Solución:</b> el par a 120 A baja un 10 % (Te ∝ λm). La base <b>sube</b>, porque hay menos back-EMF. Lo notas arrancando: menos empuje. En punta casi no, porque ahí manda la batería.</p></template></div>
+    <details>
+      <summary style="cursor:pointer;font-weight:600">Curva par–velocidad: ábrela después de contestar los tres cuadros</summary>
+      <canvas id="z_curve" height="300" aria-label="Par máximo frente a velocidad para cada combinación de límites" style="margin-top:10px"></canvas>
+      <dl class="readout" id="r_curve" style="margin-top:10px"></dl>
+    </details>
+  </div>
+</section>
+
+<section id="criterio" class="part">
+  <p class="eyebrow">4 · Criterio · 7 min</p>
+  <h2>Piensa tú</h2>
+  <div class="case"><span class="tag">Caso · El mentor quiere más aceleración</span>
+    <div class="qa" data-q="c1"><p>En la review, un mentor te pide más aceleración entre 15 y 25 km/h. Tienes tres palancas: subir l_current_max a 160 A, cambiar la transmisión a una relación más corta, o subir l_in_current_max a 60 A. ¿Cuál funciona, cuál no y por qué? ¿Cuál harías, y qué riesgo tiene?</p>
+      <template class="sol"><p><b>Solución:</b> en esa zona vas limitado por <b>potencia de batería</b>. Más corriente de fase: no ayuda. Transmisión más corta: tampoco, porque a potencia fija la fuerza en el suelo es P/v, sea cual sea la relación (y bajas la velocidad punta). Solo funciona más potencia de batería, pero el BMS tiene 40 A de límite continuo y viste picos de ~40 A: pasarlo es un riesgo de seguridad. Respuesta honesta: «con esta batería no; haría falta un pack con más corriente».</p></template></div></div>
+  <div class="case"><span class="tag">Encuentra el error</span>
+    <div class="qa" data-q="c2"><p>Un compañero dice: <i>"Activo el debilitamiento de campo en el VESC y el quad irá al doble de velocidad punta, sin pegas."</i> Encuentra los errores. Hay al menos tres.</p>
+      <template class="sol"><p><b>Solución:</b> (1) La corriente que gastas en id negativa no hace par y calienta: en un motor de imanes suele ser solo intermitente (Hughes §9.5.2). (2) El centro de tu elipse está en −170 A, fuera del círculo: hay un techo de velocidad aun con debilitamiento. (3) Si el control falla a alta velocidad, la back-EMF entera vuelve de golpe y puede superar los 52 V del bus: el inversor se juega la vida (§9.6.3). Y de propina: a esas velocidades ya mandaba la batería.</p></template></div></div>
+</section>
+
+<section id="cierre" class="part">
+  <p class="eyebrow">5 · Cierre · 3 min</p>
+  <h2>Explícalo en voz alta</h2>
+  <p>Sin mirar, en un minuto: <b>los tres límites de tu quad, en el orden en que aparecen al acelerar, con su número.</b> Es una slide de la review.</p>
+  <div class="qa" data-q="z1"><p>¿Qué no tienes claro todavía? Escríbelo tal cual. Va a la parte «lo que no entiendo» de la review del 13.</p>
+    <template class="sol"><p>Guardado. Claude lo lee antes de Control 1, esta tarde.</p></template></div>
+</section>
+
+<footer>Fuente: Hughes, A. y Drury, B. <i>Electric Motors and Drives</i>, 5.ª ed., Newnes, 2019: §9.5.1–9.5.2, §9.6.3, §9.6.5. Parámetros y límites: <span style="font-family:var(--mono)">04_model/params/motor_params.m</span>. Esta tarde, Control 1: el lazo que mantiene esa corriente.</footer>
+</main>
+<script>
+(function(){
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const $=id=>document.getElementById(id);
+const fmt=(x,d=1)=>(Math.abs(x)<5e-10?0:x).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});
+const D2R=Math.PI/180,TAU=Math.PI*2;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function fitCanvas(c){const r=c.getBoundingClientRect();const dpr=window.devicePixelRatio||1;const h=+(c.dataset.h||(c.dataset.h=c.getAttribute('height')));c.style.height=h+'px';const w=Math.max(260,r.width);c.width=w*dpr;c.height=h*dpr;const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return {g,w,h};}
+function readout(el,rows){el.innerHTML=rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');}
+function arrow(g,x0,y0,x1,y1,col,w){g.strokeStyle=col;g.fillStyle=col;g.lineWidth=w;g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();const a=Math.atan2(y1-y0,x1-x0),L=Math.hypot(x1-x0,y1-y0);if(L<4)return;const h=Math.min(10,L*.4);g.beginPath();g.moveTo(x1,y1);g.lineTo(x1-h*Math.cos(a-.4),y1-h*Math.sin(a-.4));g.lineTo(x1-h*Math.cos(a+.4),y1-h*Math.sin(a+.4));g.closePath();g.fill();}
+
+/* motor parameters: 04_model/params/motor_params.m */
+const M={p:3,lam:0.016855,R:0.02802,Ld:99.23e-6,Lq:112.77e-6};
+/* ---------- id-iq plane ---------- */
+let batOn=false;
+function zp(){return {rpm:+$('z_rpm').value,Vdc:+$('z_vdc').value,Imax:+$('z_imax').value,lam:M.lam*(+$('z_lam').value)/100};}
+function volts(id,iq,we,lam){const vd=M.R*id-we*M.Lq*iq,vq=M.R*iq+we*(M.Ld*id+lam);return {vd,vq,v:Math.hypot(vd,vq),P:1.5*(vd*id+vq*iq)};}
+function torque(id,iq,lam){return 1.5*M.p*(lam*iq+(M.Ld-M.Lq)*id*iq);}
+function best(rpm,P,useV,useB){const we=rpm/60*TAU*M.p;const Vmax=P.Vdc/Math.sqrt(3);let bt=-1,bi=null;const st=P.Imax/120;
+  for(let id=-P.Imax;id<=0.001;id+=st){const qmax=Math.sqrt(Math.max(0,P.Imax*P.Imax-id*id));
+    // largest feasible iq at this id (feasibility is monotone in iq for motoring)
+    let lo=0,hi=qmax;const ok=iq=>{const r=volts(id,iq,we,P.lam);if(useV&&r.v>Vmax)return false;if(useB&&r.P/P.Vdc>40)return false;return true;};
+    if(!ok(0))continue; if(ok(hi)){lo=hi;}else{for(let k=0;k<30;k++){const m=(lo+hi)/2;ok(m)?lo=m:hi=m;}}
+    const t=torque(id,lo,P.lam);if(t>bt){bt=t;bi={id,iq:lo};}}
+  return bi?{T:bt,...bi,we}:{T:0,id:0,iq:0,we};}
+function drawPlane(){const P=zp();$('o_zrpm').textContent=P.rpm.toLocaleString('es-ES')+' rpm';$('o_zvdc').textContent=fmt(P.Vdc,1)+' V';$('o_zimax').textContent=P.Imax+' A';$('o_zlam').textContent=$('z_lam').value+' %';
+  const {g,w,h}=fitCanvas($('z_plane'));g.clearRect(0,0,w,h);const ink=css('--ink'),mut=css('--muted'),line=css('--line'),acc=css('--accent'),soft=css('--accent-soft'),warn=css('--warn'),cw=css('--w');
+  const span=Math.max(180,P.Imax*1.25);const L=40,Rm=12,T=12,B=h-28;const W=w-L-Rm,H=B-T;
+  // x: id from -span..+0.35span ; y: iq from -0.15span..span
+  const xmin=-span,xmax=span*0.4,ymin=-span*0.12,ymax=span;const sx=Math.min(W/(xmax-xmin),H/(ymax-ymin));
+  const ox=L+(W-(xmax-xmin)*sx)/2-xmin*sx,oy=T+ymax*sx;const X=id=>ox+id*sx,Y=iq=>oy-iq*sx;
+  const we=P.rpm/60*TAU*M.p,Vmax=P.Vdc/Math.sqrt(3);
+  // feasible shading
+  const cell=4;for(let px=L;px<w-Rm;px+=cell)for(let py=T;py<B;py+=cell){const id=(px+cell/2-ox)/sx,iq=(oy-(py+cell/2))/sx;if(id*id+iq*iq>P.Imax*P.Imax)continue;const r=volts(id,iq,we,P.lam);if(r.v>Vmax)continue;if(batOn&&r.P/P.Vdc>40)continue;g.fillStyle=soft;g.fillRect(px,py,cell,cell);}
+  // axes
+  g.strokeStyle=line;g.lineWidth=1;g.beginPath();g.moveTo(L,Y(0));g.lineTo(w-Rm,Y(0));g.moveTo(X(0),T);g.lineTo(X(0),B);g.stroke();
+  g.font='11px IBM Plex Mono, monospace';g.fillStyle=mut;g.textAlign='center';[-150,-100,-50,0,50].forEach(v=>{if(v>=xmin&&v<=xmax){g.fillText(String(v),X(v),Y(0)+14);}});g.textAlign='right';[50,100,150].forEach(v=>{if(v<=ymax)g.fillText(String(v),X(0)-4,Y(v)+4);});
+  g.textAlign='left';g.fillText('id [A]',w-Rm-46,Y(0)-6);g.fillText('iq [A]',X(0)+6,T+10);
+  // current circle
+  g.strokeStyle=ink;g.lineWidth=1.5;g.beginPath();g.arc(X(0),Y(0),P.Imax*sx,0,TAU);g.stroke();
+  // voltage boundary (contour, sample along rays from ellipse centre)
+  if(we>0){g.strokeStyle=cw;g.lineWidth=2;g.setLineDash([6,4]);g.beginPath();let first=true;const c0=-P.lam/M.Ld;
+    for(let k=0;k<=360;k+=2){const a=k*D2R;let lo=0,hi=2000;const f=r=>volts(c0+r*Math.cos(a),r*Math.sin(a),we,P.lam).v-Vmax;if(f(hi)<0){continue;}for(let j=0;j<40;j++){const m=(lo+hi)/2;f(m)<0?lo=m:hi=m;}const id=c0+lo*Math.cos(a),iq=lo*Math.sin(a);const x=X(id),y=Y(iq);if(x<L-40||x>w+40||y<-40||y>h+40){first=true;continue;}first?g.moveTo(x,y):g.lineTo(x,y);first=false;}
+    g.stroke();g.setLineDash([]);g.fillStyle=cw;const cx0=X(c0);if(cx0>L){g.beginPath();g.arc(cx0,Y(0),3,0,TAU);g.fill();g.textAlign='center';g.fillText('−λm/Ld',cx0,Y(0)+26);}}
+  const b=best(P.rpm,P,true,batOn);
+  // torque hyperbola through best
+  if(b.T>0.01){g.strokeStyle=mut;g.lineWidth=1;g.setLineDash([2,3]);g.beginPath();let f=true;for(let id=xmin;id<=xmax;id+=2){const den=1.5*M.p*(P.lam+(M.Ld-M.Lq)*id);const iq=b.T/den;if(iq>ymax||iq<0){f=true;continue;}f?g.moveTo(X(id),Y(iq)):g.lineTo(X(id),Y(iq));f=false;}g.stroke();g.setLineDash([]);}
+  g.fillStyle=acc;g.beginPath();g.arc(X(b.id),Y(b.iq),6,0,TAU);g.fill();
+  const r=volts(b.id,b.iq,b.we,P.lam);const wm=b.we/M.p;const Ib=r.P/P.Vdc;
+  const vkmh=P.rpm/(92/11)/60*TAU*0.155*3.6;
+  readout($('r_plane'),[['Velocidad quad',fmt(vkmh,1)+' km/h'],['Par máx. motor',fmt(b.T,2)+' N·m'],['Fuerza en rueda',fmt(b.T*(92/11)/0.155,0)+' N'],['id óptima',fmt(b.id,0)+' A'],['iq óptima',fmt(b.iq,0)+' A'],['|v| necesaria',fmt(r.v,1)+' / '+fmt(Vmax,1)+' V'],['P mecánica',fmt(b.T*wm/1000,2)+' kW'],['I batería (inversor ideal)',fmt(Ib,1)+' A'],['Pérdidas cobre',fmt(1.5*M.R*(b.id*b.id+b.iq*b.iq),0)+' W']]);
+  drawCurve(P);}
+function drawCurve(P){const c=$('z_curve');if(!c.closest('details').open)return;const {g,w,h}=fitCanvas(c);g.clearRect(0,0,w,h);const ink=css('--ink'),mut=css('--muted'),line=css('--line'),acc=css('--accent'),warn=css('--warn'),cw=css('--w');
+  const L=44,R=12,T=14,B=h-30;const rmax=7000;const Tm=1.5*M.p*P.lam*P.Imax*1.1;const X=r=>L+(w-L-R)*r/rmax,Y=t=>B-(B-T)*t/Tm;
+  g.strokeStyle=line;g.lineWidth=1;g.font='11px IBM Plex Mono, monospace';g.fillStyle=mut;
+  for(let r=0;r<=rmax;r+=1000){g.beginPath();g.moveTo(X(r),T);g.lineTo(X(r),B);g.stroke();g.textAlign='center';g.fillText(String(r),X(r),B+14);}
+  for(let t=0;t<=Tm;t+=2){g.beginPath();g.moveTo(L,Y(t));g.lineTo(w-R,Y(t));g.stroke();g.textAlign='right';g.fillText(String(t),L-4,Y(t)+4);}
+  g.textAlign='left';g.fillText('rpm del motor',L,h-4);g.fillText('par [N·m]',L+4,T+2);
+  const sets=[[false,false,ink,'solo corriente'],[true,false,cw,'+ tensión'],[true,true,warn,'+ batería 40 A']];let knees=[];
+  sets.forEach(([v,bb,col,n],j)=>{g.strokeStyle=col;g.lineWidth=j===2?3:2;g.beginPath();let base=null;for(let r=0;r<=rmax;r+=50){const b=best(r,P,v,bb);if(base===null&&b.T<1.5*M.p*P.lam*P.Imax*0.995&&r>0)base=r;r?g.lineTo(X(r),Y(b.T)):g.moveTo(X(r),Y(b.T));}g.stroke();knees.push(base);g.fillStyle=col;g.fillText(n,w-R-130,T+14+16*j);});
+  let lo=0,hi=20000;const Vm=P.Vdc/Math.sqrt(3);for(let j=0;j<50;j++){const m=(lo+hi)/2;volts(0,P.Imax,m/60*TAU*M.p,P.lam).v<Vm?lo=m:hi=m;}
+  readout($('r_curve'),[['Par a baja velocidad',fmt(1.5*M.p*P.lam*P.Imax,2)+' N·m'],['Velocidad base (id = 0)',Math.round(lo).toLocaleString('es-ES')+' rpm'],['El par cae un 0,5 % por tensión',knees[1]?knees[1].toLocaleString('es-ES')+' rpm':'—'],['El par cae por la batería',knees[2]?knees[2].toLocaleString('es-ES')+' rpm':'—']]);}
+['z_rpm','z_vdc','z_imax','z_lam'].forEach(id=>$(id).addEventListener('input',drawPlane));
+$('z_bat').onclick=e=>{batOn=!batOn;e.target.setAttribute('aria-pressed',String(batOn));e.target.textContent='Límite de batería 40 A: '+(batOn?'encendido':'apagado');drawPlane();};
+$('z_curve').closest('details').addEventListener('toggle',()=>drawCurve(zp()));
+window.addEventListener('resize',drawPlane);
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',drawPlane);
+new MutationObserver(drawPlane).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+drawPlane();
+})();
+</script>
+<script>
+/* Answer boxes. Each .qa[data-q] gets a textarea; the solution stays hidden until the viewer writes an attempt and saves it.
+   Saved answers live in the db at answers/<lesson>-<q>; Claude writes a "feedback" field there and the page shows it. */
+(function(){
+const LESSON=document.body.dataset.lesson||document.querySelector('main').dataset.lesson;
+const MIN=12;
+const boxes=[...document.querySelectorAll('.qa[data-q]')];
+const key=q=>LESSON+'-'+q;
+const draftKey=q=>'draft:'+key(q);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let db=null;
+boxes.forEach(box=>{
+  const q=box.dataset.q,sol=box.querySelector('template.sol');
+  const ta=document.createElement('textarea');ta.placeholder='Tu respuesta, con tu razonamiento. Un "no lo sé, pero creo que…" vale.';ta.setAttribute('aria-label','Tu respuesta');
+  const row=document.createElement('div');row.className='row';
+  const btn=document.createElement('button');btn.type='button';btn.className='primary';btn.textContent='Guardar y ver la solución';btn.disabled=true;
+  const st=document.createElement('span');st.className='st';
+  row.append(btn,st);
+  const rev=document.createElement('div');rev.className='reveal';rev.hidden=true;
+  if(sol)rev.append(sol.content.cloneNode(true));
+  const fb=document.createElement('div');fb.className='fb';fb.hidden=true;
+  box.append(ta,row,rev,fb);
+  const d=store.get(draftKey(q));if(d)ta.value=d;
+  const sync=()=>{btn.disabled=ta.value.trim().length<MIN;if(rev.hidden)st.textContent=btn.disabled?'Escribe tu intento para desbloquear la solución':'';};
+  let tmr;ta.addEventListener('input',()=>{sync();clearTimeout(tmr);tmr=setTimeout(()=>store.set(draftKey(q),ta.value),400);});
+  btn.addEventListener('click',async()=>{
+    const text=ta.value.trim();if(text.length<MIN)return;
+    rev.hidden=false;btn.textContent='Guardar cambios';store.set(draftKey(q),ta.value);
+    if(!db){st.textContent='Guardado solo en este navegador';return;}
+    st.textContent='Guardando…';
+    try{const ref=db.doc('answers/'+key(q));const cur=await ref.get();
+      const body={lesson:LESSON,q,text,question:(box.querySelector('p')||{}).textContent||'',savedAt:new Date().toISOString()};
+      if(cur.exists)await ref.update(body);else await ref.set(body);
+      st.textContent='Guardado ✓ · Claude lo corrige';}
+    catch(e){st.textContent='No se pudo guardar ('+(e&&e.code||'error')+'). Queda en este navegador.';}
+  });
+  box._show=data=>{if(data.text&&!ta.value)ta.value=data.text;if(data.text){rev.hidden=false;btn.textContent='Guardar cambios';st.textContent='Guardado ✓';}
+    if(data.feedback){fb.hidden=false;fb.innerHTML='';const b=document.createElement('b');b.textContent='Corrección de Claude: ';fb.append(b,document.createTextNode(data.feedback));}
+    sync();};
+  sync();
+});
+// canvases inside a closed annex were sized at 0 width: redraw them when it opens
+document.querySelectorAll('details.annex').forEach(d=>d.addEventListener('toggle',()=>window.dispatchEvent(new Event('resize'))));
+(async()=>{
+  const c=window.claude;if(!c||!c.use)return;
+  try{db=await c.use('db');}catch(e){db=null}
+  if(!db)return;
+  try{const snap=await db.collection('answers').where('lesson','==',LESSON).get();
+    snap.docs.forEach(s=>{const v=s.data();const box=boxes.find(b=>b.dataset.q===v.q);if(box)box._show(v);});}
+  catch(e){}
+})();
+})();
+</script>
