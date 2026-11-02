@@ -17,12 +17,22 @@
    puerto de temperatura del VESC. Decidido por ti hoy.
 5. **Condensadores cerámicos 100 nF, surtido** · ~3 €. Uno junto a cada sensor, entre VCC y GND.
 
-### Para montar el registrador en el quad (≈ 10 €)
+### Para montar el registrador en el quad (≈ 35 €)
 
-1. **Placa perforada 7×9 cm + tiras de pines hembra** · ~5 €. La protoboard no aguanta la
-   vibración, y los cables largos del SPI fueron la entrada del ruido (EXP-002).
-2. **Caja de plástico** (`caja estanca ABS 100x68x50`) · ~5 €, opcional. De plástico, no de
-   aluminio.
+Todo sale del [plano de la placa](https://claude.ai/artifact/1iWNCiLEPZMBHst7gngBAS).
+
+1. **Placa perforada 9×15 cm de doble cara ×2** (`placa perforada 9x15 doble cara`) · ~4 €.
+   La de 7×9 no llega: la placa ocupa 112×86 mm.
+2. **Tiras de pines 2,54 mm:** hembra 1×40 ×3 y macho 1×40 ×1 · ~3 €. Zócalos de la ESP32,
+   la SD (va de pie) y la IMU.
+3. **Bornas de tornillo 5,08 mm** (`borne tornillo 5.08 2P 3P`) · ~3 €: 2 de 2 polos y 4 de 3.
+   Son los conectores del borde: el cable se atornilla y no se suelta con la vibración.
+4. **Hilo de cobre estañado desnudo 0,6 mm** · ~2 €, para los buses.
+5. **Cable rígido aislado 22 AWG, kit de colores** · ~6 €, para todo lo demás.
+6. **Cable dupont hembra-hembra de 10 cm, tira de 40** · ~2 €: del módulo CAN a la placa.
+7. **Separadores de nylon M3, kit** · ~4 €: CAN sobre la placa, placa en la caja, IMU en el chasis.
+8. **Cable apantallado de 4 hilos, 1 m** · ~2 €: de la placa a la IMU.
+9. **Caja estanca ABS ~150×110×70 mm** · ~8 €. 60 mm de alto por dentro como mínimo.
 
 ### Para medir el vehículo (préstamo mejor que compra)
 
