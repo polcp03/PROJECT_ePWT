@@ -102,15 +102,14 @@ Practicarlo solo, sin la presión de un equipo, es la mejor forma de llegar prep
 ## 6. El flujo completo, un ciclo de trabajo real
 
 ```bash
-git switch master                          # 1. partir de master
-git pull                                   # 2. traerse lo ultimo (si hay remoto)
-git switch -c model/longitudinal-v1        # 3. rama para este trabajo
+git fetch origin                           # 1-2. traerse lo ultimo de GitHub
+git switch -c model/longitudinal-v1 origin/master   # 3. rama nueva desde el master de GitHub
 # ... trabajar ...
 git add .                                  # 4. seleccionar
 git commit -m "Add longitudinal vehicle model"   # 5. foto + porque
 git push -u origin model/longitudinal-v1   # 6. subir la rama
 gh pr create --fill                        # 7. abrir el PR (GitHub CLI)
-gh pr merge --squash                       # 8. fusionar cuando este revisado
+gh pr merge --merge                        # 8. fusionar cuando este revisado (merge commit, nunca squash)
 ```
 
 ## 7. Errores típicos y cómo salir

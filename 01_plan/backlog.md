@@ -113,6 +113,12 @@ Mientras tanto, la disciplina es manual: al cerrar sesión, `add` por tema → `
 → `push`, aunque el trabajo esté a medias. Un WIP con mensaje honesto vale más que
 46 archivos en el limbo.
 
+**Integración continua, aplazada (2-nov-2026).** Se valoró que GitHub compile el firmware y
+haga comprobaciones en cada PR. Hoy aporta poco: un solo autor, sketches pequeños y ninguna
+prueba que corra en el PC. Se monta con la unidad de control del vehículo, cuando haya lógica
+con test en el PC (escalón 6 de la skill `software-con-ia`): entonces sí atrapa fallos y sí
+cuenta en el CV.
+
 ---
 
 ## Marca personal, contenido y empresa
