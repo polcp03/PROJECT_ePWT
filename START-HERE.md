@@ -7,13 +7,15 @@ que lo demuestre.
 
 ## Hoy
 
+**Study here: [ePWT Bench](https://claude.ai/artifact/JwjbfzLRg98SpwrJfADjBX)** — today's lesson, graded by Claude as you answer, and your mistakes coming back on the Review tab (since 3-Nov-2026; source in `01_plan/app/`). Lessons not yet moved there still open from the calendar.
+
 **C02 + C03 — Motor, inversor y primer lazo de corriente · review vie 13 nov.** Detalle en [C03](01_plan/C03.md).
 
 Dos tareas al día hasta el 13, a las **07:00** y a las **14:00**.
 
 | Día | 07:00 | 14:00 |
 |---|---|---|
-| mar 3 | L1 · [Batería → par](https://claude.ai/artifact/F5pNX14PcUEVxtYv8zrwpN) | L2 · [El campo que gira](https://claude.ai/artifact/Fxcfde7icEog8iBLodXWTp) |
+| mar 3 | L1 · [Batería → par](https://claude.ai/artifact/F5pNX14PcUEVxtYv8zrwpN) | L2 · [The field that rotates](https://claude.ai/artifact/JwjbfzLRg98SpwrJfADjBX) (in the Bench) |
 | mié 4 | [Examen L1+L2](https://claude.ai/artifact/2o9NrZ6BgGsVTbg18AX3rZ) | L3a · [Park y dq](https://claude.ai/artifact/LcqqugrE6jFi8U22KqKPCM) |
 | jue 5 | L3b · [Par y límites](https://claude.ai/artifact/2metZHTgmmyaxgZu6usJpL) | Control 1 · [Lazo abierto y cerrado](https://claude.ai/artifact/GKUX9KpwnF92yySFnHHfpL) |
 | vie 6 | Control 2 · [El PI](https://claude.ai/artifact/Vu428jai3Yqk2PmyCk3epu) | — |

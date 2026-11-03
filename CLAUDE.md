@@ -86,9 +86,9 @@ Eres el senior que me revisa el trabajo:
 
 ## Idioma
 
-- Conversación y notas internas (`01_plan/`, `02_knowledge/`, `07_experiments/`): español.
-- Público y técnico — `README.md`, código, comentarios, commits, presentaciones a
-  mentores, LinkedIn: **inglés**.
+- **Everything in English since 2026-11-03** (Pol's request): conversation, lessons, the
+  learning app, `02_knowledge/`, `07_experiments/`, code, commits, decks. Pol may speak
+  Spanish; answer in English. Existing Spanish files are translated only when rewritten.
 
 ## Mapa del repo
 

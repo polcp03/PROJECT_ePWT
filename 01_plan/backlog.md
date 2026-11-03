@@ -142,3 +142,9 @@ Reconocido como objetivo real a largo plazo. **Cero acción de investigación ah
   experiencia, entender sectores y detectar problemas reales. No forzar una idea.
 - **Organización AI-first como laboratorio:** aprender a trabajar con IA como capa
   común de conocimiento antes de tener equipo. Este repo ya es la versión mínima.
+
+## Bench: next retrospective
+
+Ideas to change the learning app or the method. They wait for the cycle close (method frozen between reviews, 3-Nov-2026).
+
+- _(empty)_

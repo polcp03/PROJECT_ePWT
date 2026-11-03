@@ -1,0 +1,929 @@
+<title>ePWT Bench</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: a lab bench. Reading column on the left, the 3D motor pinned on the right (wide screens),
+   in the flow on narrow ones. Phase colours U/V/W are the identity, teal is the UI accent, copper marks
+   the grader's voice. */
+:root{
+  --bg:#F3F6F5; --surface:#FFFFFF; --sunk:#E8EEEB; --ink:#14201B; --muted:#55665E; --line:#D4DDD9;
+  --accent:#0E6E62; --accent-soft:#D8EEEA; --copper:#A85A23; --copper-soft:#F7E9DD;
+  --u:#D1495B; --v:#C98A00; --w:#2F6FDE; --ok:#1F7A3D; --ok-soft:#DDF1E2; --warn:#A8500B; --warn-soft:#FBEBDD; --bad:#B3261E; --bad-soft:#F9E0DE;
+  --magN:#0E6E62; --magS:#7A5FA8; --steel:#9AA6A1; --scene:#CBD6D2;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1412; --surface:#161F1C; --sunk:#1D2925; --ink:#E4ECE8; --muted:#94A69E; --line:#2B3833;
+  --accent:#3DB6A3; --accent-soft:#163A34; --copper:#E39A62; --copper-soft:#3A2618;
+  --u:#F06A7A; --v:#F0B53A; --w:#73A0FF; --ok:#5CC981; --ok-soft:#173523; --warn:#F0A060; --warn-soft:#3A2715; --bad:#F2867D; --bad-soft:#3D1C1A;
+  --magN:#3DB6A3; --magS:#9C86D0; --steel:#7D8A85; --scene:#121A17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1412; --surface:#161F1C; --sunk:#1D2925; --ink:#E4ECE8; --muted:#94A69E; --line:#2B3833;
+  --accent:#3DB6A3; --accent-soft:#163A34; --copper:#E39A62; --copper-soft:#3A2618;
+  --u:#F06A7A; --v:#F0B53A; --w:#73A0FF; --ok:#5CC981; --ok-soft:#173523; --warn:#F0A060; --warn-soft:#3A2715; --bad:#F2867D; --bad-soft:#3D1C1A;
+  --magN:#3DB6A3; --magS:#9C86D0; --steel:#7D8A85; --scene:#121A17; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+h1,h2,h3{font-family:var(--display);font-stretch:85%;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(2rem,5vw,2.8rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.55rem;font-weight:750}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0}
+ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+code{font-family:var(--mono);font-size:.92em;background:var(--sunk);padding:1px 5px;border-radius:4px}
+a{color:var(--accent)}
+button{font:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;background:var(--surface);border-bottom:1px solid var(--line);margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:0 max(16px,env(safe-area-inset-left,0px))}
+.bar-in{max-width:1320px;margin:0 auto;display:flex;align-items:center;gap:16px;min-height:54px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font:800 1.15rem/1 var(--display);font-stretch:80%;color:var(--ink);text-decoration:none;letter-spacing:.01em}
+.phasebar{display:flex;height:16px;width:18px;gap:2px}.phasebar i{flex:1;border-radius:2px}
+.phasebar i:nth-child(1){background:var(--u)}.phasebar i:nth-child(2){background:var(--v)}.phasebar i:nth-child(3){background:var(--w)}
+.tabs{display:flex;gap:4px;margin-left:auto}
+.tabs a{font:500 .92rem/1 var(--body);color:var(--muted);text-decoration:none;padding:9px 12px;border-radius:8px;display:flex;gap:6px;align-items:center}
+.tabs a[aria-current="page"]{color:var(--ink);background:var(--sunk)}
+.badge{font:600 .72rem/1 var(--mono);background:var(--copper);color:var(--surface);border-radius:999px;padding:3px 7px}
+
+main{max-width:1320px;margin:0 auto;padding-block:26px 90px}
+.loading{color:var(--muted)}
+.eyebrow{font:500 .76rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:1.08rem;color:var(--muted);max-width:62ch}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;font:.86rem/1.4 var(--mono);color:var(--muted)}
+
+/* lesson layout */
+.lesson{display:grid;gap:28px}
+.lesson-head{display:grid;gap:12px;max-width:720px}
+.lesson-grid{display:grid;gap:28px}
+.lesson-grid>.col{min-width:0;display:grid;gap:34px;max-width:720px}
+@media (min-width:1080px){
+  .lesson-grid.with-motor{grid-template-columns:minmax(0,1fr) minmax(420px,520px);align-items:start}
+  .lesson-grid.with-motor>.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px);order:2}
+}
+.toc{display:flex;gap:6px;flex-wrap:wrap}
+.toc a{font:500 .84rem/1 var(--body);color:var(--ink);text-decoration:none;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);display:flex;gap:6px;align-items:center}
+.toc a .dots{font:.75rem/1 var(--mono);color:var(--muted)}
+.sec{display:grid;gap:18px}
+.sec>h2{padding-bottom:4px}
+.sec>p,.sec>ul{max-width:64ch}
+.idea{display:grid;grid-template-columns:2.2rem minmax(0,1fr);gap:4px 12px;padding-top:18px;border-top:1px solid var(--line)}
+.idea>.n{font:800 1.5rem/1 var(--display);color:var(--accent);font-stretch:75%}
+.idea>div{min-width:0;display:grid;gap:12px}
+.idea.live>.n{color:var(--copper)}
+.eq{font:500 1.02rem/1.5 var(--mono);background:var(--sunk);border-radius:8px;padding:10px 14px;overflow-x:auto;white-space:nowrap}
+.src{font:.8rem/1.4 var(--mono);color:var(--muted)}
+.mine{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:10px 14px;font-size:.96rem;display:grid;gap:2px}
+.mine span{font:500 .72rem/1.2 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.scene-ref{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;font-size:.92rem;color:var(--muted)}
+.scene-ref p{flex:1 1 240px}
+
+/* buttons */
+.btn{appearance:none;border:1px solid var(--accent);background:var(--accent);color:var(--surface);border-radius:8px;padding:9px 14px;font-weight:600;font-size:.92rem;cursor:pointer;line-height:1.2}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.small{padding:6px 10px;font-size:.84rem}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 11px;font-size:.84rem;cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--ink);font-weight:600}
+
+/* question box */
+.qa{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:16px;display:grid;gap:12px}
+.qa .qtag{font:500 .72rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.qa .prompt{font-weight:500;display:grid;gap:8px}
+.qa textarea{width:100%;min-height:96px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:15px/1.5 var(--body);background:var(--bg);color:var(--ink)}
+.qa .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.qa .hint{font-size:.84rem;color:var(--muted)}
+.turn{border-radius:10px;padding:12px 14px;display:grid;gap:8px;font-size:.95rem}
+.turn.mine-t{background:var(--sunk)}
+.turn.mine-t .who{color:var(--muted)}
+.turn .who{font:500 .72rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.turn.grader{background:var(--copper-soft);border:1px solid color-mix(in srgb,var(--copper) 35%,transparent)}
+.turn.grader .who{color:var(--copper)}
+.turn .txt{white-space:pre-wrap;overflow-wrap:anywhere}
+.verdict{display:inline-flex;align-items:center;gap:6px;font:600 .82rem/1 var(--mono);padding:5px 9px;border-radius:999px;width:max-content}
+.verdict.right{background:var(--ok-soft);color:var(--ok)}
+.verdict.partial{background:var(--warn-soft);color:var(--warn)}
+.verdict.wrong,.verdict.no_attempt{background:var(--bad-soft);color:var(--bad)}
+.verdict.saved{background:var(--sunk);color:var(--muted)}
+.fb-list{display:grid;gap:4px;padding:0;list-style:none}
+.fb-list li{display:grid;grid-template-columns:1.2em minmax(0,1fr);gap:6px}
+.fb-list li b{font-family:var(--mono)}
+.explain{border-left:3px solid var(--copper);padding-left:10px}
+.explain .lbl{font:500 .72rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--copper);display:block;margin-bottom:4px}
+.redo{font-weight:600}
+.solution{border-top:1px dashed var(--line);padding-top:10px;display:grid;gap:8px;font-size:.95rem}
+.solution .lbl{font:500 .72rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.thinking{display:flex;gap:8px;align-items:center;color:var(--copper);font-size:.9rem}
+.thinking i{width:8px;height:8px;border-radius:50%;background:var(--copper);animation:pulse 1s infinite ease-in-out}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.thinking i{animation:none}}
+.err{color:var(--bad);font-size:.88rem}
+
+/* motor panel */
+.motor{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:grid}
+.motor .vp{position:relative;aspect-ratio:1/0.86;max-width:100%;background:radial-gradient(circle at 50% 40%,var(--surface),var(--scene));touch-action:none}
+.motor .vp canvas{display:block;width:100%;height:100%}
+.motor .labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.motor .labels span{position:absolute;transform:translate(-50%,-100%);font:600 .74rem/1.15 var(--body);color:var(--ink);background:color-mix(in srgb,var(--surface) 88%,transparent);border:1px solid var(--line);border-radius:6px;padding:3px 6px;white-space:nowrap}
+.motor .labels span::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:10px;background:var(--muted)}
+.motor .labels span.hidden{display:none}
+.motor .hud{position:absolute;left:10px;top:10px;font:.74rem/1.3 var(--mono);color:var(--muted);pointer-events:none}
+.motor .body{padding:12px 14px;display:grid;gap:10px;border-top:1px solid var(--line)}
+.motor .caption{font-size:.9rem;min-height:1.4em}
+.motor .ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px 16px}
+.motor .ctl label{display:flex;justify-content:space-between;font-size:.84rem;gap:8px}
+.motor output,.readout dd{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:6px;margin:0}
+.readout div{background:var(--sunk);border-radius:8px;padding:6px 9px;min-width:0}
+.readout dt{font-size:.72rem;color:var(--muted)}
+.readout dd{margin:0;font-size:.92rem}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.fallback{padding:24px;color:var(--muted)}
+
+/* 2D labs */
+.labbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px}
+.labbox h3{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.labbox h3 small{font:500 .72rem/1 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.labbox canvas{width:100%;display:block;border-radius:8px;background:var(--sunk)}
+.labbox .pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.labbox .ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px 16px}
+.labbox .ctl label{display:flex;justify-content:space-between;font-size:.86rem;gap:8px}
+
+/* today / review / lessons */
+.page{display:grid;gap:26px;max-width:760px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:10px}
+.due{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--copper-soft);border:1px solid color-mix(in srgb,var(--copper) 35%,transparent);border-radius:12px;padding:14px 16px}
+.due b{font-family:var(--display);font-size:1.25rem;font-stretch:85%}
+.list{display:grid;gap:10px}
+.lrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-decoration:none;color:var(--ink)}
+.lrow .t{font:700 1.08rem/1.2 var(--display);font-stretch:85%}
+.lrow .m{font:.82rem/1.3 var(--mono);color:var(--muted)}
+.lrow .p{font:600 .9rem/1 var(--mono);color:var(--accent)}
+.status{font:600 .72rem/1 var(--mono);padding:4px 8px;border-radius:999px}
+.status.red{background:var(--bad-soft);color:var(--bad)}
+.status.yellow{background:var(--warn-soft);color:var(--warn)}
+.status.green{background:var(--ok-soft);color:var(--ok)}
+.empty{color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:18px}
+.doubt{display:grid;gap:6px;font-size:.95rem}
+.doubt .q{font-weight:600}
+@media (max-width:1079px){.motor .vp{aspect-ratio:auto;height:min(62vh,88vw)}}
+
+</style>
+<header class="bar">
+  <div class="bar-in">
+    <a class="brand" href="#today"><span class="phasebar"><i></i><i></i><i></i></span>ePWT Bench</a>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#today" data-tab="today">Today</a>
+      <a href="#review" data-tab="review">Review <span class="badge" id="due-badge" hidden></span></a>
+      <a href="#lessons" data-tab="lessons">Lessons</a>
+    </nav>
+  </div>
+</header>
+<main id="view">
+  <p class="loading">Loading your bench…</p>
+</main>
+<script type="application/json" id="data">{"facts": "Pol's quad motor: radial-flux PMSM, inner rotor, outer slotted stator, 3 pole pairs (p = 3, 6 magnets, measured by Hall pulse counting). Magnets probably interior or inset: saliency Lq/Ld = 1.14, so not pure surface; exact magnet layout and slot count NOT measured. lambda_m = 16.855 mWb (measured, back-EMF spin test with a drill, motor disconnected, 7-Sep-2026). Rs = 28 mOhm per phase (VESC estimate, includes MOSFETs). Ld = 99 uH, Lq = 113 uH. Kt = 1.5*p*lambda_m = 0.0758 N*m/A of iq. Bus 52 V nominal (13S5P Li-ion), pack resistance measured 0.18 Ohm. VESC in FOC, current control: the throttle asks for amps. Limits: motor 120 A, battery 40 A (BMS continuous). PWM 30 kHz. Field weakening OFF (fw_current = 0). Max sinusoidal phase voltage with SVPWM = Vbus/sqrt(3) = 30 V peak. Measured no-load speed 5480 rpm. Gear 92/11 = 8.364. Wheel radius 0.155 m (assumed). 110 kg with rider. Amplitude-invariant Clarke/Park (VESC convention).", "lessons": [{"id": "C02-L2", "cycle": "C02", "title": "The field that rotates", "date": "2026-11-03", "minutes": "60", "lede": "Eighteen slots of copper that never move, three currents that only go up and down, and still a magnetic field that turns at constant strength and drags your rotor with it. This is the door to motor control.", "sources": "Hughes & Drury, Electric Motors and Drives, 5th ed. §1.3, §5.2, §8.2, §9.3", "html": "\n<section class=\"sec\" id=\"s-predict\"><h2>Predict<\/h2>\n<p>Two from L1 first, from memory: recalling costs more than rereading, which is why it sticks. Then two guesses about today, with your reason.<\/p>\n<div class=\"qa\" data-q=\"r1\"><\/div>\n\n<div class=\"qa\" data-q=\"r2\"><\/div>\n\n<div class=\"qa\" data-q=\"p1\"><\/div>\n\n<div class=\"qa\" data-q=\"p2\"><\/div>\n\n<\/section>\n<section class=\"sec\" id=\"s-core\"><h2>Core: six ideas on your motor<\/h2>\n<p>Each idea starts from the real part in your motor, then gives the law. On a wide screen the motor on the right follows the idea you are reading; on a phone, press the button.<\/p>\n<article class=\"idea\"><span class=\"n\">1<\/span><div><h3>Open your motor: steel, copper, magnets and a gap of air<\/h3>\n<p>Cut your motor in half like a sausage and look at the cut. From outside in: a <strong>stack of thin steel sheets<\/strong> (laminations, each about 0.35 mm, insulated from each other so eddy currents cannot circulate). Their inner edge is a comb: <strong>teeth<\/strong> and <strong>slots<\/strong>. In the slots sits the <strong>copper<\/strong> of the three phases. Then a thin ring of <strong>air<\/strong>: the air gap, under a millimetre in a motor this size. Then the <strong>rotor<\/strong>: another lamination stack with <strong>magnets buried inside it<\/strong>, small air pockets at their ends (<strong>flux barriers<\/strong>), and the shaft.<\/p>\n<p>Why a gap at all? The rotor must spin, so it cannot touch the stator. And that thin ring of air is the most important dimension in the machine: the flux from the magnets and from the copper has to jump it twice on every loop (out of one tooth, back into another), and air is about 2000 times harder for flux to cross than steel.<\/p>\n<div class=\"eq\">reluctance = length / (μ0 · μr · area)    μr: steel ≈ 2000, air = 1, magnet ≈ 1.05<\/div>\n<aside class=\"mine\"><span>In your motor<\/span>A magnet looks like air to the stator (μr ≈ 1). Flux that the stator pushes along the magnet axis (d axis) has to cross the magnet; flux pushed between magnets (q axis) goes through steel. Harder path, lower inductance: that is why your Ld = 99 µH is lower than your Lq = 113 µH.<\/aside>\n<div class=\"scene-ref\" data-scene='{&quot;phases&quot;: &quot;0&quot;, &quot;labels&quot;: &quot;on&quot;, &quot;field&quot;: &quot;off&quot;, &quot;currents&quot;: &quot;off&quot;, &quot;vectors&quot;: &quot;off&quot;, &quot;spin&quot;: &quot;off&quot;, &quot;rotor&quot;: &quot;on&quot;, &quot;endturns&quot;: &quot;true&quot;, &quot;caption&quot;: &quot;Turn it with the mouse. Labels on: find the teeth, the air gap, a buried magnet and its flux barrier.&quot;}'><button type=\"button\" class=\"btn ghost show-scene\">Show it in the motor<\/button><p>Labels on, no current.<\/p><\/div>\n\n<div class=\"qa\" data-q=\"i1\"><\/div>\n<p class=\"src\">Hughes §1.3, pp. 7–15 (magnetic circuit and air gap)<\/p>\n<\/div><\/article>\n<article class=\"idea\"><span class=\"n\">2<\/span><div><h3>Three phases, three sines 120° apart, that always add to zero<\/h3>\n<p>Look at the slots of your motor going round: U+, W−, V+, U−, W+, V−, and the pattern repeats three times (once per pole pair). \"U−\" means the same U copper coming back the other way: a U coil goes down one slot and back up three slots later. Each phase owns 6 of the 18 slots.<\/p>\n<p>The three phase currents are the same sine, shifted by a third of a cycle. At every instant they add to zero: each wire is the return of the other two, so no neutral wire is needed.<\/p>\n<div class=\"eq\">iU + iV + iW = 0    iU = Î·cos ωt,  iV = Î·cos(ωt − 120°),  iW = Î·cos(ωt − 240°)<\/div>\n<div class=\"scene-ref\" data-scene='{&quot;phases&quot;: &quot;3&quot;, &quot;currents&quot;: &quot;on&quot;, &quot;field&quot;: &quot;off&quot;, &quot;labels&quot;: &quot;off&quot;, &quot;vectors&quot;: &quot;off&quot;, &quot;speed&quot;: &quot;0.08&quot;, &quot;rotor&quot;: &quot;on&quot;, &quot;caption&quot;: &quot;Copper glows with the size of its phase current. \\u2299 current comes towards you, \\u2297 goes away. Watch the \\u2299 group walk round.&quot;}'><button type=\"button\" class=\"btn ghost show-scene\">Show it in the motor<\/button><p>Currents on, slow.<\/p><\/div>\n\n<div class=\"qa\" data-q=\"i2\"><\/div>\n<p class=\"src\">Hughes §5.2.1, p. 165<\/p>\n<\/div><\/article>\n<article class=\"idea\"><span class=\"n\">3<\/span><div><h3>One phase pulses; three phases rotate<\/h3>\n<p>Feed only phase U. Each U slot pushes flux across the gap, but always at the same places: the field grows, dies and reverses, on fixed axes. It pulsates.<\/p>\n<p>Now feed all three. Each phase pushes along its own axis with its value at that instant, and the sum is one field pattern of constant strength, 1.5 times the peak of one phase, that turns at constant speed. It needs two shifts at once: 120° electrical in space (where the coils sit) and 120° in time (when each current peaks). Swap two wires and it turns the other way.<\/p>\n<div class=\"scene-ref\" data-scene='{&quot;phases&quot;: &quot;1&quot;, &quot;field&quot;: &quot;on&quot;, &quot;currents&quot;: &quot;on&quot;, &quot;labels&quot;: &quot;off&quot;, &quot;vectors&quot;: &quot;off&quot;, &quot;speed&quot;: &quot;0.15&quot;, &quot;rotor&quot;: &quot;off&quot;, &quot;caption&quot;: &quot;Only U. The arrows in the gap grow and shrink in place. Nothing travels.&quot;}'><button type=\"button\" class=\"btn ghost show-scene\">Show it in the motor<\/button><p>Only phase U.<\/p><\/div>\n\n<div class=\"scene-ref\" data-scene='{&quot;phases&quot;: &quot;3&quot;, &quot;field&quot;: &quot;on&quot;, &quot;currents&quot;: &quot;on&quot;, &quot;labels&quot;: &quot;off&quot;, &quot;vectors&quot;: &quot;off&quot;, &quot;speed&quot;: &quot;0.15&quot;, &quot;rotor&quot;: &quot;off&quot;, &quot;caption&quot;: &quot;U, V and W. Same arrows, now a pattern that travels round the gap at constant size.&quot;}'><button type=\"button\" class=\"btn ghost show-scene\">Show it in the motor<\/button><p>All three phases.<\/p><\/div>\n\n<div class=\"qa\" data-q=\"i3\"><\/div>\n<p class=\"src\">Hughes §5.2.2–5.2.3, §8.2.1, figs. 5.8 and 8.2<\/p>\n<\/div><\/article>\n<article class=\"idea\"><span class=\"n\">4<\/span><div><h3>An electrical turn is a third of a mechanical turn<\/h3>\n<p>Count the norths in the gap pattern: three, because your stator is wound for 3 pole pairs to match the 6 magnets. One electrical cycle of the currents moves the pattern by one north–south pair, which is a third of the circumference. So your currents must cycle three times for one turn of the shaft.<\/p>\n<div class=\"eq\">fe = p · rpm / 60    ωe = p·ωm    θe = p·θm<\/div>\n<div class=\"scene-ref\" data-scene='{&quot;phases&quot;: &quot;3&quot;, &quot;field&quot;: &quot;on&quot;, &quot;currents&quot;: &quot;off&quot;, &quot;vectors&quot;: &quot;on&quot;, &quot;labels&quot;: &quot;off&quot;, &quot;speed&quot;: &quot;0.15&quot;, &quot;rotor&quot;: &quot;on&quot;, &quot;delta&quot;: &quot;90&quot;, &quot;caption&quot;: &quot;Count the three norths. Follow one: it needs three electrical cycles to go all the way round.&quot;}'><button type=\"button\" class=\"btn ghost show-scene\">Show it in the motor<\/button><p>Field plus axes.<\/p><\/div>\n\n<div class=\"qa\" data-q=\"i4\"><\/div>\n\n<\/div><\/article>\n<article class=\"idea\"><span class=\"n\">5<\/span><div><h3>The rotor follows the field like a compass needle<\/h3>\n<p>The buried magnets are another field. Like a compass needle, the rotor wants its north axis to point along the stator field. Torque depends on the angle δ between the two: zero when aligned, maximum at 90°, zero again at 180°.<\/p>\n<div class=\"eq\">T ∝ Φmagnet · Φstator · sin δ    in dq terms: all current on q, δ = 90°<\/div>\n<p>This is a synchronous motor: there is average torque only if the field turns exactly with the rotor. To hold δ at 90° the controller must know where the rotor is at every instant. In your motor, the three Hall sensors at the back (40° mechanical apart, which is 120° electrical) give that at start-up; then the VESC estimates it.<\/p>\n<div class=\"scene-ref\" data-scene='{&quot;phases&quot;: &quot;3&quot;, &quot;field&quot;: &quot;on&quot;, &quot;currents&quot;: &quot;off&quot;, &quot;vectors&quot;: &quot;on&quot;, &quot;labels&quot;: &quot;off&quot;, &quot;speed&quot;: &quot;0.12&quot;, &quot;rotor&quot;: &quot;on&quot;, &quot;delta&quot;: &quot;90&quot;, &quot;caption&quot;: &quot;Accent arrow: the stator field. Green arrow: a rotor north. Move \\u03b4 with the slider and watch the torque-per-amp readout.&quot;}'><button type=\"button\" class=\"btn ghost show-scene\">Show it in the motor<\/button><p>Move δ.<\/p><\/div>\n\n<div class=\"qa\" data-q=\"i5\"><\/div>\n<p class=\"src\">Hughes §9.3.2, p. 318; §9.5.1, pp. 342–344<\/p>\n<\/div><\/article>\n<article class=\"idea\"><span class=\"n\">6<\/span><div><h3>Clarke: three currents become one arrow, two numbers<\/h3>\n<p>Instead of following three currents, follow their effect: the field arrow of idea 3. Add the three phases along their axes and scale by ⅔, so the arrow is as long as one phase peak. The arrow lives in a plane, so two numbers are enough: α along phase U, β 90° ahead. It holds at every instant, transients included.<\/p>\n<div class=\"eq\">iα = iU (when the three add to zero)    iβ = (iV − iW) / √3<\/div>\n<div class=\"labbox\" data-lab=\"clarke\" data-title=\"Three currents become one arrow\"><\/div>\n\n<div class=\"qa\" data-q=\"i6\"><\/div>\n<p class=\"src\">Hughes §8.2.1–8.2.2, fig. 8.3, pp. 262–266<\/p>\n<\/div><\/article>\n<\/section>\n<section class=\"sec\" id=\"s-lab\"><h2>Lab: touch it<\/h2>\n<p>Write your prediction before you press. If it surprises you, say why in the same box.<\/p>\n<div class=\"qa\" data-q=\"l1\"><\/div>\n\n<div class=\"qa\" data-q=\"l2\"><\/div>\n\n<div class=\"labbox\" data-lab=\"hexagon\" data-title=\"The hexagon and the two circles\"><\/div>\n\n<div class=\"qa\" data-q=\"l3\"><\/div>\n<p class=\"src\">Hughes §2.4.3, p. 71; §8.6.1, pp. 287–290<\/p>\n<\/section>\n<section class=\"sec\" id=\"s-judgement\"><h2>Judgement<\/h2>\n<p>Reason from what you know is true, not from what sounds familiar.<\/p>\n<div class=\"qa\" data-q=\"c1\"><\/div>\n\n<div class=\"qa\" data-q=\"c2\"><\/div>\n\n<\/section>\n<section class=\"sec\" id=\"s-close\"><h2>Close<\/h2>\n\n<div class=\"qa\" data-q=\"z0\"><\/div>\n\n<div class=\"qa\" data-q=\"z1\"><\/div>\n\n<\/section>", "questions": {"r1": {"kind": "recall", "prompt": "<p>Same coil, same current (same MMF). You double the air gap. What happens to the flux density in the gap, roughly, and why?<\/p>", "key": ["B roughly halves", "almost all the MMF is spent crossing the gap, because air is thousands of times harder for flux than iron", "so the gap length sets B: B ≈ μ0·N·I / g"], "traps": ["\"the flux stays the same\" (the mistake he made in L1 k1)", "talking about the magnet flux \"of the rotor\" as fixed without the gap"], "solution": "<p>B falls to about half. Air is roughly 2000 times harder for flux to cross than iron, so nearly all of the coil's MMF (N·I) is used up in the gap: B ≈ μ0·N·I / g. Double g, half B. This is why motor gaps are as thin as the mechanics allow.<\/p>", "prompt_text": "Same coil, same current (same MMF). You double the air gap. What happens to the flux density in the gap, roughly, and why?"}, "r2": {"kind": "recall", "prompt": "<p>Your quad cruises on the flat with a fixed average voltage on the motor (throttle not moving, voltage mode). A hill starts. In order: what happens to speed, back-EMF and current? Where does it settle?<\/p>", "key": ["the extra load torque slows the motor: speed drops", "back-EMF E = λ·ω drops with speed", "with fixed V, current I = (V − E)/R rises because V − E grows", "more current gives more torque; it settles where motor torque equals the new load, at a lower speed"], "traps": ["\"the current stays the same\" (L1 c1 mistake): that is current mode, not voltage mode", "\"the back-EMF drops because the load rises\" without the speed link"], "solution": "<p>Speed drops, so back-EMF (E = λm·ω) drops, so the voltage left to push current (V − E) grows and the current rises. Torque rises with current until it matches the hill: a new balance at lower speed and higher current. In your VESC it is different: in current mode the throttle sets the amps, so on the hill the torque stays the same and only the speed falls.<\/p>", "prompt_text": "Your quad cruises on the flat with a fixed average voltage on the motor (throttle not moving, voltage mode). A hill starts. In order: what happens to speed, back-EMF and current? Where does it settle?"}, "p1": {"kind": "predict", "prompt": "<p>One coil fed with alternating current. Does its magnetic field rotate, or does it only change size and direction?<\/p>", "key": ["it does not rotate: it pulsates along one fixed axis (grows, goes to zero, reverses)", "rotation needs several coils displaced in space and fed with currents displaced in time"], "traps": ["\"it rotates because the current alternates\""], "solution": "<p>It does not rotate. It grows, falls to zero and reverses, always along the same axis: a pulsating field. Rotation needs coils spread around the bore and currents shifted in time (idea 3).<\/p>", "prompt_text": "One coil fed with alternating current. Does its magnetic field rotate, or does it only change size and direction?"}, "p2": {"kind": "predict", "prompt": "<p>Your motor has 6 magnets (3 pole pairs). If the stator field does one full electrical turn, how far does the rotor turn?<\/p>", "key": ["one third of a turn (120° mechanical)", "one electrical turn covers one N–S pair; with p = 3 a mechanical turn is 3 electrical turns: θe = p·θm"], "traps": [], "solution": "<p>A third of a turn. One electrical cycle moves the field by one north–south pair; your rotor has three pairs, so θe = 3·θm (idea 4).<\/p>", "prompt_text": "Your motor has 6 magnets (3 pole pairs). If the stator field does one full electrical turn, how far does the rotor turn?"}, "i1": {"kind": "calc", "prompt": "<p>Flux from one magnet crosses a 0.8 mm gap twice per loop and runs about 100 mm through steel with μr = 2000. Which part needs more MMF, and about how many times more? Same cross-section everywhere, for simplicity.<\/p>", "key": ["reluctance is proportional to length / μr", "air: 2 × 0.8 mm = 1.6 mm of air", "steel: 100 mm / 2000 = 0.05 mm of \"equivalent air\"", "the gap needs about 30 times more MMF than all the steel"], "traps": ["forgetting the gap is crossed twice", "saying the steel needs more because it is longer"], "solution": "<p>Gap: 2 × 0.8 = 1.6 mm of air. Steel: 100 mm / 2000 = 0.05 mm of equivalent air. The gap needs about 1.6 / 0.05 ≈ 32 times more MMF. The steel is a nearly free road; the gap is the toll.<\/p>", "prompt_text": "Flux from one magnet crosses a 0.8 mm gap twice per loop and runs about 100 mm through steel with μr = 2000. Which part needs more MMF, and about how many times more? Same cross-section everywhere, for simplicity."}, "i2": {"kind": "check", "prompt": "<p>At the instant iU is at its positive peak Î, what are iV and iW? Reason it, do not recall it.<\/p>", "key": ["both are −Î/2", "cos(−120°) = cos(−240°) = −½", "they add to zero with iU"], "traps": [], "solution": "<p>−Î/2 each: cos(−120°) = cos(−240°) = −½. Î − Î/2 − Î/2 = 0, as it must.<\/p>", "prompt_text": "At the instant iU is at its positive peak Î, what are iV and iW? Reason it, do not recall it."}, "i3": {"kind": "check", "prompt": "<p>What would happen if the three coils sat in the same slots, with the currents still 120° apart in time?<\/p>", "key": ["the three fields would be on the same axis", "they would add to zero at every instant, because iU + iV + iW = 0", "no field at all: the time shift is useless without the space shift"], "traps": [], "solution": "<p>Their fields would lie on the same axis and add to zero all the time, because the currents add to zero. No field. You need both shifts.<\/p>", "prompt_text": "What would happen if the three coils sat in the same slots, with the currents still 120° apart in time?"}, "i4": {"kind": "calc", "prompt": "<p>Your motor at 4000 rpm: what frequency do the phase currents have? How many 30 kHz PWM periods fit in one electrical cycle?<\/p>", "key": ["fe = 3 × 4000 / 60 = 200 Hz", "30 000 / 200 = 150 PWM periods per electrical cycle", "plenty to build a decent sine"], "traps": [], "solution": "<p>fe = 3 · 4000 / 60 = 200 Hz. 30 000 / 200 = 150 PWM periods per cycle: plenty for a smooth sine. Hughes counts poles (2p) and writes 120·f / poles: the same thing.<\/p>", "prompt_text": "Your motor at 4000 rpm: what frequency do the phase currents have? How many 30 kHz PWM periods fit in one electrical cycle?"}, "i5": {"kind": "calc", "prompt": "<p>The rotor position estimate is off by 30° electrical. How much torque do you lose per amp? And if it is off by 90°?<\/p>", "key": ["torque ∝ sin δ: with 30° error, δ = 60° or 120°, sin = 0.87: you lose about 13 %", "with 90° error, sin 0° = 0: no torque, all the current only heats the copper", "the rotor angle is the most critical measurement of the control"], "traps": [], "solution": "<p>sin 60° ≈ 0.87: about 13 % less torque per amp. With 90° of error, sin 0° = 0: zero torque and all the current goes into heat. That is why the rotor angle matters more than any other signal.<\/p>", "prompt_text": "The rotor position estimate is off by 30° electrical. How much torque do you lose per amp? And if it is off by 90°?"}, "i6": {"kind": "calc", "prompt": "<p>100 A peak currents at ωt = 120°. Compute iU, iV, iW, then iα, iβ, the length and the angle of the arrow. What does the result check?<\/p>", "key": ["iU = −50 A, iV = 100 A, iW = −50 A", "iα = −50 A, iβ = 150/√3 = 86.6 A", "length 100 A = the peak, angle 120° = ωt"], "traps": ["using sin instead of cos for the phases"], "solution": "<p>iU = −50 A, iV = 100 A, iW = −50 A, so iα = −50 A and iβ = 150/√3 = 86.6 A. Length 100 A, angle 120°. The arrow sits where the time says and is as long as the peak says.<\/p>", "prompt_text": "100 A peak currents at ωt = 120°. Compute iU, iV, iW, then iα, iβ, the length and the angle of the arrow. What does the result check?"}, "l1": {"kind": "lab", "prompt": "<p>In the motor: press \"U only\", then \"U, V, W\", with the gap field on. Before pressing: what do you expect in each case? Does the size of the biggest arrows change?<\/p>", "key": ["U only: the arrows grow and shrink in place, nothing travels (pulsating)", "U, V, W: the pattern travels round and the peak keeps the same size", "the peak with three phases is 1.5 times the peak of one"], "traps": [], "solution": "<p>U only: arrows grow and shrink without moving. Three phases: the pattern travels and the peak keeps its size, 1.5 times the single-phase peak.<\/p>", "prompt_text": "In the motor: press \"U only\", then \"U, V, W\", with the gap field on. Before pressing: what do you expect in each case? Does the size of the biggest arrows change?"}, "l2": {"kind": "lab", "prompt": "<p>Press \"Swap V and W\". Predict first: what changes in the field, and what would the quad do if you swapped two motor wires on the real VESC?<\/p>", "key": ["the field turns the other way", "the motor runs backwards for the same command", "on a real VESC the detection or direction setting fixes it; Hall order must match"], "traps": [], "solution": "<p>The field reverses direction, so the motor spins the other way for the same command. On the real quad you either swap back or invert the direction in the VESC; the Hall sensor order must match the phase order or start-up fails.<\/p>", "prompt_text": "Press \"Swap V and W\". Predict first: what changes in the field, and what would the quad do if you swapped two motor wires on the real VESC?"}, "l3": {"kind": "lab", "prompt": "<p>Bus at 52 V. Raise the asked voltage until the arrow turns red, at 0° and at 30°. Where can you go further? Why is only the circle usable if you want sine currents?<\/p>", "key": ["the corners (0°, 60°…) reach further than the middle of the sides (30°…)", "only the inscribed circle, radius Vbus/√3 = 30 V, is reachable at every angle", "following the hexagon would change the arrow length as it turns: not a sine, harmonics and torque ripple"], "traps": [], "solution": "<p>At the corners you reach 34.7 V, between them only 30 V. For a sine the arrow must keep its length all the way round, so only the inscribed circle counts: Vbus/√3 = 30.0 V peak with your 52 V bus, 15 % more than the 26 V of sine PWM.<\/p>", "prompt_text": "Bus at 52 V. Raise the asked voltage until the arrow turns red, at 0° and at 30°. Where can you go further? Why is only the circle usable if you want sine currents?"}, "c1": {"kind": "case", "prompt": "<p>Phase W breaks open: iW = 0, so iV = −iU. What does the current arrow do? Does it rotate? What happens to a motor at standstill trying to start like this? And to one already running?<\/p>", "key": ["iα = iU and iβ = −iU/√3: the arrow stays on one line and only changes length and sign", "it pulsates, like a single phase", "at standstill: no average torque, it does not know which way to go, it only vibrates", "already running: a pulsating field is two half fields turning opposite ways; the one turning with the rotor still gives torque, so it can keep running with less torque and strong ripple at twice the electrical frequency"], "traps": [], "solution": "<p>iα = iU, iβ = −iU/√3: the arrow stays on one line (at −30°) and only grows, shrinks and reverses. It pulsates. Stopped: zero average torque, so it does not start, it vibrates. Running: the pulsating field splits into two half-fields turning opposite ways; the forward one keeps giving torque, so it keeps running with less torque and ripple at twice the electrical frequency.<\/p>", "prompt_text": "Phase W breaks open: iW = 0, so iV = −iU. What does the current arrow do? Does it rotate? What happens to a motor at standstill trying to start like this? And to one already running?"}, "c2": {"kind": "error", "prompt": "<p>A colleague says: \"Clarke turns three currents into two numbers, so it loses information. That is why the inverter has to measure all three phases.\" Where is he wrong?<\/p>", "key": ["in a star motor with no neutral connected, iU + iV + iW = 0 always (Kirchhoff at the star point)", "the third current is not new information: it follows from the other two", "Clarke loses nothing; two sensors are enough", "a third sensor is useful for fault detection: if the sum is not zero, something is wrong"], "traps": [], "solution": "<p>With the star point not connected, Kirchhoff forces iU + iV + iW = 0. The third current carries no new information, so Clarke loses nothing and two current sensors are enough. A third one is for fault detection: if the sum is not zero, something leaks.<\/p>", "prompt_text": "A colleague says: \"Clarke turns three currents into two numbers, so it loses information. That is why the inverter has to measure all three phases.\" Where is he wrong?"}, "z0": {"kind": "explain", "prompt": "<p>Explain it as you would to an interviewer, in at most 5 lines: how do 18 slots of copper that never move, with currents that only go up and down, make a field that turns, and what does your rotor do with it?<\/p>", "key": ["three phases displaced 120° in space and fed 120° apart in time", "each pulsates on its axis; the sum is one field of constant size that rotates", "p = 3: the field turns once per three electrical cycles", "the magnets lock to it like a compass; torque ∝ sin δ, maximum at 90°, so the controller needs the rotor angle"], "traps": [], "solution": "<p>Three phases sit 120° apart (electrical) around the bore and carry currents 120° apart in time. Each one alone only pulsates; together they make one field of constant strength that rotates, one pole pair per electrical cycle, so a third of a turn per cycle in my p = 3 motor. The rotor magnets lock onto it like a compass; torque is maximum when the field leads the rotor by 90°, which is why the controller must know the rotor angle.<\/p>", "prompt_text": "Explain it as you would to an interviewer, in at most 5 lines: how do 18 slots of copper that never move, with currents that only go up and down, make a field that turns, and what does your rotor do with it?"}, "z1": {"kind": "doubt", "prompt": "<p>What is still unclear? Write it as it is. Claude explains it now, and it goes to the \"what I don't get\" part of the review with your mentors.<\/p>", "key": [], "traps": [], "solution": "", "prompt_text": "What is still unclear? Write it as it is. Claude explains it now, and it goes to the \"what I don't get\" part of the review with your mentors."}}, "hasScene": true}]}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/* Motor3D — Pol's motor as it is built: an interior-magnet PMSM with an inner rotor and an outer
+   slotted stator, p = 3. One scene for every lesson; a lesson changes its state with presets.
+   Proportions and slot count (18, q = 1) are illustrative: slot count and magnet layout are not
+   measured (03_hardware/baseline.md). The air gap is drawn about twice its real size. */
+window.Motor3D = (function () {
+  const TAU = Math.PI * 2, D2R = Math.PI / 180;
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fmt = (x, d) => (Math.abs(x) < 5e-10 ? 0 : x).toLocaleString('en-GB', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // geometry, in centimetres-ish scene units
+  const P = 3, NS = 18, RSO = 6.0, RB = 3.7, RS = 5.0, R1 = RB + 0.16, W1 = 0.19, W2 = 0.38, OPEN = 0.11;
+  const RR = 3.52, RSH = 0.85, L = 5.0, NLAM = 10;
+  const RM = 2.85, MA = 1.15, MT = 0.32; // magnet bar: radial position, half length, thickness
+  // slot n holds this phase with this sign (q = 1, full pitch, 60 deg phase belts): U+ W- V+ U- W+ V-
+  const BELT = [[0, 1], [2, -1], [1, 1], [0, -1], [2, 1], [1, -1]];
+  const slotAngle = n => (n + 0.5) * TAU / NS;
+
+  const DEFAULT = { phases: 3, field: true, currents: true, labels: false, rotor: true, vectors: false, spin: true, speed: 0.2, delta: 90, endturns: true, caption: '' };
+
+  function mount(host) {
+    const vp = host.querySelector('.vp'), labelsEl = host.querySelector('.labels'), hud = host.querySelector('.hud');
+    const S = Object.assign({}, DEFAULT, { wt: 30 * D2R });
+    if (!window.THREE) { vp.innerHTML = '<p class="fallback">The 3D motor did not load (no connection to the 3D library). The rest of the lesson works.</p>'; return null; }
+    const T = THREE;
+    let renderer;
+    try { renderer = new T.WebGLRenderer({ antialias: true, alpha: true }); } catch (e) { vp.innerHTML = '<p class="fallback">This browser has no WebGL, so the 3D motor cannot run here.</p>'; return null; }
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    vp.prepend(renderer.domElement);
+    const scene = new T.Scene();
+    const cam = new T.PerspectiveCamera(36, 1, 0.1, 200);
+    cam.position.set(4.2, -10.5, 23.5); cam.up.set(0, 0, 1); cam.lookAt(0, 0, 0);
+    const controls = T.OrbitControls ? new T.OrbitControls(cam, renderer.domElement) : null;
+    if (controls) { controls.enableDamping = true; controls.minDistance = 7; controls.maxDistance = 30; controls.enablePan = false; }
+    scene.add(new T.HemisphereLight(0xffffff, 0x445048, 0.95));
+    const key = new T.DirectionalLight(0xffffff, 0.75); key.position.set(6, -8, 14); scene.add(key);
+    const rim = new T.DirectionalLight(0xffffff, 0.35); rim.position.set(-8, 6, -4); scene.add(rim);
+    const col = n => new T.Color(css(n) || '#888');
+
+    const mats = {
+      steel: new T.MeshStandardMaterial({ color: 0xb9c3c8, metalness: 0.15, roughness: 0.5 }),
+      steelDark: new T.MeshStandardMaterial({ color: 0x96a1a7, metalness: 0.15, roughness: 0.55 }),
+      shaft: new T.MeshStandardMaterial({ color: 0xd6dadc, metalness: 0.25, roughness: 0.3 }),
+      hall: new T.MeshStandardMaterial({ color: 0x1b1e1f, roughness: 0.6 }),
+      magN: new T.MeshStandardMaterial({ color: col('--magN'), metalness: 0.1, roughness: 0.4 }),
+      magS: new T.MeshStandardMaterial({ color: col('--magS'), metalness: 0.1, roughness: 0.4 }),
+    };
+    const phaseCol = () => [col('--u'), col('--v'), col('--w')];
+    const copperMats = [0, 1, 2].map(k => new T.MeshStandardMaterial({ color: 0xd27b3c, metalness: 0.25, roughness: 0.35, emissive: phaseCol()[k], emissiveIntensity: 0 }));
+    const endMats = [0, 1, 2].map(k => new T.MeshStandardMaterial({ color: phaseCol()[k], metalness: 0.2, roughness: 0.5, emissive: phaseCol()[k], emissiveIntensity: 0 }));
+
+    // ---- stator lamination: outer circle, bore with 18 slots ----
+    function pt(theta, rad, w) { const c = Math.cos(theta), s = Math.sin(theta); return new T.Vector2(c * rad - s * w, s * rad + c * w); }
+    function boreContour() {
+      const pts = [];
+      for (let n = 0; n < NS; n++) {
+        const th = slotAngle(n);
+        pts.push(pt(th, RB, -OPEN), pt(th, RB + 0.1, -OPEN), pt(th, R1, -W1), pt(th, RS - 0.28, -W2), pt(th, RS - 0.05, -W2 * 0.62), pt(th, RS + 0.06, 0),
+          pt(th, RS - 0.05, W2 * 0.62), pt(th, RS - 0.28, W2), pt(th, R1, W1), pt(th, RB + 0.1, OPEN), pt(th, RB, OPEN));
+        const a0 = th + OPEN / RB, a1 = slotAngle(n + 1) - OPEN / RB;
+        for (let k = 1; k < 6; k++) { const a = a0 + (a1 - a0) * k / 6; pts.push(new T.Vector2(RB * Math.cos(a), RB * Math.sin(a))); }
+      }
+      return pts;
+    }
+    const statorShape = new T.Shape(); statorShape.absarc(0, 0, RSO, 0, TAU, false);
+    statorShape.holes.push(new T.Path(boreContour()));
+    const lamD = L / NLAM;
+    const statorG = new T.Group(); scene.add(statorG);
+    const statorGeo = new T.ExtrudeGeometry(statorShape, { depth: lamD - 0.035, bevelEnabled: false, curveSegments: 80 });
+    for (let k = 0; k < NLAM; k++) { const m = new T.Mesh(statorGeo, k % 2 ? mats.steel : mats.steelDark); m.position.z = -L / 2 + k * lamD; statorG.add(m); }
+
+    // ---- copper in the slots ----
+    function slotFill(th) {
+      return new T.Shape([pt(th, R1 + 0.05, -(W1 - 0.04)), pt(th, RS - 0.3, -(W2 - 0.05)), pt(th, RS - 0.08, -W2 * 0.5), pt(th, RS + 0.0, 0), pt(th, RS - 0.08, W2 * 0.5), pt(th, RS - 0.3, W2 - 0.05), pt(th, R1 + 0.05, W1 - 0.04)]);
+    }
+    const slots = [];
+    for (let n = 0; n < NS; n++) {
+      const [ph, sign] = BELT[n % 6];
+      const geo = new T.ExtrudeGeometry(slotFill(slotAngle(n)), { depth: L + 0.2, bevelEnabled: false });
+      const m = new T.Mesh(geo, copperMats[ph]); m.position.z = -L / 2 - 0.1; statorG.add(m);
+      slots.push({ n, ph, sign, th: slotAngle(n) });
+    }
+    // ---- end windings: each coil goes from a + slot to the - slot three slots on ----
+    const endG = new T.Group(); statorG.add(endG);
+    const rc = (R1 + RS) / 2;
+    slots.filter(s => s.sign > 0).forEach(s => {
+      [-1, 1].forEach(side => {
+        const a0 = s.th, a1 = slotAngle(s.n + 3), z0 = side * (L / 2 + 0.1), pts = [];
+        for (let k = 0; k <= 16; k++) { const f = k / 16, a = a0 + (a1 - a0) * f, bulge = Math.sin(Math.PI * f); pts.push(new T.Vector3((rc + 0.25 * bulge) * Math.cos(a), (rc + 0.25 * bulge) * Math.sin(a), z0 + side * (0.15 + 0.75 * bulge))); }
+        const tube = new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts), 32, 0.2, 10, false), endMats[s.ph]);
+        tube.userData.side = side; endG.add(tube);
+      });
+    });
+    // ---- Hall sensors at the back, 40 deg mechanical apart = 120 deg electrical ----
+    [0, 40, 80].forEach(d => { const a = d * D2R + TAU / NS; const h = new T.Mesh(new T.BoxGeometry(0.35, 0.5, 0.25), mats.hall); h.position.set((RB + 0.25) * Math.cos(a), (RB + 0.25) * Math.sin(a), -L / 2 - 0.15); h.rotation.z = a; statorG.add(h); });
+
+    // ---- rotor: laminated core with interior magnet bars and flux barriers ----
+    function pocket(phi) {
+      const loc = [[RM - MT / 2, -MA], [RM - MT / 2, MA], [RM + 0.1, MA + 0.3], [RM + 0.32, MA + 0.22], [RM + MT / 2, MA], [RM + MT / 2, -MA], [RM + 0.32, -MA - 0.22], [RM + 0.1, -MA - 0.3]];
+      return loc.map(([x, y]) => pt(phi, x, y));
+    }
+    const rotorShape = new T.Shape(); rotorShape.absarc(0, 0, RR, 0, TAU, false);
+    const shaftHole = new T.Path(); shaftHole.absarc(0, 0, RSH, 0, TAU, true); rotorShape.holes.push(shaftHole);
+    for (let j = 0; j < 2 * P; j++) rotorShape.holes.push(new T.Path(pocket(j * TAU / (2 * P))));
+    const rotorG = new T.Group(); scene.add(rotorG);
+    const rotorGeo = new T.ExtrudeGeometry(rotorShape, { depth: lamD - 0.035, bevelEnabled: false, curveSegments: 72 });
+    for (let k = 0; k < NLAM; k++) { const m = new T.Mesh(rotorGeo, k % 2 ? mats.steel : mats.steelDark); m.position.z = -L / 2 + k * lamD; rotorG.add(m); }
+    const magnets = [];
+    for (let j = 0; j < 2 * P; j++) {
+      const phi = j * TAU / (2 * P);
+      const shp = new T.Shape([pt(phi, RM - MT / 2 + 0.02, -MA + 0.02), pt(phi, RM + MT / 2 - 0.02, -MA + 0.02), pt(phi, RM + MT / 2 - 0.02, MA - 0.02), pt(phi, RM - MT / 2 + 0.02, MA - 0.02)]);
+      const m = new T.Mesh(new T.ExtrudeGeometry(shp, { depth: L - 0.04, bevelEnabled: false }), j % 2 ? mats.magS : mats.magN);
+      m.position.z = -L / 2 + 0.02; rotorG.add(m); magnets.push(m);
+    }
+    const shaft = new T.Mesh(new T.CylinderGeometry(RSH, RSH, L + 4.5, 40), mats.shaft); shaft.rotation.x = Math.PI / 2; shaft.position.z = -0.9; rotorG.add(shaft);
+    const key3 = new T.Mesh(new T.BoxGeometry(0.3, 0.3, 1.6), mats.steelDark); key3.position.set(RSH, 0, L / 2 + 0.9); rotorG.add(key3);
+
+    // ---- air-gap field arrows on the front face ----
+    const arrowG = new T.Group(); scene.add(arrowG);
+    const NA = 90, arrows = [];
+    for (let k = 0; k < NA; k++) { const th = k / NA * TAU; const a = new T.ArrowHelper(new T.Vector3(1, 0, 0), new T.Vector3(), 0.4, 0x888888, 0.12, 0.09); a.userData.th = th; arrowG.add(a); arrows.push(a); }
+    // ---- vectors: stator field axis and rotor N axis (one pole pair shown) ----
+    const vecG = new T.Group(); scene.add(vecG);
+    const vStator = new T.ArrowHelper(new T.Vector3(1, 0, 0), new T.Vector3(0, 0, L / 2 + 1.6), 3.4, 0xffffff, 0.45, 0.3);
+    const vRotor = new T.ArrowHelper(new T.Vector3(1, 0, 0), new T.Vector3(0, 0, L / 2 + 1.55), 2.7, 0xffffff, 0.4, 0.28);
+    vecG.add(vStator, vRotor);
+    // ---- current glyphs (dot = out of the page, cross = into it) on each slot face ----
+    function glyph(dot) {
+      const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+      g.fillStyle = 'rgba(255,255,255,.92)'; g.beginPath(); g.arc(32, 32, 28, 0, TAU); g.fill();
+      g.strokeStyle = '#111'; g.lineWidth = 5; g.beginPath(); g.arc(32, 32, 26, 0, TAU); g.stroke();
+      if (dot) { g.fillStyle = '#111'; g.beginPath(); g.arc(32, 32, 8, 0, TAU); g.fill(); } else { g.beginPath(); g.moveTo(16, 16); g.lineTo(48, 48); g.moveTo(48, 16); g.lineTo(16, 48); g.stroke(); }
+      const t = new T.CanvasTexture(c); return new T.SpriteMaterial({ map: t, depthTest: false });
+    }
+    const gDot = glyph(true), gCross = glyph(false);
+    const glyphs = slots.map(s => { const sp = new T.Sprite(gDot); sp.position.set(rc * Math.cos(s.th), rc * Math.sin(s.th), L / 2 + 0.25); sp.scale.set(0.42, 0.42, 1); scene.add(sp); return sp; });
+
+    // ---- labels ----
+    const tooth = TAU / NS;
+    const LABELS = [
+      ['Stator lamination stack (steel)', new T.Vector3(5.5 * Math.cos(1.05), 5.5 * Math.sin(1.05), L / 2)],
+      ['Tooth', new T.Vector3(4.3 * Math.cos(2 * tooth), 4.3 * Math.sin(2 * tooth), L / 2)],
+      ['Slot with copper winding', new T.Vector3(4.45 * Math.cos(slotAngle(4)), 4.45 * Math.sin(slotAngle(4)), L / 2 + 0.1)],
+      ['Air gap (drawn 2× real)', new T.Vector3(3.61 * Math.cos(3.3), 3.61 * Math.sin(3.3), L / 2)],
+      ['Rotor lamination', new T.Vector3(1.6 * Math.cos(2.6), 1.6 * Math.sin(2.6), L / 2), true],
+      ['Magnet inside the rotor', new T.Vector3(RM * Math.cos(TAU / 6 * 4), RM * Math.sin(TAU / 6 * 4), L / 2), true],
+      ['Flux barrier (air)', null, true],
+      ['Shaft', new T.Vector3(0, 0, L / 2 + 2.2), true],
+      ['End winding', new T.Vector3(rc * Math.cos(slotAngle(10)), rc * Math.sin(slotAngle(10)), -L / 2 - 0.9)],
+      ['Hall sensors', new T.Vector3((RB + 0.3) * Math.cos(TAU / NS + 0.7), (RB + 0.3) * Math.sin(TAU / NS + 0.7), -L / 2 - 0.3)],
+    ];
+    { const phi = TAU / 6 * 4; const p2 = pt(phi, RM + 0.25, MA + 0.28); LABELS[6][1] = new T.Vector3(p2.x, p2.y, L / 2); }
+    const labelEls = LABELS.map(([t]) => { const s = document.createElement('span'); s.textContent = t; labelsEl.appendChild(s); return s; });
+
+    function applyColors() {
+      mats.magN.color = col('--magN'); mats.magS.color = col('--magS');
+      const pc = phaseCol(); copperMats.forEach((m, k) => m.emissive = pc[k]); endMats.forEach((m, k) => { m.color = pc[k]; m.emissive = pc[k]; });
+    }
+    function resize() {
+      const w = vp.clientWidth, h = vp.clientHeight; if (!w || !h) return;
+      renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix();
+    }
+    new ResizeObserver(resize).observe(vp); resize();
+    new MutationObserver(applyColors).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', applyColors);
+
+    function currents(wt) {
+      if (S.phases === 0) return [0, 0, 0];
+      const order = S.phases === 'swap' ? [0, 2, 1] : [0, 1, 2];
+      const i = [0, 1, 2].map(k => Math.cos(wt - order[k] * 120 * D2R));
+      if (S.phases === 1) { i[1] = 0; i[2] = 0; }
+      return i;
+    }
+    // field peak electrical angle; NaN when the field does not rotate
+    const fieldE = () => S.phases === 3 ? S.wt : S.phases === 'swap' ? -S.wt : NaN;
+    let rotorE = 0;
+
+    let visible = true;
+    new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(vp);
+    let last = performance.now(), lastHud = 0;
+    function frame(now) {
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      if (visible) {
+        if (S.spin && !reduce && S.phases !== 0) S.wt = (S.wt + TAU * S.speed * dt) % TAU;
+        const i = currents(S.wt), fE = fieldE();
+        if (!isNaN(fE)) rotorE = fE - S.delta * D2R;
+        rotorG.rotation.z = S.rotor ? rotorE / P : rotorG.rotation.z;
+        rotorG.visible = S.rotor;
+        const nC = col('--magN'), sC = col('--magS');
+        arrowG.visible = S.field;
+        if (S.field) arrows.forEach(a => {
+          const th = a.userData.th; let B = 0;
+          for (let k = 0; k < 3; k++) B += i[k] * Math.cos(P * th - k * 120 * D2R);
+          const Lr = Math.max(0.03, Math.abs(B) * 0.75), out = B >= 0;
+          const dir = new T.Vector3(Math.cos(th), Math.sin(th), 0).multiplyScalar(out ? 1 : -1);
+          const r = out ? RB - 0.05 : RB - 0.05 + Lr;
+          a.position.set(r * Math.cos(th), r * Math.sin(th), L / 2 + 0.12);
+          a.setDirection(dir); a.setLength(Lr, Math.min(0.24, Lr * 0.45), 0.16); a.setColor(out ? nC : sC);
+        });
+        copperMats.forEach((m, k) => m.emissiveIntensity = S.currents ? 0.55 * Math.abs(i[k]) : 0);
+        endMats.forEach((m, k) => m.emissiveIntensity = S.currents ? 0.45 * Math.abs(i[k]) : 0.05);
+        endG.children.forEach(t => t.visible = S.endturns && (t.userData.side < 0 || S.endturns === 'both'));
+        glyphs.forEach((g, n) => { const s = slots[n], v = i[s.ph] * s.sign; g.visible = S.currents && Math.abs(v) > 0.08; g.material = v >= 0 ? gDot : gCross; const sc = 0.22 + 0.3 * Math.abs(v); g.scale.set(sc, sc, 1); });
+        vecG.visible = S.vectors;
+        if (S.vectors) {
+          vStator.visible = !isNaN(fE);
+          if (!isNaN(fE)) { const a = fE / P; vStator.setDirection(new T.Vector3(Math.cos(a), Math.sin(a), 0)); vStator.setColor(col('--accent')); }
+          const ar = rotorG.rotation.z; vRotor.setDirection(new T.Vector3(Math.cos(ar), Math.sin(ar), 0)); vRotor.setColor(col('--magN'));
+        }
+        if (controls) controls.update();
+        renderer.render(scene, cam);
+        // labels
+        const w = vp.clientWidth, h = vp.clientHeight;
+        LABELS.forEach(([, p, onRotor], k) => {
+          const el = labelEls[k];
+          if (!S.labels || (onRotor && !S.rotor)) { el.classList.add('hidden'); return; }
+          const v = p.clone(); if (onRotor) v.applyAxisAngle(new T.Vector3(0, 0, 1), rotorG.rotation.z);
+          v.project(cam);
+          if (v.z > 1) { el.classList.add('hidden'); return; }
+          el.classList.remove('hidden'); el.style.left = ((v.x + 1) / 2 * w) + 'px'; el.style.top = ((1 - v.y) / 2 * h - 8) + 'px';
+        });
+        if (now - lastHud > 120) { lastHud = now; updateReadout(i, fE); }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    // ---- controls and readout ----
+    const ro = host.querySelector('.readout'), cap = host.querySelector('.caption');
+    function updateReadout(i, fE) {
+      const deg = x => fmt(((x / D2R) % 360 + 360) % 360, 0) + '°';
+      const rows = [['iU', fmt(i[0] * 100, 0) + ' %'], ['iV', fmt(i[1] * 100, 0) + ' %'], ['iW', fmt(i[2] * 100, 0) + ' %'],
+        ['Electrical angle ωt', deg(S.wt)], ['Field peak (mechanical)', isNaN(fE) ? 'not rotating' : deg(fE / P)],
+        ['Torque per amp', isNaN(fE) ? '0 on average' : fmt(Math.sin(S.delta * D2R) * 100, 0) + ' % of max']];
+      ro.innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+      hud.textContent = S.phases === 0 ? 'no current' : S.phases === 1 ? 'phase U only' : S.phases === 'swap' ? 'V and W swapped' : 'U, V, W';
+    }
+    const segs = {};
+    host.querySelectorAll('[data-set]').forEach(b => {
+      const [k, v] = b.dataset.set.split('=');
+      (segs[k] = segs[k] || []).push(b);
+      b.addEventListener('click', () => set({ [k]: parseVal(k, v) }));
+    });
+    host.querySelectorAll('[data-toggle]').forEach(b => b.addEventListener('click', () => set({ [b.dataset.toggle]: !S[b.dataset.toggle] })));
+    const sp = host.querySelector('#m-speed'), de = host.querySelector('#m-delta');
+    sp.addEventListener('input', () => set({ speed: +sp.value })); de.addEventListener('input', () => set({ delta: +de.value }));
+    function parseVal(k, v) {
+      if (v === 'true' || v === 'on') return true; if (v === 'false' || v === 'off') return false;
+      if (k === 'phases') return v === 'swap' ? 'swap' : +v;
+      if (k === 'endturns' && v === 'both') return 'both';
+      return isNaN(+v) ? v : +v;
+    }
+    function sync() {
+      Object.entries(segs).forEach(([k, bs]) => bs.forEach(b => b.setAttribute('aria-pressed', String(String(parseVal(k, b.dataset.set.split('=')[1])) === String(S[k])))));
+      host.querySelectorAll('[data-toggle]').forEach(b => b.setAttribute('aria-pressed', String(!!S[b.dataset.toggle])));
+      sp.value = S.speed; host.querySelector('#o-speed').textContent = fmt(S.speed, 2) + ' cycles/s';
+      de.value = S.delta; host.querySelector('#o-delta').textContent = fmt(S.delta, 0) + '°';
+      cap.textContent = S.caption || '';
+    }
+    function set(patch) { Object.assign(S, patch); sync(); }
+    function preset(attrs) {
+      const p = Object.assign({}, DEFAULT);
+      Object.entries(attrs || {}).forEach(([k, v]) => { p[k] = k === 'caption' ? v : parseVal(k, v); });
+      if ('wt' in p) p.wt = p.wt * D2R; else delete p.wt;
+      set(p);
+    }
+    applyColors(); sync(); requestAnimationFrame(frame);
+    return { set, preset, state: S };
+  }
+
+  function panelHTML() {
+    return `<div class="motor" id="motor">
+  <div class="vp"><div class="labels"></div><div class="hud"></div></div>
+  <div class="body">
+    <p class="caption"></p>
+    <div class="seg" role="group" aria-label="Phase currents">
+      <button type="button" data-set="phases=0">No current</button><button type="button" data-set="phases=1">U only</button>
+      <button type="button" data-set="phases=3">U, V, W</button><button type="button" data-set="phases=swap">Swap V and W</button>
+    </div>
+    <div class="seg" role="group" aria-label="Layers">
+      <button type="button" data-toggle="labels">Labels</button><button type="button" data-toggle="field">Gap field</button>
+      <button type="button" data-toggle="currents">Currents ⊙⊗</button><button type="button" data-toggle="vectors">Field and rotor axes</button>
+      <button type="button" data-toggle="rotor">Rotor</button><button type="button" data-toggle="spin">Run</button>
+    </div>
+    <div class="ctl">
+      <div><label for="m-speed">Electrical speed <output id="o-speed"></output></label><input id="m-speed" type="range" min="0.02" max="1" step="0.01"></div>
+      <div><label for="m-delta">Angle δ, rotor behind field <output id="o-delta"></output></label><input id="m-delta" type="range" min="0" max="180" step="1"></div>
+    </div>
+    <dl class="readout"></dl>
+    <p class="legend"><span><i style="background:var(--u)"></i>U</span><span><i style="background:var(--v)"></i>V</span><span><i style="background:var(--w)"></i>W</span><span><i style="background:var(--magN)"></i>N magnet · field out of rotor</span><span><i style="background:var(--magS)"></i>S magnet · field into rotor</span></p>
+    <p class="src">18 slots and the magnet layout are illustrative: neither is measured yet. p = 3 is measured. Drag to turn, wheel or pinch to zoom.</p>
+  </div>
+</div>`;
+  }
+  return { mount, panelHTML };
+})();
+
+</script>
+<script>
+/* Labs — small 2D interactives a lesson places with :::lab <name>. Each mounts into a .labbox. */
+window.Labs = (function () {
+  const D2R = Math.PI / 180, TAU = Math.PI * 2;
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fmt = (x, d = 1) => (Math.abs(x) < 5e-10 ? 0 : x).toLocaleString('en-GB', { minimumFractionDigits: d, maximumFractionDigits: d });
+  function fit(c, h) {
+    const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, w = Math.max(240, r.width);
+    c.style.height = h + 'px'; c.width = w * dpr; c.height = h * dpr; const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); return { g, w, h };
+  }
+  function arrow(g, x0, y0, x1, y1, col, w) {
+    g.strokeStyle = col; g.fillStyle = col; g.lineWidth = w; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
+    const a = Math.atan2(y1 - y0, x1 - x0), L = Math.hypot(x1 - x0, y1 - y0); if (L < 4) return; const hh = Math.min(10, L * 0.4);
+    g.beginPath(); g.moveTo(x1, y1); g.lineTo(x1 - hh * Math.cos(a - 0.4), y1 - hh * Math.sin(a - 0.4)); g.lineTo(x1 - hh * Math.cos(a + 0.4), y1 - hh * Math.sin(a + 0.4)); g.closePath(); g.fill();
+  }
+  const readout = rows => rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+  const slider = (id, label, min, max, step, val) => `<div><label for="${id}">${label} <output id="${id}-o"></output></label><input id="${id}" type="range" min="${min}" max="${max}" step="${step}" value="${val}"></div>`;
+
+  function clarke(box) {
+    box.insertAdjacentHTML('beforeend', `
+      <div class="seg" role="group" aria-label="Mode"><button type="button" id="cl-sine" aria-pressed="true">Balanced sines</button><button type="button" id="cl-free" aria-pressed="false">Free values</button><button type="button" id="cl-play">Animate ωt</button></div>
+      <div class="ctl" id="cl-c-sine">${slider('cl-wt', 'Instant ωt', 0, 360, 1, 30)}${slider('cl-amp', 'Peak current', 10, 120, 1, 100)}</div>
+      <div class="ctl" id="cl-c-free" hidden>${slider('cl-u', 'iU', -120, 120, 1, 100)}${slider('cl-v', 'iV', -120, 120, 1, -100)}</div>
+      <div class="pair"><canvas id="cl-wave"></canvas><canvas id="cl-vec"></canvas></div>
+      <dl class="readout" id="cl-r"></dl>`);
+    const $ = id => box.querySelector('#' + id);
+    let mode = 'sine', playing = false;
+    function I() {
+      if (mode === 'sine') { const wt = +$('cl-wt').value * D2R, A = +$('cl-amp').value; return [A * Math.cos(wt), A * Math.cos(wt - 120 * D2R), A * Math.cos(wt - 240 * D2R)]; }
+      const u = +$('cl-u').value, v = +$('cl-v').value; return [u, v, -u - v];
+    }
+    function draw() {
+      const [iu, iv, iw] = I();
+      $('cl-wt-o').textContent = $('cl-wt').value + '°'; $('cl-amp-o').textContent = $('cl-amp').value + ' A';
+      $('cl-u-o').textContent = $('cl-u').value + ' A'; $('cl-v-o').textContent = $('cl-v').value + ' A';
+      const ia = (2 / 3) * (iu - 0.5 * iv - 0.5 * iw), ib = (iv - iw) / Math.sqrt(3);
+      const cU = css('--u'), cV = css('--v'), cW = css('--w'), ink = css('--ink'), mut = css('--muted'), line = css('--line'), acc = css('--accent');
+      const A = mode === 'sine' ? +$('cl-amp').value : 120;
+      { const { g, w, h } = fit($('cl-wave'), 220); g.clearRect(0, 0, w, h); const L = 42, R = 10, T = 12, B = h - 24;
+        const X = d => L + (w - L - R) * d / 360, Y = v => T + (B - T) * (1 - (v / A + 1) / 2);
+        g.strokeStyle = line; g.lineWidth = 1; g.beginPath(); g.moveTo(L, Y(0)); g.lineTo(w - R, Y(0)); g.stroke();
+        g.font = '12px IBM Plex Mono, monospace'; g.fillStyle = mut; g.textAlign = 'right'; g.fillText('+' + A, L - 4, T + 8); g.fillText('0', L - 4, Y(0) + 4); g.fillText('−' + A, L - 4, B);
+        g.textAlign = 'center'; [0, 90, 180, 270, 360].forEach(d => g.fillText(d + '°', X(d), h - 6));
+        if (mode === 'sine') {
+          [[0, cU], [120, cV], [240, cW]].forEach(([ph, cc]) => { g.strokeStyle = cc; g.lineWidth = 2.2; g.beginPath(); for (let d = 0; d <= 360; d += 3) { const y = Y(A * Math.cos((d - ph) * D2R)); d ? g.lineTo(X(d), y) : g.moveTo(X(d), y); } g.stroke(); });
+          const d = +$('cl-wt').value; g.strokeStyle = ink; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(X(d), T); g.lineTo(X(d), B); g.stroke(); g.setLineDash([]);
+          [[iu, cU], [iv, cV], [iw, cW]].forEach(([v, cc]) => { g.fillStyle = cc; g.beginPath(); g.arc(X(d), Y(v), 4.5, 0, TAU); g.fill(); });
+        } else {
+          const bw = (w - L - R) / 5; [[iu, cU, 'iU'], [iv, cV, 'iV'], [iw, cW, 'iW']].forEach(([v, cc, n], k) => { const x = L + bw * (0.6 + 1.5 * k); g.fillStyle = cc; g.fillRect(x, Math.min(Y(0), Y(v)), bw * 0.8, Math.abs(Y(v) - Y(0))); g.fillStyle = mut; g.textAlign = 'center'; g.fillText(n + ' = ' + fmt(v, 0), x + bw * 0.4, T + 10); });
+        } }
+      { const { g, w, h } = fit($('cl-vec'), 220); g.clearRect(0, 0, w, h); const cx = w / 2, cy = h / 2, Rr = Math.min(w, h) / 2 - 26, sc = Rr / (A * 1.05);
+        g.font = '12px IBM Plex Mono, monospace'; g.textAlign = 'center';
+        [[0, cU, 'U = α'], [120, cV, 'V'], [240, cW, 'W']].forEach(([a, cc, n]) => { const x = cx + Rr * Math.cos(a * D2R), y = cy - Rr * Math.sin(a * D2R); g.strokeStyle = line; g.lineWidth = 1; g.beginPath(); g.moveTo(2 * cx - x, 2 * cy - y); g.lineTo(x, y); g.stroke(); g.fillStyle = cc; g.fillText(n, cx + (Rr + 14) * Math.cos(a * D2R), cy - (Rr + 14) * Math.sin(a * D2R) + 4); });
+        g.strokeStyle = line; g.setLineDash([2, 4]); g.beginPath(); g.moveTo(cx, cy + Rr); g.lineTo(cx, cy - Rr); g.stroke(); g.setLineDash([]); g.fillStyle = mut; g.fillText('β', cx + 10, cy - Rr + 4);
+        let x = cx, y = cy; [[iu, 0, cU], [iv, 120, cV], [iw, 240, cW]].forEach(([v, a, cc]) => { const dx = (2 / 3) * v * sc * Math.cos(a * D2R), dy = -(2 / 3) * v * sc * Math.sin(a * D2R); arrow(g, x, y, x + dx, y + dy, cc, 2.5); x += dx; y += dy; });
+        arrow(g, cx, cy, cx + ia * sc, cy - ib * sc, acc, 4); }
+      const mag = Math.hypot(ia, ib), ang = (Math.atan2(ib, ia) / D2R + 360) % 360;
+      $('cl-r').innerHTML = readout([['iU', fmt(iu) + ' A'], ['iV', fmt(iv) + ' A'], ['iW', fmt(iw) + ' A'], ['Sum', fmt(iu + iv + iw) + ' A'], ['iα', fmt(ia) + ' A'], ['iβ', fmt(ib) + ' A'], ['Length', fmt(mag) + ' A'], ['Angle', mag > 0.5 ? fmt(ang, 0) + '°' : '—']]);
+    }
+    ['cl-wt', 'cl-amp', 'cl-u', 'cl-v'].forEach(id => $(id).addEventListener('input', draw));
+    const pressMode = m => { mode = m; $('cl-sine').setAttribute('aria-pressed', String(m === 'sine')); $('cl-free').setAttribute('aria-pressed', String(m === 'free')); $('cl-c-sine').hidden = m !== 'sine'; $('cl-c-free').hidden = m !== 'free'; $('cl-play').hidden = m !== 'sine'; if (m !== 'sine') playing = false; draw(); };
+    $('cl-sine').onclick = () => pressMode('sine'); $('cl-free').onclick = () => pressMode('free');
+    $('cl-play').onclick = () => { playing = !playing; $('cl-play').textContent = playing ? 'Stop' : 'Animate ωt'; if (playing) tick(); };
+    function tick() { if (!playing) return; const s = $('cl-wt'); s.value = (+s.value + 2) % 361; draw(); setTimeout(() => requestAnimationFrame(tick), 30); }
+    new ResizeObserver(draw).observe(box); draw();
+    return draw;
+  }
+
+  function hexagon(box) {
+    const Vdc = 52;
+    box.insertAdjacentHTML('beforeend', `<div class="ctl">${slider('hx-m', 'Phase voltage asked (peak)', 0, 36, 0.5, 26)}${slider('hx-a', 'Angle', 0, 360, 1, 20)}</div><canvas id="hx-c"></canvas><dl class="readout" id="hx-r"></dl>`);
+    const $ = id => box.querySelector('#' + id);
+    function draw() {
+      const m = +$('hx-m').value, a = +$('hx-a').value; $('hx-m-o').textContent = fmt(m) + ' V'; $('hx-a-o').textContent = a + '°';
+      const { g, w, h } = fit($('hx-c'), 320); g.clearRect(0, 0, w, h); const cx = w / 2, cy = h / 2, R = Math.min(w, h) / 2 - 34, Vv = 2 / 3 * Vdc, sc = R / Vv;
+      const ink = css('--ink'), mut = css('--muted'), acc = css('--accent'), bad = css('--bad'), cw = css('--w');
+      const names = ['100', '110', '010', '011', '001', '101'];
+      g.strokeStyle = ink; g.lineWidth = 1.5; g.beginPath(); for (let k = 0; k <= 6; k++) { const x = cx + R * Math.cos(k * 60 * D2R), y = cy - R * Math.sin(k * 60 * D2R); k ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
+      g.font = '12px IBM Plex Mono, monospace'; g.textAlign = 'center';
+      for (let k = 0; k < 6; k++) { const x = cx + R * Math.cos(k * 60 * D2R), y = cy - R * Math.sin(k * 60 * D2R); arrow(g, cx, cy, x, y, mut, 1.2); g.fillStyle = mut; g.fillText('V' + (k + 1) + ' ' + names[k], cx + (R + 20) * Math.cos(k * 60 * D2R), cy - (R + 20) * Math.sin(k * 60 * D2R) + 4); }
+      const r1 = Vdc / Math.sqrt(3) * sc, r2 = Vdc / 2 * sc;
+      g.strokeStyle = acc; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, r1, 0, TAU); g.stroke();
+      g.strokeStyle = cw; g.setLineDash([5, 4]); g.beginPath(); g.arc(cx, cy, r2, 0, TAU); g.stroke(); g.setLineDash([]);
+      const sector = Math.floor(((a % 360) + 360) % 360 / 60), th = (a - sector * 60) * D2R;
+      const T1 = m * Math.sin(60 * D2R - th) / (Vv * Math.sin(60 * D2R)), T2 = m * Math.sin(th) / (Vv * Math.sin(60 * D2R)), T0 = 1 - T1 - T2, ok = T0 >= -1e-9;
+      arrow(g, cx, cy, cx + m * sc * Math.cos(a * D2R), cy - m * sc * Math.sin(a * D2R), ok ? ink : bad, 3);
+      $('hx-r').innerHTML = readout([['SVPWM circle', fmt(Vdc / Math.sqrt(3)) + ' V'], ['Sine-PWM circle', fmt(Vdc / 2) + ' V'], ['Sector', `V${sector + 1} → V${(sector + 1) % 6 + 1}`], ['Time in V' + (sector + 1), fmt(Math.max(0, T1) * 100, 0) + ' %'], ['Time in V' + ((sector + 1) % 6 + 1), fmt(Math.max(0, T2) * 100, 0) + ' %'], ['Zero vectors', ok ? fmt(T0 * 100, 0) + ' %' : 'out of reach']]);
+    }
+    ['hx-m', 'hx-a'].forEach(id => $(id).addEventListener('input', draw));
+    new ResizeObserver(draw).observe(box); draw();
+    return draw;
+  }
+
+  const REG = { clarke: ['Three currents become one arrow', 'Clarke'], hexagon: ['The hexagon and the two circles', 'SVPWM'] };
+  function mount(box) {
+    const name = box.dataset.lab, fn = { clarke, hexagon }[name];
+    if (!fn) { box.textContent = 'Unknown lab: ' + name; return; }
+    box.insertAdjacentHTML('afterbegin', `<h3>${box.dataset.title || REG[name][0]} <small>${REG[name][1]}</small></h3>`);
+    const redraw = fn(box);
+    new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', redraw);
+  }
+  return { mount };
+})();
+
+</script>
+<script>
+/* ePWT Bench engine — lessons, automatic grading by Claude, spaced review of mistakes.
+   Storage (artifact db):
+     attempts/<lesson>-<q>  one per question: turns, verdict, history
+     errors/<id>            open mistakes: question, said, correct, status red/yellow/green, due, hits
+     doubts/<id>            "what I still don't get", with Claude's explanation
+   Grading uses the `sample` capability. Without it, answers are saved as "ungraded" and the
+   Sunday sync grades them (prompts/sincronizar.md). */
+(function () {
+  const DATA = JSON.parse(document.getElementById('data').textContent);
+  const LESSONS = DATA.lessons;
+  const view = document.getElementById('view');
+  let db = null, sample = null, ready = false;
+  const attempts = {};   // id -> doc
+  const errors = {};     // id -> doc
+  const doubts = [];
+  let motor = null;
+
+  // ---------- small helpers ----------
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const el = (tag, attrs, kids) => { const e = document.createElement(tag); Object.entries(attrs || {}).forEach(([k, v]) => { if (k === 'text') e.textContent = v; else if (k === 'html') e.innerHTML = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else if (v != null && v !== false) e.setAttribute(k, v); }); (kids || []).forEach(k => k && e.append(k)); return e; };
+  const day = (offset = 0) => { const d = new Date(); d.setDate(d.getDate() + offset); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  const words = s => (s.trim().match(/\S+/g) || []).length;
+  const store = { get(k) { try { return localStorage.getItem('bench:' + k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem('bench:' + k, v); } catch (e) { } } };
+  const VERDICT = { right: '✓ Right', partial: '◐ Partly', wrong: '✗ Wrong', no_attempt: '✗ No attempt', saved: 'Saved · not graded yet' };
+
+  async function save(path, data) {
+    if (!db) return;
+    try { const ref = db.doc(path); const cur = await ref.get(); if (cur.exists) await ref.update(data); else await ref.set(data); } catch (e) { console.warn('save failed', path, e); }
+  }
+
+  // ---------- grading prompts ----------
+  const ROLE = 'You are the senior engineer who reviews Pol\'s work. Pol is a powertrain calibration engineer (combustion ECUs, SEAT/VW) learning electric machines and control from first principles on his own electric quad, to get a systems-engineer job in an Israeli robotics startup. He answers by typing or by voice dictation, in English or Spanish: ignore transcription errors and grammar. Write in plain, short English sentences.\n\n';
+  function gradePrompt(q, lesson, answer) {
+    return ROLE +
+      'Facts about his motor (use them, never invent others):\n' + DATA.facts + '\n\n' +
+      'Lesson: ' + lesson.title + '\nQuestion: ' + q.prompt_text + '\n\n' +
+      'What a correct answer must contain (your private key, do not paste it):\n- ' + q.key.join('\n- ') + '\n' +
+      (q.traps.length ? 'Typical mistakes to watch for:\n- ' + q.traps.join('\n- ') + '\n' : '') +
+      '\nPol\'s answer (' + words(answer) + ' words):\n"""\n' + answer + '\n"""\n\n' +
+      'Grade it like a senior engineer, against the key, not the wording:\n' +
+      '- Attack HIS answer. Quote or paraphrase what he actually said when you correct it.\n' +
+      '- Name wrong physics plainly. Do not soften it.\n' +
+      '- If he answered more than was asked or mixed questions, say so in wrong.\n' +
+      '- If he refused or skipped a calculation, verdict is no_attempt.\n' +
+      '- "explain": only if the verdict is not right. Explain from zero the one fundamental behind his biggest gap, anchored on a concrete physical picture of his own motor (a slot, a magnet, the air gap, the copper, a number from the facts). Max 110 words. Do not just restate the key.\n' +
+      '- "redo": one concrete instruction for a second try, e.g. "Explain in 3 lines why X" or "Compute Y with your λm". Never give the answer in it. If right, ask for the same idea in 2 lines as he would say it in an interview.\n' +
+      '- "error": if not right, one line of what he got wrong (his idea, in English) and one line of the correct fact. Otherwise null.\n\n' +
+      'Reply ONLY with JSON:\n{"verdict":"right|partial|wrong|no_attempt","good":["..."],"wrong":["..."],"missing":["..."],"explain":"...","too_long":false,"redo":"...","error":{"said":"...","correct":"..."}}\n' +
+      'good / wrong / missing: max 3 short items each, concrete, empty list if none. good says why it matters.';
+  }
+  function redoPrompt(q, lesson, first, fb, answer) {
+    return ROLE + 'Facts about his motor:\n' + DATA.facts + '\n\nLesson: ' + lesson.title + '\nQuestion: ' + q.prompt_text +
+      '\nKey:\n- ' + q.key.join('\n- ') + '\n\nHis first answer:\n"""\n' + first + '\n"""\nYou told him: ' + (fb.explain || '') + '\nAnd asked: ' + fb.redo +
+      '\n\nHis second try (' + words(answer) + ' words):\n"""\n' + answer + '\n"""\n\n' +
+      'Judge only the second try: did he now get the idea, in his own words? Repeating your words without the reasoning is partial.\n' +
+      'Reply ONLY with JSON: {"verdict":"right|partial|wrong","comment":"max 2 sentences: what is now right and what is still missing","error":{"said":"...","correct":"..."}}  (error null if right)';
+  }
+  function reviewPrompt(err, answer) {
+    return ROLE + 'Facts about his motor:\n' + DATA.facts + '\n\nThis is a spaced-repetition check of a mistake he made before.\nQuestion: ' + err.question +
+      '\nThe correct idea: ' + err.correct + '\nWhat he got wrong last time: ' + err.said +
+      '\n\nHis answer now:\n"""\n' + answer + '\n"""\n\nReply ONLY with JSON: {"verdict":"right|partial|wrong","comment":"max 3 sentences, concrete; if not right, explain the fundamental briefly on his motor"}';
+  }
+  function doubtPrompt(lesson, text) {
+    return ROLE + 'Facts about his motor:\n' + DATA.facts + '\n\nAfter the lesson "' + lesson.title + '" he wrote what he still does not understand:\n"""\n' + text +
+      '\n"""\n\nFind the real doubt inside it (he may ramble). Explain it from first principles, anchored on his motor, in max 160 words, with one number from the facts. End with one question he should be able to answer if he understood.\n' +
+      'Reply ONLY with JSON: {"doubt":"the doubt in one line","answer":"...","check":"..."}';
+  }
+  function errText(e) {
+    const c = e && e.code;
+    if (c === 'not_granted') return 'Claude may not grade on this page. Allow it in the page permissions, or the answer waits for Sunday.';
+    if (c === 'rate_limited') return 'Too many gradings in a row. Wait a minute and press again.';
+    if (c === 'invalid_json') return 'The grading came back malformed. Press again.';
+    return 'Grading failed just now. Press again; the answer is saved.';
+  }
+
+  // ---------- errors (spaced repetition) ----------
+  async function recordError(lesson, qid, q, err, verdict) {
+    const id = lesson.id + '-' + qid;
+    const prev = errors[id];
+    const doc = Object.assign({}, prev || {}, {
+      lesson: lesson.id, q: qid, topic: lesson.title, question: q.prompt_text,
+      said: (err && err.said) || (prev && prev.said) || '', correct: (err && err.correct) || (prev && prev.correct) || q.key.join('; '),
+      status: 'red', hits: 0, lastHit: null, due: day(1), verdict, updated: new Date().toISOString(), created: (prev && prev.created) || new Date().toISOString()
+    });
+    errors[id] = doc; await save('errors/' + id, doc); updateBadge();
+  }
+  const dueList = () => Object.entries(errors).filter(([, e]) => e.status !== 'green' && (!e.due || e.due <= day())).sort((a, b) => (a[1].due || '').localeCompare(b[1].due || ''));
+  function updateBadge() { const n = dueList().length, b = document.getElementById('due-badge'); b.hidden = !n; b.textContent = n; }
+
+  // ---------- question widget ----------
+  function renderFeedback(fb) {
+    const box = el('div', { class: 'turn grader' }, [el('span', { class: 'who', text: 'Claude' }), el('span', { class: 'verdict ' + fb.verdict, text: VERDICT[fb.verdict] || fb.verdict })]);
+    const list = el('ul', { class: 'fb-list' });
+    (fb.good || []).forEach(t => list.append(el('li', {}, [el('b', { text: '✓' }), el('span', { text: t })])));
+    (fb.wrong || []).forEach(t => list.append(el('li', {}, [el('b', { text: '✗' }), el('span', { text: t })])));
+    (fb.missing || []).forEach(t => list.append(el('li', {}, [el('b', { text: '?' }), el('span', { text: t })])));
+    if (list.children.length) box.append(list);
+    if (fb.too_long) box.append(el('p', { text: 'Too long. In an interview you get 30 seconds: one idea, one number, one reason.' }));
+    if (fb.explain) box.append(el('div', { class: 'explain' }, [el('span', { class: 'lbl', text: 'The fundamental' }), el('span', { text: fb.explain })]));
+    if (fb.comment) box.append(el('p', { text: fb.comment }));
+    if (fb.redo) box.append(el('p', { class: 'redo', text: '→ ' + fb.redo }));
+    return box;
+  }
+  const mineTurn = (text, label) => el('div', { class: 'turn mine-t' }, [el('span', { class: 'who', text: label || 'You' }), el('span', { class: 'txt', text: text })]);
+  const thinking = () => el('div', { class: 'thinking' }, [el('i'), el('span', { text: 'Claude is reading your answer…' })]);
+
+  function mountQuestion(box, lesson) {
+    const qid = box.dataset.q, q = lesson.questions[qid], id = lesson.id + '-' + qid;
+    if (!q) { box.textContent = 'Missing question ' + qid; return; }
+    const KIND = { predict: 'Predict first', check: 'Check', lab: 'Lab', case: 'Case', error: 'Find the error', calc: 'Calculate', explain: 'Explain aloud', recall: 'From last lesson', doubt: 'What you still don\'t get' };
+    function draw() {
+      const a = attempts[id];
+      box.innerHTML = '';
+      box.append(el('div', { class: 'qtag' }, [el('span', { text: KIND[q.kind] || 'Question' }), a && a.final ? el('span', { class: 'verdict ' + a.final, text: VERDICT[a.final] }) : null]));
+      box.append(el('div', { class: 'prompt', html: q.prompt }));
+      if (q.kind === 'doubt') return drawDoubt();
+      const turns = (a && a.turns) || [];
+      turns.forEach(t => box.append(t.role === 'pol' ? mineTurn(t.text, t.n === 2 ? 'You, second try' : 'You') : renderFeedback(t.fb)));
+      const stage = !a ? 'first' : a.stage;
+      if (stage === 'first' || stage === 'redo') input(stage);
+      if (stage === 'done' || stage === 'saved') showSolution();
+      if (stage === 'done' || stage === 'saved') box.append(el('div', { class: 'row' }, [el('button', { type: 'button', class: 'btn ghost small', text: 'Try again from zero', onclick: restart })]));
+    }
+    function input(stage) {
+      const key = 'draft:' + id + ':' + stage;
+      const ta = el('textarea', { id: 'ta-' + id + '-' + stage, placeholder: stage === 'first' ? 'Your attempt, with your reasoning. "I don\'t know, but I think…" is fine. Dictation works.' : 'Second try, in your own words. Short.' });
+      ta.value = store.get(key) || '';
+      const btn = el('button', { type: 'button', class: 'btn', text: stage === 'first' ? 'Check my answer' : 'Check my second try' });
+      const hint = el('span', { class: 'hint' });
+      const sync = () => { const n = words(ta.value); btn.disabled = n < 3; hint.textContent = n < 3 ? 'Write an attempt first' : n + ' words' + (n > 150 ? ' · long: one idea, one number' : ''); };
+      ta.addEventListener('input', () => { sync(); store.set(key, ta.value); });
+      btn.addEventListener('click', () => submit(stage, ta.value.trim()));
+      box.append(ta, el('div', { class: 'row' }, [btn, hint]));
+      if (stage === 'redo') box.append(el('div', { class: 'row' }, [el('button', { type: 'button', class: 'btn ghost small', text: 'Skip the second try and see the solution', onclick: () => finish(attempts[id].turns[1].fb.verdict) })]));
+      sync();
+    }
+    function showSolution() { if (q.solution) box.append(el('div', { class: 'solution' }, [el('span', { class: 'lbl', text: 'Reference solution' }), el('div', { html: q.solution })])); }
+    async function submit(stage, text) {
+      const a = attempts[id] || { lesson: lesson.id, q: qid, question: q.prompt_text, turns: [], history: [] };
+      a.turns.push({ role: 'pol', n: stage === 'first' ? 1 : 2, text, at: new Date().toISOString() });
+      attempts[id] = a;
+      if (!sample) { a.stage = 'saved'; a.final = 'saved'; await save('attempts/' + id, a); draw(); return; }
+      a.stage = 'thinking'; draw(); box.append(thinking());
+      try {
+        const fb = stage === 'first' ? await sample.json(gradePrompt(q, lesson, text), { modelTier: 'default' })
+          : await sample.json(redoPrompt(q, lesson, a.turns[0].text, a.turns[1].fb, text), { modelTier: 'default' });
+        fb.verdict = VERDICT[fb.verdict] ? fb.verdict : 'partial';
+        a.turns.push({ role: 'claude', fb, at: new Date().toISOString() });
+        if (stage === 'first') {
+          a.first = fb.verdict;
+          if (fb.verdict !== 'right') await recordError(lesson, qid, q, fb.error, fb.verdict);
+          a.stage = 'redo';
+        } else {
+          if (fb.verdict !== 'right' && fb.error) await recordError(lesson, qid, q, fb.error, fb.verdict);
+          a.final = fb.verdict; a.stage = 'done';
+        }
+        store.set('draft:' + id + ':' + stage, '');
+        await save('attempts/' + id, a); draw();
+      } catch (e) {
+        a.turns.pop(); a.stage = stage; draw(); box.append(el('p', { class: 'err', text: errText(e) }));
+      }
+    }
+    async function finish(v) { const a = attempts[id]; a.final = v; a.stage = 'done'; await save('attempts/' + id, a); draw(); }
+    async function restart() { const a = attempts[id]; a.history = (a.history || []).concat([{ turns: a.turns, final: a.final }]).slice(-3); a.turns = []; a.final = null; a.stage = 'first'; await save('attempts/' + id, a); draw(); }
+    function drawDoubt() {
+      const mine = doubts.filter(d => d.lesson === lesson.id);
+      mine.forEach(d => { box.append(mineTurn(d.text)); if (d.answer) box.append(renderFeedback({ verdict: 'saved', explain: d.answer, redo: d.check })); });
+      const ta = el('textarea', { id: 'ta-' + id, placeholder: 'Write it as it is. Claude explains it now, and it goes to the "what I don\'t get" slide of the review.' });
+      const btn = el('button', { type: 'button', class: 'btn', text: 'Explain it to me' });
+      btn.addEventListener('click', async () => {
+        const text = ta.value.trim(); if (words(text) < 3) return;
+        const d = { lesson: lesson.id, text, at: new Date().toISOString() };
+        box.append(thinking());
+        if (sample) { try { const r = await sample.json(doubtPrompt(lesson, text), { modelTier: 'default' }); d.doubt = r.doubt; d.answer = r.answer; d.check = r.check; } catch (e) { d.error = String(e && e.code || e); } }
+        doubts.push(d); await save('doubts/' + lesson.id + '-' + Date.now(), d); draw();
+      });
+      box.append(ta, el('div', { class: 'row' }, [btn]));
+    }
+    draw();
+  }
+
+  // ---------- views ----------
+  function lessonProgress(l) {
+    const ids = Object.keys(l.questions).filter(k => l.questions[k].kind !== 'doubt');
+    const done = ids.filter(k => attempts[l.id + '-' + k] && attempts[l.id + '-' + k].turns && attempts[l.id + '-' + k].turns.length).length;
+    return { done, total: ids.length };
+  }
+  function todayLesson() {
+    const t = day(), sorted = LESSONS.slice().sort((a, b) => a.date.localeCompare(b.date));
+    return sorted.find(l => l.date === t) || sorted.filter(l => l.date <= t).find(l => { const p = lessonProgress(l); return p.done < p.total; }) || sorted.filter(l => l.date <= t).pop() || sorted[0];
+  }
+  function showLesson(l, intro) {
+    view.innerHTML = '';
+    const wrap = el('div', { class: 'lesson' });
+    const p = lessonProgress(l);
+    const head = el('div', { class: 'lesson-head' }, [
+      el('p', { class: 'eyebrow', text: (intro || 'Lesson') + ' · ' + (l.cycle || '') + ' · ' + l.date }),
+      el('h1', { text: l.title }),
+      l.lede ? el('p', { class: 'lede', text: l.lede }) : null,
+      el('div', { class: 'meta' }, [el('span', { text: (l.minutes || 55) + ' min' }), el('span', { text: p.done + ' / ' + p.total + ' answered' }), l.sources ? el('span', { text: l.sources }) : null])
+    ]);
+    wrap.append(head);
+    const grid = el('div', { class: 'lesson-grid' + (l.hasScene ? ' with-motor' : '') });
+    const col = el('div', { class: 'col', html: l.html });
+    if (l.hasScene) { const side = el('div', { class: 'side', html: Motor3D.panelHTML() }); grid.append(side, col); } else grid.append(col);
+    const toc = el('nav', { class: 'toc', 'aria-label': 'Lesson parts' });
+    col.querySelectorAll('section.sec').forEach(s => toc.append(el('a', { href: '#' + l.id, text: s.querySelector('h2').textContent, onclick: e => { e.preventDefault(); s.scrollIntoView({ behavior: 'smooth', block: 'start' }); } })));
+    head.append(toc);
+    wrap.append(grid);
+    view.append(wrap);
+    motor = l.hasScene ? Motor3D.mount(grid.querySelector('.motor')) : null;
+    col.querySelectorAll('.qa').forEach(b => mountQuestion(b, l));
+    col.querySelectorAll('.labbox').forEach(b => Labs.mount(b));
+    // presets: button press anywhere; on wide screens also when the idea scrolls into view
+    const refs = [...col.querySelectorAll('.scene-ref')];
+    refs.forEach(r => r.querySelector('.show-scene').addEventListener('click', () => {
+      if (!motor) return; motor.preset(JSON.parse(r.dataset.scene)); mark(r);
+      if (!matchMedia('(min-width:1080px)').matches) grid.querySelector('.motor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
+    function mark(r) { col.querySelectorAll('.idea.live').forEach(i => i.classList.remove('live')); const idea = r.closest('.idea'); if (idea) idea.classList.add('live'); }
+    if (motor && refs.length) {
+      motor.preset(JSON.parse(refs[0].dataset.scene));
+      const io = new IntersectionObserver(es => {
+        if (!matchMedia('(min-width:1080px)').matches) return;
+        es.filter(e => e.isIntersecting).forEach(e => { motor.preset(JSON.parse(e.target.dataset.scene)); mark(e.target); });
+      }, { rootMargin: '-35% 0px -55% 0px' });
+      refs.forEach(r => io.observe(r.closest('.idea') ? r : r));
+    }
+  }
+  function showToday() {
+    const l = todayLesson(), n = dueList().length;
+    showLesson(l, 'Today');
+    if (n) {
+      const due = el('div', { class: 'due' }, [el('div', {}, [el('b', { text: n + (n === 1 ? ' mistake' : ' mistakes') + ' to re-answer' }), el('p', { text: 'About ' + Math.max(5, n * 2) + ' minutes. Do them before the lesson: recalling costs more than rereading, and that is why it sticks.' })]), el('a', { class: 'btn', href: '#review', text: 'Open review' })]);
+      view.querySelector('.lesson-head').append(due);
+    }
+  }
+  function showReview() {
+    view.innerHTML = '';
+    const page = el('div', { class: 'page' });
+    page.append(el('div', { class: 'lesson-head' }, [el('p', { class: 'eyebrow', text: 'Review' }), el('h1', { text: 'Your mistakes, again' }), el('p', { class: 'lede', text: 'Every mistake comes back until you get it right on two different days. No answers shown first: try, then Claude grades.' })]));
+    const due = dueList();
+    if (!ready) page.append(el('p', { class: 'empty', text: 'Loading your mistakes…' }));
+    else if (!db) page.append(el('p', { class: 'empty', text: 'Your mistakes live in this page\'s database, which is not available in this view. Open the page signed in to claude.ai.' }));
+    else if (!due.length) page.append(el('p', { class: 'empty', text: 'Nothing due today. New mistakes from a lesson come back the next day.' }));
+    const list = el('div', { class: 'list' });
+    due.forEach(([id, e]) => list.append(reviewCard(id, e)));
+    page.append(list);
+    const later = Object.values(errors).filter(e => e.status !== 'green' && e.due > day()).length, closed = Object.values(errors).filter(e => e.status === 'green').length;
+    if (ready && db) page.append(el('p', { class: 'meta', text: later + ' coming back later · ' + closed + ' closed' }));
+    if (doubts.length) {
+      page.append(el('h2', { text: 'What you said you don\'t get' }));
+      doubts.slice().reverse().slice(0, 8).forEach(d => page.append(el('div', { class: 'card doubt' }, [el('span', { class: 'eyebrow', text: d.lesson }), el('p', { class: 'q', text: d.doubt || d.text }), d.answer ? el('p', { text: d.answer }) : el('p', { class: 'meta', text: 'Not answered yet' })])));
+    }
+    view.append(page);
+  }
+  function reviewCard(id, e) {
+    const card = el('div', { class: 'qa' });
+    function draw(res) {
+      card.innerHTML = '';
+      card.append(el('div', { class: 'qtag' }, [el('span', { text: e.topic || e.lesson }), el('span', { class: 'status ' + e.status, text: e.status === 'red' ? 'open' : e.status === 'yellow' ? 'right once' : 'closed' })]));
+      card.append(el('p', { class: 'prompt', text: e.question }));
+      if (res) { card.append(mineTurn(res.text), renderFeedback(res.fb)); if (res.fb.verdict !== 'right') card.append(el('div', { class: 'solution' }, [el('span', { class: 'lbl', text: 'The correct idea' }), el('p', { text: e.correct })])); return; }
+      const ta = el('textarea', { id: 'rv-' + id, placeholder: 'From memory. Short.' }), btn = el('button', { type: 'button', class: 'btn', text: 'Check' });
+      btn.addEventListener('click', async () => {
+        const text = ta.value.trim(); if (words(text) < 3) return;
+        if (!sample) { card.append(el('p', { class: 'err', text: 'Claude cannot grade in this view. Try again signed in.' })); return; }
+        card.append(thinking());
+        try {
+          const fb = await sample.json(reviewPrompt(e, text), { modelTier: 'default' });
+          fb.verdict = VERDICT[fb.verdict] ? fb.verdict : 'partial';
+          const t = day();
+          if (fb.verdict === 'right') { if (e.lastHit !== t) { e.hits = (e.hits || 0) + 1; e.lastHit = t; } e.status = e.hits >= 2 ? 'green' : 'yellow'; e.due = e.hits >= 2 ? null : day(3); }
+          else if (fb.verdict === 'partial') e.due = day(1);
+          else { e.status = 'red'; e.hits = 0; e.due = day(1); }
+          e.log = (e.log || []).concat([{ at: new Date().toISOString(), text, verdict: fb.verdict }]).slice(-6);
+          await save('errors/' + id, e); updateBadge(); draw({ text, fb });
+        } catch (err) { card.querySelector('.thinking')?.remove(); card.append(el('p', { class: 'err', text: errText(err) })); }
+      });
+      card.append(ta, el('div', { class: 'row' }, [btn]));
+    }
+    draw(); return card;
+  }
+  function showLessons() {
+    view.innerHTML = '';
+    const page = el('div', { class: 'page' });
+    page.append(el('div', { class: 'lesson-head' }, [el('p', { class: 'eyebrow', text: 'All lessons' }), el('h1', { text: 'Lessons' })]));
+    const list = el('div', { class: 'list' });
+    LESSONS.slice().sort((a, b) => b.date.localeCompare(a.date)).forEach(l => {
+      const p = lessonProgress(l), open = Object.values(errors).filter(e => e.lesson === l.id && e.status !== 'green').length;
+      list.append(el('a', { class: 'lrow', href: '#' + l.id }, [el('span', { class: 't', text: l.title }), el('span', { class: 'p', text: p.done + '/' + p.total }), el('span', { class: 'm', text: (l.cycle || '') + ' · ' + l.date + (open ? ' · ' + open + ' open mistakes' : '') })]));
+    });
+    page.append(list); view.append(page);
+  }
+
+  function route() {
+    const h = (location.hash || '#today').slice(1);
+    document.querySelectorAll('.tabs a').forEach(a => a.toggleAttribute('aria-current', false));
+    const lesson = LESSONS.find(l => l.id === h);
+    const tab = lesson ? 'lessons' : ['today', 'review', 'lessons'].includes(h) ? h : 'today';
+    document.querySelector('.tabs a[data-tab="' + tab + '"]').setAttribute('aria-current', 'page');
+    if (lesson) showLesson(lesson); else if (tab === 'review') showReview(); else if (tab === 'lessons') showLessons(); else showToday();
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+
+  // ---------- boot ----------
+  route();
+  (async () => {
+    const c = window.claude;
+    if (c && c.use) {
+      try { db = await c.use('db'); } catch (e) { db = null; }
+      try { sample = await c.use('sample'); } catch (e) { sample = null; }
+    }
+    if (db) {
+      const timer = new Promise(r => setTimeout(r, 10000));
+      const load = Promise.all([
+        db.collection('attempts').get().then(s => s.docs.forEach(d => attempts[d.id] = d.data())),
+        db.collection('errors').get().then(s => s.docs.forEach(d => errors[d.id] = d.data())),
+        db.collection('doubts').get().then(s => s.docs.forEach(d => doubts.push(d.data()))),
+      ]).catch(e => console.warn('load failed', e));
+      await Promise.race([load, timer]);
+      doubts.sort((a, b) => (a.at || '').localeCompare(b.at || ''));
+    }
+    ready = true; updateBadge();
+    // redraw with the loaded state unless Pol is already typing
+    const typing = document.activeElement && document.activeElement.tagName === 'TEXTAREA' && document.activeElement.value;
+    if (!typing) { const y = window.scrollY; route(); window.scrollTo(0, y); }
+  })();
+})();
+
+</script>
