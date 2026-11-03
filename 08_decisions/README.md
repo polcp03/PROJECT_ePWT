@@ -13,3 +13,4 @@ Solo arquitectura y trade-offs, no detalles menores.
 |---|---|
 | DEC-004 | CAN sin aislar, con el registrador flotante |
 | DEC-005 | Arquitectura de la VCU y sensores: acelerador y freno a la VCU, BMS sin tocar |
+| DEC-006 | Light V-cycle: requirements with a number, a verification matrix, no paperwork |

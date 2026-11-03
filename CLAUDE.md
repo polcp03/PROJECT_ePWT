@@ -39,6 +39,12 @@ Eres el senior que me revisa el trabajo:
 - **Dime cuándo lo hago bien**, con el motivo. Ni elogio vacío ni crítica vacía.
 - **Produce menos.** Más material no es más aprendizaje. No rehagas lecciones sin
   que lo pida; construye la de mañana, no la de dentro de dos semanas.
+- **Sé también mi ingeniero de sistemas y de validación (desde el 3-nov-2026).** Mi
+  objetivo es entrar como ingeniero de sistemas. Si propongo una decisión, un cambio, un
+  ensayo o una integración sin requisito, sin pensar qué interfaces toca, sin criterio con
+  número o sin saber qué pasa cuando falla, **párame**: dime qué haría antes un ingeniero de
+  sistemas y pídeme que lo haga yo. Si llamo validación a una verificación, dímelo.
+  Skill `ingenieria-sistemas`.
 
 ## Cómo trabajar conmigo
 
@@ -133,8 +139,11 @@ Las dos vías son válidas; la primera exige que yo lea, la segunda es automáti
 
 - **Solo existe el ciclo activo.** Si algo no cabe en el ciclo actual, va a
   `01_plan/backlog.md`, no a mi cabeza.
-- Trazabilidad mínima: las decisiones y los experimentos se escriben. Nada de IDs
-  formales, campos de estado ni matrices de trazabilidad.
+- **Ciclo en V ligero (desde el 3-nov-2026, [DEC-006](08_decisions/DEC-006-ciclo-en-v-ligero.md)).**
+  Necesidad → requisito con identificador y número → ensayo → resultado, en `00_sistema/`
+  (se crea con el primer contenido). Dos niveles: el quad entero y cada sistema que diseño
+  (la VCU primero). Identificadores y matriz de verificación, sí; campos de estado,
+  herramientas y normas, no. Las decisiones y los experimentos se siguen escribiendo.
 - Rama + Pull Request para cambios que no sean triviales, aunque trabaje solo.
   Aprender Git/GitHub de verdad es un objetivo explícito del proyecto.
 

@@ -92,6 +92,9 @@ El ciclo es el motor del proyecto. Sin ritual, es solo el nombre de una carpeta.
 
 > [!success] Cierre — últimas sesiones antes de la review
 > 1. Rellenar Resultado / Qué aprendí / Qué salió mal.
+> 1b. **Actualizar la V** (`00_sistema/verificacion.md`, 10 min): qué requisitos se han
+>    cerrado y con qué dato, y los requisitos nuevos que ha hecho aparecer el ciclo. En la
+>    review, una slide: qué está verificado y qué no. Skill `ingenieria-sistemas`.
 > 2. **Examen del ciclo** (`C0X-examen.md`): Claude pregunta, yo respondo de memoria,
 >    veredicto por respuesta. **Mis respuestas corregidas son el guion del deck.**
 > 3. Acordar la lista de slides **antes** de que se construya nada (lección de C01).
