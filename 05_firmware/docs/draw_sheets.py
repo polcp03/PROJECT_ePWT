@@ -162,16 +162,16 @@ def schematic():
     s.text(300, 314, "WHEEL", "net")
 
     # J2 throttle (planned) ---------------------------------------------
-    s.ic(140, 400, 100, 85, "J2", "Throttle", right=[("+5V", 437, 1), ("SIG", 455, 2), ("GND", 473, 3)],
+    s.ic(140, 400, 100, 85, "J2", "Throttle", right=[("+3V3", 437, 1), ("SIG", 455, 2), ("GND", 473, 3)],
          cls="comp plan", sub="Hall grip")
-    s.line([(260, 437), (275, 437)], P); s.rail(275, 437, "+5V", P)
+    s.line([(260, 437), (275, 437)], P); s.rail(275, 437, "+3V3", P)
     s.line([(260, 473), (275, 473)], P); s.gnd(275, 473, P)
     s.line([(260, 455), (300, 455), (300, 400), (310, 400)], P)
-    s.res_h(310, 370, 400, "R4", "10k", P)
+    s.res_h(310, 370, 400, "R4", "1k", P)
     s.line([(370, 400), (500, 400)], P)
-    s.dot(390, 400); s.res_v(390, 400, 470, "R5", "12k", P, side="l"); s.gnd(390, 470, P)
+    s.dot(390, 400); s.res_v(390, 400, 470, "R5", "100k", P, side="l"); s.gnd(390, 470, P)
     s.dot(455, 400); s.cap_v(455, 400, 470, "C2", "100n", P); s.gnd(455, 470, P)
-    s.text(470, 393, "THR ×0.545", "net", "end")
+    s.text(470, 393, "THR RC", "net", "end")
     s.text(140, 503, "unplug from VESC ADC", "warn")
 
     # SW1 / SW2 brakes (planned) ----------------------------------------
@@ -252,14 +252,14 @@ def schematic():
     notes = ["1  Dashed = planned, not wired yet. Solid = on the bench today (2026-11-01).",
              "2  Every pull-up goes to +3V3, never +5V: ESP32 inputs are not 5 V tolerant.",
              "3  GND is one net. It meets the vehicle only at J5 pin − (CAN ground), DEC-004.",
-             "4  To confirm: throttle full-scale, brake NO/NC and dry contact, DC-DC rating."]
+             "4  Throttle from +3V3 (measured 0.80-2.60 V, 2026-11-05). To confirm: brake NO/NC, DC-DC rating."]
     for i, n in enumerate(notes):
         s.text(52, 932 + i * 19, n, "note")
     s.rect(830, 910, 390, 95, "title")
     s.line([(830, 942), (1220, 942)], "tline"); s.line([(830, 974), (1220, 974)], "tline")
     s.line([(1080, 942), (1080, 1005)], "tline")
     s.text(842, 932, "ePWT · VCU wiring schematic", "ttl")
-    s.text(842, 963, "Sheet 2 of 2 · Rev A", "tsm"); s.text(1092, 963, "2026-11-02", "tsm")
+    s.text(842, 963, "Sheet 2 of 2 · Rev B", "tsm"); s.text(1092, 963, "2026-11-05", "tsm")
     s.text(842, 995, "Drawn: Claude · Checked: Pol (open)", "tsm"); s.text(1092, 995, "DEC-005", "tsm")
     return s.svg()
 
@@ -329,7 +329,7 @@ def architecture():
     s.text(537, 356, "status 1–6 @ 50 Hz", "lbl", "end")
     s.text(537, 371, "erpm · I · duty · V · temps", "lbl", "end")
     s.text(683, 356, "current request", "lbl")
-    s.text(683, 371, "(planned)", "lbl")
+    s.text(683, 371, "(bench-tested 11-05)", "lbl")
     s.text(610, 350, "CAN", "net", "middle")
     s.text(610, 366, "500 kbit/s", "lbl", "middle")
     s.text(610, 381, "H · L · GND", "lbl", "middle")
@@ -343,7 +343,7 @@ def architecture():
     s.text(630, 546, "brake + throttle = zero torque", "s", "middle")
     s.text(630, 562, "later: traction control", "s", "middle")
 
-    ins = [("Throttle", "5 V Hall grip", "analog · GPIO35", 470, True),
+    ins = [("Throttle", "3.3 V Hall grip", "analog · GPIO35", 470, True),
            ("Brake left", "on/off switch", "digital · GPIO32", 515, True),
            ("Brake right", "on/off switch", "digital · GPIO33", 560, True),
            ("IMU LSM6DS3", "ax, pitch, yaw rate", "I2C · GPIO21/22", 605, True)]
@@ -352,7 +352,7 @@ def architecture():
         s.text(262, y - 3, name, "t"); s.text(262, y + 13, sub, "s")
         s.line([(400, y), (500, y)], "sig" + (" plan" if plan else "") + " arrow")
         s.text(450, y - 6, sig, "lbl", "middle")
-    s.text(250, 437, "today wired to the VESC ADC → moves to the VCU", "warn")
+    s.text(250, 437, "bench 2026-11-05: VCU → CAN → VESC works", "warn")
 
     s.rect(40, 600, 160, 50, "blk"); s.text(120, 621, "Front wheel", "t", "middle")
     s.text(120, 637, "undriven · speed reference", "s", "middle")
@@ -378,7 +378,7 @@ def architecture():
         x = x0 + i * 175
         s.line([(x, 695), (x + 40, 695)], c)
         s.text(x + 48, 699, t, "lbl")
-    s.text(1240, 30, "Sheet 1 of 2 · Rev A · 2026-11-02", "lbl", "end")
+    s.text(1240, 30, "Sheet 1 of 2 · Rev B · 2026-11-05", "lbl", "end")
     s.text(20, 28, "ePWT · vehicle architecture", "ttl")
     return s.svg()
 

@@ -120,7 +120,7 @@ text { fill:var(--fg); }
 <text class="lbl" x="537" y="356" text-anchor="end">status 1–6 @ 50 Hz</text>
 <text class="lbl" x="537" y="371" text-anchor="end">erpm · I · duty · V · temps</text>
 <text class="lbl" x="683" y="356" text-anchor="start">current request</text>
-<text class="lbl" x="683" y="371" text-anchor="start">(planned)</text>
+<text class="lbl" x="683" y="371" text-anchor="start">(bench-tested 11-05)</text>
 <text class="net" x="610" y="350" text-anchor="middle">CAN</text>
 <text class="lbl" x="610" y="366" text-anchor="middle">500 kbit/s</text>
 <text class="lbl" x="610" y="381" text-anchor="middle">H · L · GND</text>
@@ -134,7 +134,7 @@ text { fill:var(--fg); }
 <text class="s" x="630" y="562" text-anchor="middle">later: traction control</text>
 <rect class="blk planc" x="250" y="450" width="150" height="40" rx="0"/>
 <text class="t" x="262" y="467" text-anchor="start">Throttle</text>
-<text class="s" x="262" y="483" text-anchor="start">5 V Hall grip</text>
+<text class="s" x="262" y="483" text-anchor="start">3.3 V Hall grip</text>
 <polyline class="sig plan arrow" points="400,470 500,470" marker-end="url(#ah)"/>
 <text class="lbl" x="450" y="464" text-anchor="middle">analog · GPIO35</text>
 <rect class="blk planc" x="250" y="495" width="150" height="40" rx="0"/>
@@ -152,7 +152,7 @@ text { fill:var(--fg); }
 <text class="s" x="262" y="618" text-anchor="start">ax, pitch, yaw rate</text>
 <polyline class="sig plan arrow" points="400,605 500,605" marker-end="url(#ah)"/>
 <text class="lbl" x="450" y="599" text-anchor="middle">I2C · GPIO21/22</text>
-<text class="warn" x="250" y="437" text-anchor="start">today wired to the VESC ADC → moves to the VCU</text>
+<text class="warn" x="250" y="437" text-anchor="start">bench 2026-11-05: VCU → CAN → VESC works</text>
 <rect class="blk" x="40" y="600" width="160" height="50" rx="0"/>
 <text class="t" x="120" y="621" text-anchor="middle">Front wheel</text>
 <text class="s" x="120" y="637" text-anchor="middle">undriven · speed reference</text>
@@ -189,5 +189,5 @@ text { fill:var(--fg); }
 <text class="lbl" x="953" y="699" text-anchor="start">planned</text>
 <polyline class="radio" points="1080,695 1120,695"/>
 <text class="lbl" x="1128" y="699" text-anchor="start">wireless</text>
-<text class="lbl" x="1240" y="30" text-anchor="end">Sheet 1 of 2 · Rev A · 2026-11-02</text>
+<text class="lbl" x="1240" y="30" text-anchor="end">Sheet 1 of 2 · Rev B · 2026-11-05</text>
 <text class="ttl" x="20" y="28" text-anchor="start">ePWT · vehicle architecture</text></svg>

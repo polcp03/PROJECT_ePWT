@@ -79,7 +79,7 @@ pins = [
     ("34", "Wheel speed", "sig", "digital · interrupt", "H1 3144 Hall, front wheel",
      "R3 10 kΩ to +3V3 (GPIO 34 has no internal pull-up). C1 100 nF at the sensor.", "wired"),
     ("35", "Throttle", "ana", "analog · ADC1", "J2 Hall grip",
-     "R4 10 k / R5 12 k divider (× 0.545) + C2 100 nF. Cut wire or short → out of window → zero torque.", "planned"),
+     "Grip powered from +3V3: 0.80 V rest, 2.60 V full, no divider. RC filter R4 1 k + C2 100 nF (1.6 kHz). R5 100 k pull-down: a cut wire reads 0 V. Out of window → zero torque.", "planned"),
     ("32", "Brake, left", "sig", "digital · active low", "SW1 on/off switch",
      "Switch to GND. R6 10 kΩ to +3V3 + C3 100 nF. Debounce 10–20 ms in code.", "planned"),
     ("33", "Brake, right", "sig", "digital · active low", "SW2 on/off switch", "R7 + C4, same as GPIO 32.", "planned"),
@@ -139,6 +139,9 @@ th, td {{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line)
 th {{ font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }}
 td.n {{ font-family:var(--mono); white-space:nowrap; font-variant-numeric:tabular-nums; }}
 ol.check {{ margin:0; padding-left:22px; display:grid; gap:8px; max-width:75ch; }}
+.tocard {{ display:grid; gap:2px; margin-top:6px; padding:12px 14px; border:1px solid var(--sig); border-radius:6px;
+  background:var(--paper); color:var(--fg); text-decoration:none; max-width:72ch; }}
+.tocard strong {{ color:var(--sig); }} .tocard span {{ font-size:14px; color:var(--muted); }}
 .note2 {{ font-size:13px; color:var(--muted); margin-top:8px; }}
 @media (max-width:560px) {{ li.pin {{ grid-template-columns:1fr; gap:4px; }} }}
 """
@@ -150,7 +153,8 @@ html = f"""<title>ePWT VCU Pinout</title>
 <main>
 <header style="display:grid;gap:6px">
   <h1>ePWT electrical architecture</h1>
-  <p class="lede">Two sheets. Sheet 1 is the whole quad: power, mechanics, sensors and the two ground domains. Sheet 2 is the vehicle control unit wired part by part. Rev A, 2 November 2026, DEC-005. On a phone, swipe each sheet sideways.</p>
+  <p class="lede">Two sheets. Sheet 1 is the whole quad: power, mechanics, sensors and the two ground domains. Sheet 2 is the vehicle control unit wired part by part. Rev B, 5 November 2026 (throttle on 3V3 with an RC filter), DEC-005. On a phone, swipe each sheet sideways.</p>
+  <a class="tocard" href="perfboard.html"><strong>Sheet 3 · Perfboard layout →</strong><span>The same VCU hole by hole, interactive: tap a wire or a part to see what it is. Build order and parts list.</span></a>
 </header>
 
 <figure>
@@ -173,25 +177,25 @@ html = f"""<title>ePWT VCU Pinout</title>
 </section>
 
 <section>
-  <h2>Throttle divider, R4 10 k / R5 12 k</h2>
+  <h2>Throttle from +3V3, filter R4 1 k + C2 100 nF</h2>
   <div class="tablewrap"><table>
     <thead><tr><th>Throttle out</th><th>At GPIO 35</th><th>Code does</th></tr></thead>
     <tbody>
-      <tr><td class="n">0 V (wire cut)</td><td class="n">0 V</td><td>out of window → zero torque</td></tr>
-      <tr><td class="n">~0.8 V (rest)</td><td class="n">~0.44 V</td><td>zero demand</td></tr>
-      <tr><td class="n">full, ~4.2 V?</td><td class="n">~2.3 V</td><td>full demand, still linear (≤ 2.45 V)</td></tr>
-      <tr><td class="n">5.3 V (short)</td><td class="n">2.89 V</td><td>out of window → zero torque</td></tr>
+      <tr><td class="n">signal cut</td><td class="n">0 V (R5)</td><td>out of window → zero torque</td></tr>
+      <tr><td class="n">0.80 V (rest)</td><td class="n">0.80 V</td><td>zero demand (≤ 0.90 V)</td></tr>
+      <tr><td class="n">2.60 V (full)</td><td class="n">2.60 V</td><td>full demand (≥ 2.55 V). Just above the 2.45 V linear limit: calibrated, so it is read correctly</td></tr>
+      <tr><td class="n">short to 3V3, or GND cut</td><td class="n">~3.3 V</td><td>out of window (&gt; 2.80 V) → zero torque. Below the 3.6 V absolute max</td></tr>
     </tbody>
   </table></div>
-  <p class="note2">Full-scale voltage not measured yet: set the window once the multimeter gives it.</p>
+  <p class="note2">Measured 2026-11-05. The filter cuts the inverter's 30 kHz PWM by ~19× before the ADC; a software filter alone cannot, because slow sampling aliases it. R5 value to check: rest and full readings must not move more than 10 mV with it fitted.</p>
 </section>
 
 <section>
   <h2>Before wiring anything new</h2>
   <ol class="check">
-    <li><strong>Throttle:</strong> measure rest and full output, then unplug it from the VESC completely. Tied to both, it makes a second ground path.</li>
+    <li><strong>Throttle:</strong> measured 2026-11-05 on +3V3: 0.80 V rest, 2.60 V full. Keep it unplugged from the VESC ADC: tied to both, it makes a second ground path.</li>
     <li><strong>Brakes:</strong> check each switch is a dry contact (no voltage from the old 36 V system) and whether it is normally open. With normally open, a cut wire reads “not braking” and silently drops the brake + throttle check.</li>
-    <li><strong>VESC:</strong> set the CAN timeout and test it with the wheel in the air before the throttle leaves the VESC.</li>
+    <li><strong>VESC:</strong> CAN timeout 100 ms, tested 2026-11-05 with the wheel in the air: 105–121 ms over 5 runs (REQ-VCU-03).</li>
     <li><strong>Motor NTC:</strong> wire it to TEMP and GND of the VESC Hall plug (check the pin on the board) and set its beta in VESC Tool.</li>
     <li><strong>5 V budget:</strong> the DC-DC rating is not recorded. Check it covers the ESP32 with Wi-Fi (~250 mA peaks) plus the modules.</li>
   </ol>

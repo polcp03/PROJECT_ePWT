@@ -70,7 +70,7 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">ePWT · registrador CAN → unidad de control · ESP32 DevKitC de 38 pines · revisión B</div>
+    <div class="eyebrow">ePWT · registrador CAN → unidad de control · ESP32 DevKitC de 38 pines · revisión B, 5-nov-2026: acelerador a 3,3 V con filtro RC</div>
     <h1>Placa perforada de la VCU</h1>
     <p class="lede">La ESP32, el módulo CAN, la microSD y la rueda de hoy, y el acelerador, los frenos y la IMU de la unidad de control,
       <b>a escala real: cada punto es un agujero de 2,54 mm</b>. Toca un cable o una pieza para ver qué es y por qué está ahí.
@@ -153,7 +153,7 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
           <tr><td>Resistencias 1 kΩ, 2 kΩ, 10 kΩ</td><td class="n">1, 1, 1</td><td>R1, R2, R3 (ya las tienes)</td></tr>
           <tr><td>Cerámico 100 nF</td><td class="n">2 (+4)</td><td>C7, C8 (C2–C4 y el de la IMU)</td></tr>
           <tr><td>Electrolítico 220 µF</td><td class="n">1</td><td>C6 (ya lo tienes)</td></tr>
-          <tr><td>Después: 10 kΩ ×3, 12 kΩ ×1</td><td class="n">4</td><td>R4–R7</td></tr>
+          <tr><td>Después: 1 kΩ ×1, 100 kΩ ×1, 10 kΩ ×2</td><td class="n">4</td><td>R4 (filtro), R5 (pull-down), R6–R7</td></tr>
           <tr><td>Caja estanca ABS ~150×110×70</td><td class="n">1</td><td>60 mm de alto por dentro como mínimo</td></tr>
         </tbody>
       </table></div>
@@ -164,7 +164,7 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
     <h2>Revisión eléctrica</h2>
     <ul class="checks">
       <li><span class="tag ok">bien</span><span><b>Cada pin, contra la documentación de Espressif.</b> Columna izquierda de 3V3 a 5V y derecha de GND a CLK, como en la ESP32-DevKitC V4. Coinciden con vcu-pinout.md: rueda 34, acelerador 35, frenos 32/33, CAN 14/13/27/26, SD 18/19/23/5, IMU 21/22.</span></li>
-      <li><span class="tag ok">bien</span><span><b>Ninguna entrada de la ESP32 ve 5 V.</b> SO del CAN baja por R1/R2 a 3,3 V; el acelerador por R4/R5 (×0,545); las pull-ups van a +3,3 V. El módulo SD trae su regulador y sus salidas ya son de 3,3 V.</span></li>
+      <li><span class="tag ok">bien</span><span><b>Ninguna entrada de la ESP32 ve 5 V.</b> SO del CAN baja por R1/R2 a 3,3 V; el acelerador va alimentado a 3,3 V (máximo 2,60 V medido); las pull-ups van a +3,3 V. El módulo SD trae su regulador y sus salidas ya son de 3,3 V.</span></li>
       <li><span class="tag ok">bien</span><span><b>Pines delicados, libres.</b> El 12 sin pull-up (si no, no arranca), del 6 al 11 sin tocar (memoria flash), 1 y 3 para el USB. El 5 es pin de arranque, pero CS descansa en alto.</span></li>
       <li><span class="tag ok">bien</span><span><b>Analógicas en ADC1</b> (35 y los libres 36/39): el ADC2 no lee con el Wi-Fi encendido.</span></li>
       <li><span class="tag ok">bien</span><span><b>Una sola masa,</b> que toca el vehículo solo por J5 (DEC-004). La placa flota sobre su batería de 12 V.</span></li>
@@ -196,8 +196,8 @@ const X=x=>ML+(flip?(W-1-x):x)*P, Y=y=>MT+y*P;
 
 const NETS={
  GND:{n:'GND · masa',c:'#1d1d1d',d:'Un solo nodo: bus de arriba (fila 2), espina del borde izquierdo y riel de abajo, todo hilo desnudo. Toca el vehículo solo por J5, el GND del cable CAN: la placa flota sobre su batería de 12 V (DEC-004).'},
- V5:{n:'+5 V',c:'#d63a2c',d:'5,3 V del DC-DC, alimentado por la batería de 12 V aparte. Nunca del pack 13S. Bus desnudo en la fila 4; a la ESP32 baja por un cable aislado por el borde izquierdo hasta su pin 5V. Alimenta el CAN, la SD, la rueda y el acelerador.'},
- V33:{n:'+3,3 V',c:'#f08c1a',d:'Sale del regulador de la ESP32 (pin 3V3, arriba a la izquierda) al bus de la fila 6. Solo para las pull-ups y la IMU. Una entrada de la ESP32 nunca se sube a 5 V: no lo tolera.'},
+ V5:{n:'+5 V',c:'#d63a2c',d:'5,3 V del DC-DC, alimentado por la batería de 12 V aparte. Nunca del pack 13S. Bus desnudo en la fila 4; a la ESP32 baja por un cable aislado por el borde izquierdo hasta su pin 5V. Alimenta el CAN, la SD y la rueda.'},
+ V33:{n:'+3,3 V',c:'#f08c1a',d:'Sale del regulador de la ESP32 (pin 3V3, arriba a la izquierda) al bus de la fila 6. Para las pull-ups, la IMU y el acelerador (desde el 5-nov). Una entrada de la ESP32 nunca se sube a 5 V: no lo tolera.'},
  CSCK:{n:'CAN · SCK',c:'#c99700',g:'GPIO 14',d:'Reloj del SPI del módulo CAN (HSPI, 4 MHz). Recto, 5 agujeros: el cable más corto de la placa.'},
  CSI:{n:'CAN · SI',c:'#2d6fd8',g:'GPIO 13',d:'Datos de la ESP32 al MCP2515.'},
  CSO:{n:'CAN · SO (0–5 V)',c:'#2e9e4c',d:'Datos del MCP2515 a la ESP32. El módulo va a 5 V, así que esta línea sube a 5 V: entra en R1 antes de llegar a la ESP32.'},
@@ -208,8 +208,8 @@ const NETS={
  DMISO:{n:'SD · MISO',c:'#2e9e4c',g:'GPIO 19',d:'Datos de la tarjeta a la ESP32. Recto, en la misma fila. El módulo trae su regulador de 3,3 V: no necesita divisor.'},
  DCS:{n:'SD · CS',c:'#8a52d6',g:'GPIO 5',d:'Selección de la tarjeta. El GPIO 5 es pin de arranque, pero no molesta porque CS descansa en alto.'},
  WHL:{n:'Rueda',c:'#13a3b6',g:'GPIO 34',d:'Hall 3144 de la rueda delantera, de colector abierto. R3 de 10 kΩ a 3,3 V, porque el GPIO 34 no tiene pull-up interno. Su condensador de 100 nF (C1) va junto al sensor, no en la placa.'},
- THRI:{n:'Acelerador (0–5 V)',c:'#d9469c',plan:1,d:'Salida del puño Hall, que pasa de 3,3 V. Entra en el divisor antes de la ESP32.'},
- THR:{n:'Acelerador ×0,545',c:'#f29bcd',g:'GPIO 35',plan:1,d:'R4 10 kΩ arriba, R5 12 kΩ a masa (×0,545) y C2 100 nF: a fondo llegan unos 2,3 V. Si el cable se corta, R5 tira el pin a 0 V y el código pone par cero. ADC1, porque el ADC2 no lee con el Wi-Fi encendido.'},
+ THRI:{n:'Acelerador (0,80–2,60 V)',c:'#d9469c',plan:1,d:'Salida del puño Hall, alimentado a 3,3 V (medido el 5-nov: 0,80 V en reposo, 2,60 V a fondo). No hace falta divisor. Entra en el filtro RC antes de la ESP32.'},
+ THR:{n:'Acelerador filtrado',c:'#f29bcd',g:'GPIO 35',plan:1,d:'R4 1 kΩ en serie y C2 100 nF a masa: filtro de 1,6 kHz, que atenúa ~19 veces los 30 kHz del inversor antes del ADC. R5 100 kΩ a masa: si el cable se corta, el pin cae a 0 V y el código pone par cero. ADC1, porque el ADC2 no lee con el Wi-Fi encendido.'},
  BRL:{n:'Freno delantero',c:'#a4d94a',g:'GPIO 32',plan:1,d:'Interruptor a masa, normalmente abierto (medido el 2-nov): cierra solo al frenar. R7 10 kΩ a 3,3 V y C4 100 nF a masa; antirrebote de 10–20 ms en el código. Si el cable se corta, se lee «sin frenar».'},
  BRR:{n:'Freno trasero (sin conectar)',c:'#5c8f1f',g:'GPIO 33',plan:1,d:'Reservado. Su interruptor falla, así que de momento no se cablea: R6 y C3 pueden quedarse sin soldar. Un bloqueo de la trasera se ve igual en el registro, porque su velocidad es la del motor.'},
  SDA:{n:'IMU · SDA',c:'#f5f5f5',g:'GPIO 21',plan:1,d:'I2C por defecto de la ESP32. Muchos GY-LSM6DS3 ya traen las pull-ups: mídelo antes de añadir una de 4,7 kΩ a 3,3 V.'},
@@ -252,7 +252,7 @@ const WIRES=[
  {n:'BRL',plan:1,p:[[10,10],[9,10]]},
  // throttle
  {n:'GND',plan:1,p:[[12,0],[12,15]]},
- {n:'V5',plan:1,p:[[16,0],[16,4]]},
+ {n:'V33',plan:1,p:[[16,0],[16,6]]},
  {n:'THRI',plan:1,p:[[14,0],[14,8]]},
  {n:'THR',plan:1,p:[[14,12],[14,18],[24,18]]},
  // SD, standing in a 1x6 socket at x=39, rows 18..23
@@ -269,7 +269,7 @@ const WIRES=[
  {n:'SDA',plan:1,p:[[37,0],[37,18],[34,18]]}
 ];
 
-const RES={'1 kΩ':['#7b4a1e','#111','#d33'],'2 kΩ':['#d33','#111','#d33'],'10 kΩ':['#7b4a1e','#111','#f08c1a'],'12 kΩ':['#7b4a1e','#d33','#f08c1a']};
+const RES={'1 kΩ':['#7b4a1e','#111','#d33'],'2 kΩ':['#d33','#111','#d33'],'10 kΩ':['#7b4a1e','#111','#f08c1a'],'12 kΩ':['#7b4a1e','#d33','#f08c1a'],'100 kΩ':['#7b4a1e','#111','#f5c400']};
 const PARTS=[
  {id:'R1',t:'r',a:[20,26],b:[20,30],v:'1 kΩ',nets:['CSO','CSON'],d:'Mitad de arriba del divisor de SO. Junto con R2 baja los 5 V del MCP2515 a 3,3 V.'},
  {id:'R2',t:'r',a:[22,30],b:[22,33],v:'2 kΩ',nets:['CSON','GND'],d:'Mitad de abajo del divisor de SO, a masa (riel de abajo).'},
@@ -277,9 +277,9 @@ const PARTS=[
  {id:'C6',t:'e',a:[27,2],b:[27,4],v:'220 µF',nets:['GND','V5'],d:'Depósito del +5 V para los picos de la ESP32 con Wi-Fi (~250 mA). La raya del electrolítico (−) a GND.'},
  {id:'C7',t:'c',a:[40,16],b:[41,16],v:'100 nF',nets:['GND','V5'],d:'Filtro de la SD, pegado a su zócalo: quita el ruido rápido que el de 220 µF no ve.'},
  {id:'C8',t:'c',a:[18,30],b:[19,30],v:'100 nF',nets:['GND','V5'],d:'Filtro del módulo CAN, junto a la tira de su cable.'},
- {id:'R4',t:'r',a:[14,8],b:[14,12],v:'10 kΩ',plan:1,nets:['THRI','THR'],d:'Mitad de arriba del divisor del acelerador.'},
- {id:'R5',t:'r',a:[14,13],b:[12,13],v:'12 kΩ',plan:1,nets:['THR','GND'],d:'Mitad de abajo, a masa: si el cable se corta, el pin cae a 0 V y el código pone par cero. Va de pie.'},
- {id:'C2',t:'c',a:[14,15],b:[12,15],v:'100 nF',plan:1,nets:['THR','GND'],d:'Con R5 forma un filtro de ~1 ms: quita ruido sin que el conductor lo note.'},
+ {id:'R4',t:'r',a:[14,8],b:[14,12],v:'1 kΩ',plan:1,nets:['THRI','THR'],d:'Resistencia del filtro RC del acelerador, en serie. Con C2 corta en 1,6 kHz.'},
+ {id:'R5',t:'r',a:[14,13],b:[12,13],v:'100 kΩ',plan:1,nets:['THR','GND'],d:'Pull-down: si el cable se corta, el pin cae a 0 V y el código pone par cero. Tan alta que no carga el puño: comprobar que reposo y fondo no se mueven más de 10 mV al ponerla. Va de pie.'},
+ {id:'C2',t:'c',a:[14,15],b:[12,15],v:'100 nF',plan:1,nets:['THR','GND'],d:'Condensador del filtro RC (1 kΩ · 100 nF = 0,1 ms): quita el ruido del inversor sin que el conductor lo note. Lo más cerca posible del pin.'},
  {id:'R6',t:'r',a:[4,6],b:[4,10],v:'10 kΩ',plan:1,nets:['V33','BRR'],d:'Pull-up del freno trasero. Mientras no se conecte, opcional.'},
  {id:'R7',t:'r',a:[10,6],b:[10,10],v:'10 kΩ',plan:1,nets:['V33','BRL'],d:'Pull-up del freno delantero. La interna (~45 kΩ) es floja para un cable largo junto al VESC.'},
  {id:'C3',t:'c',a:[5,12],b:[7,12],v:'100 nF',plan:1,nets:['BRR','GND'],d:'Filtro del freno trasero; opcional mientras no se conecte.'},
@@ -289,7 +289,7 @@ const PARTS=[
 const TERMS=[
  {id:'J1',pins:[[1,0],[3,0]],lab:['GND','+5V'],nets:['GND','V5'],side:'top',name:'J1 · 5 V',d:'Salida del DC-DC: 5,3 V y GND. El DC-DC y su batería de 12 V quedan fuera de la placa, atornillados en la caja.'},
  {id:'J4',pins:[[5,0],[7,0],[9,0]],lab:['TRAS','GND','DEL'],nets:['BRR','GND','BRL'],plan:1,side:'top',name:'J4 · frenos',d:'Interruptores a masa, normalmente abiertos. Hoy solo se conecta el delantero (DEL); el trasero falla y su borna queda libre.'},
- {id:'J2',pins:[[12,0],[14,0],[16,0]],lab:['GND','SEÑ','+5V'],nets:['GND','THRI','V5'],plan:1,side:'top',name:'J2 · acelerador',d:'El puño Hall de 5 V. Antes de conectarlo aquí, desconectarlo del todo del ADC del VESC: dos caminos de masa no.'},
+ {id:'J2',pins:[[12,0],[14,0],[16,0]],lab:['GND','SEÑ','+3V3'],nets:['GND','THRI','V33'],plan:1,side:'top',name:'J2 · acelerador',d:'El puño Hall, alimentado a 3,3 V. Antes de conectarlo aquí, desconectarlo del todo del ADC del VESC: dos caminos de masa no.'},
  {id:'J3',pins:[[19,0],[21,0],[23,0]],lab:['GND','+5V','SEÑ'],nets:['GND','V5','WHL'],side:'top',name:'J3 · rueda',d:'Hall 3144 de la rueda delantera (10 imanes). Ya montado en el quad.'},
  {id:'J6',pins:[[31,0],[33,0],[35,0],[37,0]],lab:['3V3','GND','SCL','SDA'],nets:['V33','GND','SCL','SDA'],plan:1,side:'top',name:'J6 · a la IMU (chasis)',d:'Cable apantallado de 4 hilos, menos de 50 cm, hasta la IMU atornillada al chasis cerca del centro de gravedad. Dos bornas de 2 polos juntas. La malla del cable, a GND solo en este extremo.'},
  {id:'J5',pins:[[0,23],[0,25],[0,27]],lab:['H','L','GND'],nets:['CANH','CANL','GND'],side:'left',name:'J5 · CAN al VESC',d:'Un solo conector hacia el VESC: CAH, CAL y su − (GND). H y L puentean a la borna del propio módulo. El pin 5V del VESC no se usa.'}
