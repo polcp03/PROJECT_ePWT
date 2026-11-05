@@ -47,14 +47,16 @@
 mot.p            = 3;              % [-]  MEASURED
 
 % Stator resistance, per phase.
-% Mean of THREE consecutive VESC detections, 2026-09-07, all at I = 40.00 A:
-%   27.83 / 28.14 / 28.10 mOhm  ->  28.02 +/- 0.14 mOhm, 0.5 % spread.
+% 2026-11-05: THREE VESC detections at I = 40 A, after rewriting the config,
+%   all 18.7 mOhm. Replaces the 2026-09-07 value (27.83 / 28.14 / 28.10 ->
+%   28.02 mOhm, same 40 A), which no longer reproduces. Cause of the change
+%   not found; temperature alone cannot explain 33 %.
 % Still a VESC_ESTIMATE: it includes MOSFET on-resistance and dead-time, so it
 % is the resistance the CURRENT LOOP sees, an upper bound on the winding
 % copper. That is the right number for simulating the loop; it is not the right
 % number for a copper-loss or thermal model. Temperature of the run unknown
 % (no motor sensor), and copper moves 0.39 %/K.
-mot.Rs           = 0.02802;        % [Ohm]  VESC_ESTIMATE, 3 runs
+mot.Rs           = 0.0187;         % [Ohm]  VESC_ESTIMATE, 3 runs 2026-11-05
 
 % Inductances. VESC stores the average L and the saliency difference:
 %   Lq = L + diff/2 ,  Ld = L - diff/2      (foc_math.c:782-783)
@@ -134,8 +136,8 @@ mot.bemf_thd     = 0.094;          % [-] MEASURED
 % Derived constants (do not edit - computed from the above)
 mot.Kt           = 1.5 * mot.p * mot.lambda_m;   % [Nm/A] torque per amp of iq
 mot.Ke_phase_pk  = mot.lambda_m;                 % [V*s/rad_elec] peak phase BEMF
-mot.tau_e_d      = mot.Ld / mot.Rs;              % [s] 3.49 ms
-mot.tau_e_q      = mot.Lq / mot.Rs;              % [s] 3.82 ms
+mot.tau_e_d      = mot.Ld / mot.Rs;              % [s] 5.31 ms
+mot.tau_e_q      = mot.Lq / mot.Rs;              % [s] 6.03 ms
 % Kt = 0.0758 Nm/A  ->  40 A = 3.03 Nm, 120 A = 9.10 Nm.
 % (0.0716 with the VESC's own lambda. The 5.5 % gap is hardware, not model:
 %  the controller commands torque against a flux it underestimates.)

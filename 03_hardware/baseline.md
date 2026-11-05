@@ -60,9 +60,9 @@ the measured Kt. Treat any datasheet number as belonging to another motor.
 |---|---|---|
 | Topology | Radial flux, **inner rotor**, outer wound stator, 3 phases | Observed by Pol |
 | Pole pairs `p` | **3** | MEASURED (Hall count) |
-| Flux linkage `λm` | **16.855 mWb** | MEASURED (3 methods, 0.02 %) |
-| `Rs` per phase | 28.02 mΩ | VESC_ESTIMATE (includes MOSFETs) |
-| `Ld` / `Lq` | 99.2 / 112.8 µH, **Lq/Ld = 1.136** | VESC_ESTIMATE at 40 A |
+| Flux linkage `λm` | **16.855 mWb** | MEASURED (3 methods, 0.02 %). VESC detections 2026-11-05 scatter 16.2–17 mWb around it |
+| `Rs` per phase | **18.7 mΩ** | VESC_ESTIMATE (includes MOSFETs), 2026-11-05, repeated 3× at 40 A after rewriting the config. Replaces 28.02 mΩ (2026-09-07), which no longer reproduces |
+| `Ld` / `Lq` | 99.2 / 112.8 µH, **Lq/Ld = 1.136** (2026-09-07, 40 A) · 97.8 / 113.0 µH, 1.155 (2026-11-05: L 105.39, Lq−Ld 15.19 µH) | VESC_ESTIMATE. Agree within the known current dependence |
 | Rotor inertia | 1.558·10⁻⁴ kg·m² ±14 % | MEASURED |
 | Back-EMF THD | 9.4 % (5th, 7th) | MEASURED |
 | Kt | 0.0758 Nm/A | Derived |
@@ -84,7 +84,7 @@ no decoupling, MTPA off, field weakening off.
 
 | Limit | Value |
 |---|---|
-| Motor current | ±120 A (abs 160 A) |
+| Motor current | ±120 A (abs 160 A) — Pol's choice, full power; stays for tests too |
 | Battery current | **40 A** discharge / −35 A regen — equals BMS rating, do not raise |
 | Duty | 0.95 |
 | Battery cut-off | 44.2 → 39.0 V |
