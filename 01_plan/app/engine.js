@@ -185,9 +185,11 @@
     const done = ids.filter(k => attempts[l.id + '-' + k] && attempts[l.id + '-' + k].turns && attempts[l.id + '-' + k].turns.length).length;
     return { done, total: ids.length };
   }
+  const ordered = () => LESSONS.slice().sort((a, b) => a.date.localeCompare(b.date) || (+a.slot || 1) - (+b.slot || 1) || a.id.localeCompare(b.id));
   function todayLesson() {
-    const t = day(), sorted = LESSONS.slice().sort((a, b) => a.date.localeCompare(b.date));
-    return sorted.find(l => l.date === t) || sorted.filter(l => l.date <= t).find(l => { const p = lessonProgress(l); return p.done < p.total; }) || sorted.filter(l => l.date <= t).pop() || sorted[0];
+    // the first unfinished lesson in calendar order, so a day behind just means yesterday's lesson first
+    const sorted = ordered(), open = sorted.find(l => { const p = lessonProgress(l); return p.done < p.total; });
+    return open || sorted[sorted.length - 1];
   }
   function showLesson(l, intro) {
     view.innerHTML = '';
@@ -229,7 +231,7 @@
   }
   function showToday() {
     const l = todayLesson(), n = dueList().length;
-    showLesson(l, 'Today');
+    showLesson(l, l.date > day() ? 'Ahead of plan' : l.date < day() ? 'Next · planned for' : 'Today');
     if (n) {
       const due = el('div', { class: 'due' }, [el('div', {}, [el('b', { text: n + (n === 1 ? ' mistake' : ' mistakes') + ' to re-answer' }), el('p', { text: 'About ' + Math.max(5, n * 2) + ' minutes. Do them before the lesson: recalling costs more than rereading, and that is why it sticks.' })]), el('a', { class: 'btn', href: '#review', text: 'Open review' })]);
       view.querySelector('.lesson-head').append(due);
@@ -286,7 +288,7 @@
     const page = el('div', { class: 'page' });
     page.append(el('div', { class: 'lesson-head' }, [el('p', { class: 'eyebrow', text: 'All lessons' }), el('h1', { text: 'Lessons' })]));
     const list = el('div', { class: 'list' });
-    LESSONS.slice().sort((a, b) => b.date.localeCompare(a.date)).forEach(l => {
+    ordered().forEach(l => {
       const p = lessonProgress(l), open = Object.values(errors).filter(e => e.lesson === l.id && e.status !== 'green').length;
       list.append(el('a', { class: 'lrow', href: '#' + l.id }, [el('span', { class: 't', text: l.title }), el('span', { class: 'p', text: p.done + '/' + p.total }), el('span', { class: 'm', text: (l.cycle || '') + ' · ' + l.date + (open ? ' · ' + open + ' open mistakes' : '') })]));
     });

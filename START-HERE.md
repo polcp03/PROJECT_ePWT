@@ -7,25 +7,9 @@ que lo demuestre.
 
 ## Hoy
 
-**Study here: [ePWT Bench](https://claude.ai/artifact/JwjbfzLRg98SpwrJfADjBX)** — today's lesson, graded by Claude as you answer, and your mistakes coming back on the Review tab (since 3-Nov-2026; source in `01_plan/app/`). Lessons not yet moved there still open from the calendar.
+**Study here: [ePWT Bench](https://claude.ai/artifact/JwjbfzLRg98SpwrJfADjBX)**. Open *Today*: it shows the first lesson you have not finished, in calendar order. Do the *Review* tab first. Claude grades every answer on the page; your mistakes come back by themselves. Old per-lesson artifacts are retired.
 
-**C02 + C03 — Motor, inversor y primer lazo de corriente · review vie 13 nov.** Detalle en [C03](01_plan/C03.md).
-
-Dos tareas al día hasta el 13, a las **07:00** y a las **14:00**.
-
-| Día | 07:00 | 14:00 |
-|---|---|---|
-| mar 3 | L1 · [Batería → par](https://claude.ai/artifact/F5pNX14PcUEVxtYv8zrwpN) | L2 · [The field that rotates](https://claude.ai/artifact/JwjbfzLRg98SpwrJfADjBX) (in the Bench) |
-| mié 4 | [Examen L1+L2](https://claude.ai/artifact/2o9NrZ6BgGsVTbg18AX3rZ) | L3a · [Park y dq](https://claude.ai/artifact/LcqqugrE6jFi8U22KqKPCM) |
-| jue 5 | L3b · [Par y límites](https://claude.ai/artifact/2metZHTgmmyaxgZu6usJpL) | Control 1 · [Lazo abierto y cerrado](https://claude.ai/artifact/GKUX9KpwnF92yySFnHHfpL) |
-| vie 6 | Control 2 · [El PI](https://claude.ai/artifact/Vu428jai3Yqk2PmyCk3epu) | — |
-| sáb 7 | [Kp y Ki a mano](https://claude.ai/artifact/U5QxEKTCLnBLrPNoyWQQvz) (10:00) | Repaso de fallos |
-| mar 10 | Simulink A · Tu motor en dq | λm con tus logs |
-| mié 11 | Simulink B · Cierra el lazo | Hueco libre |
-| jue 12 | Examen C03 | Acordar slides |
-| vie 13 | **Review con mentores** | |
-
-Haz solo la fila de hoy. Los enlaces que faltan llegan al calendario el día antes.
+**C03 — dq, limits and the current loop · review Fri 13 Nov (with C02).** Order, gate and open points in [C03](01_plan/C03.md). **Gate:** REQ-MOD-001 drafted in C03-LM (10 Nov).
 
 ## Dónde está cada cosa
 

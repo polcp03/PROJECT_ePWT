@@ -16,7 +16,7 @@ window.Motor3D = (function () {
   const BELT = [[0, 1], [2, -1], [1, 1], [0, -1], [2, 1], [1, -1]];
   const slotAngle = n => (n + 0.5) * TAU / NS;
 
-  const DEFAULT = { phases: 3, field: true, currents: true, labels: false, rotor: true, vectors: false, spin: true, speed: 0.2, delta: 90, endturns: true, caption: '' };
+  const DEFAULT = { phases: 3, field: true, currents: true, labels: false, rotor: true, vectors: false, spin: true, speed: 0.2, delta: 90, endturns: true, caption: '', dq: false, imag: 0 };
 
   function mount(host) {
     const vp = host.querySelector('.vp'), labelsEl = host.querySelector('.labels'), hud = host.querySelector('.hud');
@@ -124,6 +124,15 @@ window.Motor3D = (function () {
     const vStator = new T.ArrowHelper(new T.Vector3(1, 0, 0), new T.Vector3(0, 0, L / 2 + 1.6), 3.4, 0xffffff, 0.45, 0.3);
     const vRotor = new T.ArrowHelper(new T.Vector3(1, 0, 0), new T.Vector3(0, 0, L / 2 + 1.55), 2.7, 0xffffff, 0.4, 0.28);
     vecG.add(vStator, vRotor);
+    // ---- dq frame, fixed to the rotor: d through the centre of the N magnet at 0, q 90 deg electrical
+    //      ahead = 30 deg mechanical (p = 3). The stator current vector lives in this frame. ----
+    const dqG = new T.Group(); rotorG.add(dqG);
+    const zdq = L / 2 + 0.4, QM = TAU / 4 / P, LDQ = RR + 1.0;
+    const aD = new T.ArrowHelper(new T.Vector3(1, 0, 0), new T.Vector3(0, 0, zdq), LDQ, 0xffffff, 0.45, 0.3);
+    const aQ = new T.ArrowHelper(new T.Vector3(Math.cos(QM), Math.sin(QM), 0), new T.Vector3(0, 0, zdq), LDQ, 0xffffff, 0.45, 0.3);
+    dqG.add(aD, aQ);
+    const aI = new T.ArrowHelper(new T.Vector3(1, 0, 0), new T.Vector3(0, 0, zdq + 0.15), 2, 0xffffff, 0.5, 0.34); rotorG.add(aI);
+    const ILEN = I => 0.6 + 2.8 * Math.min(1, I / 120); // arrow length for |i| in A
     // ---- current glyphs (dot = out of the page, cross = into it) on each slot face ----
     function glyph(dot) {
       const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
@@ -148,6 +157,9 @@ window.Motor3D = (function () {
       ['Shaft', new T.Vector3(0, 0, L / 2 + 2.2), true],
       ['End winding', new T.Vector3(rc * Math.cos(slotAngle(10)), rc * Math.sin(slotAngle(10)), -L / 2 - 0.9)],
       ['Hall sensors', new T.Vector3((RB + 0.3) * Math.cos(TAU / NS + 0.7), (RB + 0.3) * Math.sin(TAU / NS + 0.7), -L / 2 - 0.3)],
+      ['d', new T.Vector3((LDQ + 0.35), 0, zdq), true, 'dq'],
+      ['q', new T.Vector3((LDQ + 0.35) * Math.cos(QM), (LDQ + 0.35) * Math.sin(QM), zdq), true, 'dq'],
+      ['i = id + j·iq', new T.Vector3(1, 0, zdq), true, 'cur'],
     ];
     { const phi = TAU / 6 * 4; const p2 = pt(phi, RM + 0.25, MA + 0.28); LABELS[6][1] = new T.Vector3(p2.x, p2.y, L / 2); }
     const labelEls = LABELS.map(([t]) => { const s = document.createElement('span'); s.textContent = t; labelsEl.appendChild(s); return s; });
@@ -201,6 +213,9 @@ window.Motor3D = (function () {
         endMats.forEach((m, k) => m.emissiveIntensity = S.currents ? 0.45 * Math.abs(i[k]) : 0.05);
         endG.children.forEach(t => t.visible = S.endturns && (t.userData.side < 0 || S.endturns === 'both'));
         glyphs.forEach((g, n) => { const s = slots[n], v = i[s.ph] * s.sign; g.visible = S.currents && Math.abs(v) > 0.08; g.material = v >= 0 ? gDot : gCross; const sc = 0.22 + 0.3 * Math.abs(v); g.scale.set(sc, sc, 1); });
+        dqG.visible = !!S.dq; aD.setColor(col('--magN')); aQ.setColor(col('--copper'));
+        aI.visible = S.imag > 0;
+        if (S.imag > 0) { const a = S.delta * D2R / P, l = ILEN(S.imag); aI.setDirection(new T.Vector3(Math.cos(a), Math.sin(a), 0)); aI.setLength(l, 0.5, 0.34); aI.setColor(col('--ink')); LABELS[LABELS.length - 1][1].set((l + 0.3) * Math.cos(a), (l + 0.3) * Math.sin(a), zdq + 0.15); }
         vecG.visible = S.vectors;
         if (S.vectors) {
           vStator.visible = !isNaN(fE);
@@ -211,9 +226,10 @@ window.Motor3D = (function () {
         renderer.render(scene, cam);
         // labels
         const w = vp.clientWidth, h = vp.clientHeight;
-        LABELS.forEach(([, p, onRotor], k) => {
+        LABELS.forEach(([, p, onRotor, grp], k) => {
           const el = labelEls[k];
-          if (!S.labels || (onRotor && !S.rotor)) { el.classList.add('hidden'); return; }
+          const want = grp === 'dq' ? S.dq : grp === 'cur' ? S.imag > 0 : S.labels;
+          if (!want || (onRotor && !S.rotor)) { el.classList.add('hidden'); return; }
           const v = p.clone(); if (onRotor) v.applyAxisAngle(new T.Vector3(0, 0, 1), rotorG.rotation.z);
           v.project(cam);
           if (v.z > 1) { el.classList.add('hidden'); return; }
@@ -231,6 +247,8 @@ window.Motor3D = (function () {
       const rows = [['iU', fmt(i[0] * 100, 0) + ' %'], ['iV', fmt(i[1] * 100, 0) + ' %'], ['iW', fmt(i[2] * 100, 0) + ' %'],
         ['Electrical angle ωt', deg(S.wt)], ['Field peak (mechanical)', isNaN(fE) ? 'not rotating' : deg(fE / P)],
         ['Torque per amp', isNaN(fE) ? '0 on average' : fmt(Math.sin(S.delta * D2R) * 100, 0) + ' % of max']];
+      if (S.dq || S.imag > 0) rows.push(['d axis (mechanical)', deg(rotorG.rotation.z)]);
+      if (S.imag > 0) rows.push(['id', fmt(S.imag * Math.cos(S.delta * D2R), 0) + ' A'], ['iq', fmt(S.imag * Math.sin(S.delta * D2R), 0) + ' A']);
       ro.innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
       hud.textContent = S.phases === 0 ? 'no current' : S.phases === 1 ? 'phase U only' : S.phases === 'swap' ? 'V and W swapped' : 'U, V, W';
     }
@@ -261,6 +279,9 @@ window.Motor3D = (function () {
       const p = Object.assign({}, DEFAULT);
       Object.entries(attrs || {}).forEach(([k, v]) => { p[k] = k === 'caption' ? v : parseVal(k, v); });
       if ('wt' in p) p.wt = p.wt * D2R; else delete p.wt;
+      // id/iq (A) place the current vector in the rotor frame; its angle from d is the angle δ
+      if ('id' in p || 'iq' in p) { const id = +p.id || 0, iq = +p.iq || 0; p.imag = Math.hypot(id, iq); if (p.imag > 0) p.delta = Math.atan2(iq, id) / D2R; }
+      delete p.id; delete p.iq;
       set(p);
     }
     applyColors(); sync(); requestAnimationFrame(frame);
@@ -279,7 +300,7 @@ window.Motor3D = (function () {
     <div class="seg" role="group" aria-label="Layers">
       <button type="button" data-toggle="labels">Labels</button><button type="button" data-toggle="field">Gap field</button>
       <button type="button" data-toggle="currents">Currents ⊙⊗</button><button type="button" data-toggle="vectors">Field and rotor axes</button>
-      <button type="button" data-toggle="rotor">Rotor</button><button type="button" data-toggle="spin">Run</button>
+      <button type="button" data-toggle="dq">d and q axes</button><button type="button" data-toggle="rotor">Rotor</button><button type="button" data-toggle="spin">Run</button>
     </div>
     <div class="ctl">
       <div><label for="m-speed">Electrical speed <output id="o-speed"></output></label><input id="m-speed" type="range" min="0.02" max="1" step="0.01"></div>
