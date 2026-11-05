@@ -39,6 +39,8 @@ Debe entregar **fuentes + preguntas**, no conclusiones.
 | **Dashboard / análisis en Python de los logs** | Condición cumplida: ya hay CSV. Hoy existe `04_model/scripts/can_log_decode.py` (resumen + figura); más, cuando el análisis lo pida |
 | **Hook de fin de sesión: avisar de trabajo sin commitear** | Haber cerrado 3 sesiones más olvidando el commit. Ver la nota de abajo |
 | **Control de tracción, launch control** | Modelo validado + control de par funcionando |
+| **Launch: take up the chain backlash first** (Pol, 2026-11-05) — a small torque (~1–2 A) before the launch so the slack is already gone, instead of a very tight chain, which only adds friction | With launch control. Needs the chain at its proper tension first (EXP-003) |
+| **VESC status rate over CAN** — today ~21 ms, so a timeout is measured with ±21 ms resolution | When a requirement needs a finer measurement than 21 ms |
 | **MPC** | Modelo validado. MPC sin modelo es imposible por definición |
 | **Percepción, cámaras, autonomía, robot acompañante** | Muy lejos. Mantener como horizonte, no planificar |
 | **Diagnóstico del corte de USB del VESC bajo carga** | Fallo conocido en la comunidad VESC (EMI / bucle de tierra / pull-ups). 30 min de osciloscopio antes de construir nada para evitarlo |
@@ -46,7 +48,7 @@ Debe entregar **fuentes + preguntas**, no conclusiones.
 | ~~**Medir `R_int` del pack**~~ | **Hecho 2026-10-31:** ≈ 0,18 Ω batería + cables + BMS, de un log CAN (EXP-002). Falta pasarlo a `04_model/params/` |
 | **`si_wheel_diameter` 0,30 m vs `2·r_roll` 0,31 m** | Decidir cuál vale cuando se haga el roll-out con neumáticos nuevos |
 | **Altura del CG (`h_cg`)** | MISSING. La necesita el load transfer del L2 (examen C01, bloque I) |
-| **EXP-001 (bucle de tierra) sin medir** | Sigue sin día. El registrador lo esquiva flotando (DEC-004); vuelve a importar si el ESP32 manda par al VESC |
+| **EXP-001 (bucle de tierra) sin medir** | **Condition met 2026-11-05:** the ESP32 now sends torque to the VESC (can_throttle). Done safely by running the laptop on battery with the VESC USB unplugged. Measure it before the VCU rides with a laptop attached |
 | **Velocidad de rueda: método de filtrado** | Datos del `can_logger` con el quad rodando (hace falta tarjeta nueva). Comparar media de una vuelta, calibración por hueco y filtro; solo entonces se pasa al ESP32 (Pol, 2026-11-01) |
 | **IMU al registrador** | Que llegue la GY-LSM6DS3 nueva. I2C en GPIO 21/22, 10 kΩ a 3V3, dirección 0x6A |
 | **BMS por CAN** | Solo si hace falta la tensión o la temperatura por celda. La tensión y la corriente del pack ya llegan del VESC, y el foco es motor e inversor (Pol, 2026-11-01). El BMS queda de respaldo pasivo, sin tocar ([DEC-005](../08_decisions/DEC-005-arquitectura-vcu.md)) |

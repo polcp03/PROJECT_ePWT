@@ -100,3 +100,16 @@ logs del quad irá a `04_model/scripts/`.
 2. Volcar los archivos del instrumento en `raw/`, sin renombrar ni recortar.
 3. Añadir una sección aquí: qué se midió, con qué montaje y qué script lo lee.
 4. La figura de salida va a `04_model/results/`, nunca junto a los datos.
+
+## `2026-11-05_low-speed-no-chain` — VESC low-speed control, chain off (EXP-003)
+
+Wheels in the air, chain removed, VESC Tool log at ~33 Hz. Current requests 1 / 2 / ~2.5 A
+twice, then a duty sweep 2 → 48 %.
+
+| Path | What | Size |
+|---|---|---|
+| `raw/2026-11-05_22-06-04.csv` | VESC Tool realtime log, blend 2500/4000, 5354 rows, `;`-separated | 1.5 MB |
+| `raw/2026-11-05_23-14-20.csv` | Same, blend moved to 1000/2000, 5277 rows | 1.5 MB |
+
+**Analysis:** `plot.py` → `1_session.png`, `2_negative_current.png`, `3_ripple_vs_speed.png`; `compare.py` → `4_before_after.png`.
+Conclusions in [EXP-003](../07_experiments/EXP-003-low-speed-control.md).

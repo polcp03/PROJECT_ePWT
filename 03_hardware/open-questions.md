@@ -74,6 +74,13 @@ Ver `shopping-list.md`.
 La referencia MY1020/BM1109 no está confirmada. Caracterizarlo (R de fase, back-EMF,
 pares de polos) es barato y no requiere software. → Es el objetivo de **C01**.
 
+**When the motor is opened (rotor photos for the id–iq work): inspect the Hall sensors (2026-11-05).** Their placement error (~±10°, 19°
+spread, repeatable) causes the current ripple below the Hall→observer handover
+([EXP-003](../07_experiments/EXP-003-low-speed-control.md)). Look for a moved, bent, loose or
+dirty sensor; photograph their position against the slots; clean. Replace one only if it is
+visibly damaged, then re-detect the table and repeat `hall_analyze 20`. Steps in
+`01_plan/tareas-quad.md`.
+
 ## Implementaciones de referencia a revisar antes de programar nada
 
 - **VESC Express** — firmware oficial de los desarrolladores de VESC para ESP32.
@@ -134,6 +141,22 @@ vale nada hasta correlacionar contra `06_data/`, es un bloqueante barato: un cam
 mapa lineal 0,81 → 3,30 V, y **rampa de 0,3 s de subida / 0,1 s de bajada**.
 Esa rampa (400 A/s) domina la dinámica percibida frente al lazo de corriente
 (~1,5 ms). Detalle en [`04_model/params/throttle_params.m`](../04_model/params/throttle_params.m).
+
+## Answered on the bench — the VESC controlled badly below ~2500 erpm (2026-11-05)
+
+Full record: [EXP-003](../07_experiments/EXP-003-low-speed-control.md). Two causes, found the
+same evening with the wheels in the air:
+1. **Hard start = over-tensioned chain.** Chain off: breakaway ~7 A → ~2.5 A, turns at 2 % duty.
+2. **Current ripple below ~4000 erpm = Hall angle** (sensor placement, ~±10°). Moving the
+   Hall→observer handover from 2500/4000 to **1000/2000 erpm** cut the id ripple at
+   2000–3400 erpm from ~2 A to ~0.15 A.
+
+**Still open:** the observer at 1000–2000 erpm **under load** (chain back on, at a tension
+spec), and the observer's flux linkage (detections scatter 16.2–17 mWb against 16.86 mWb
+measured), which matters most at low speed.
+
+**Export of 23:41 checked:** handover 1000/2000 ✓, `si_motor_poles` 6 ✓, battery current
+39 / −25 A ✓. Motor current ±120 A is Pol's choice (full power), not a discrepancy.
 
 ## Gotcha de hardware confirmado
 

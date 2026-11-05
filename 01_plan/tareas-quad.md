@@ -108,6 +108,28 @@ falla, así que solo se cablea el **delantero** (GPIO 32); el GPIO 33 queda rese
 bloqueo de la trasera se verá igual, porque su velocidad es la del motor. Falta comprobar
 que en los cables no queda tensión del sistema original de 36 V.
 
+### Cadena: tensión con número (5-nov, EXP-003) — **lo siguiente**
+
+La cadena muy tensada era lo que no dejaba arrancar al motor: sin ella arranca con ~2,5 A en
+vez de ~7 A. Montarla con un eslabón más si hace falta, con una **flecha medida** en el centro
+del tramo libre (mira la especificación de la cadena; la regla habitual en cadenas pequeñas es
+~1–2 cm) y los piñones alineados. Después, repetir el barrido de duty **con cadena** y comparar
+con `06_data/2026-11-05_low-speed-no-chain/`. El retardo que notabas se arregla con la
+pretensión antes de la salida (backlog), no tensando más.
+
+### Abrir el motor: fotos del rotor y revisión de los Hall
+
+Una sola apertura para dos cosas. Antes: marcar la posición de la tapa, foto de cada paso, no
+tocar el cableado de la placa de los Hall.
+1. **Rotor:** imanes en superficie, insertados o interiores, número de ranuras del estátor.
+   Lo pide el mapa id–iq del backlog (`open-questions.md`, Riesgo 3).
+2. **Los tres sensores Hall:** su posición tiene un error de ~±10° (EXP-003, dispersión de
+   19°, igual en todas las medidas). Mirar si alguno está movido, torcido, despegado o sucio;
+   fotografiar su posición respecto a las ranuras; limpiar. Cambiar uno solo si se ve dañado,
+   y entonces volver a detectar la tabla y repetir `hall_analyze 20`.
+3. Al cerrar: girarlo a mano, `hall_analyze 20` y un barrido de duty sin cadena. Debe salir
+   igual o mejor que el 5-nov.
+
 ## Paso 3 · Ensayos que dan información
 
 Cada ensayo responde a una pregunta del modelo. Señales del VESC por CAN: corriente de
@@ -148,16 +170,30 @@ a 40 A de batería: es el límite del BMS. **Seguridad abajo.**
 Rueda trasera (erpm ÷ 3 ÷ 8,364) frente a la delantera (Hall). En recta y sin patinar,
 la diferencia es el error del radio. Es la base del control de tracción.
 
+### F · Halls contra observador, bajo carga (cuando el registrador grabe en la SD)
+
+El 5-nov, con la rueda en el aire, pasar del Hall al observador a 1000/2000 erpm quitó el
+rizado de corriente (EXP-003). Falta saber si el observador aguanta **con carga**: en los
+foros lo habitual es justo lo contrario, subir el cambio a 4000–7000 erpm para tener par
+abajo. Contigo encima, salidas suaves y a fondo desde parado, grabando por CAN: id, iq,
+erpm, duty. Criterio: rizado de id < 0,5 A por encima de 2000 erpm y ningún tirón en el
+paso por 1000–2000. Si falla, subir el cambio de 500 en 500 erpm, un cambio cada vez.
+
+### G · Ruido del acelerador bajo carga (REQ-VCU-02)
+
+En la mesa, con el motor a 5 A y sin filtro, la lectura del puño saltó hasta +80 mV (4,5 %
+del recorrido). Repetirlo bajo carga y con el filtro RC (1 kΩ + 100 nF) ya montado, grabando
+la lectura cruda del ADC. El número que tiene que cumplir lo pones tú en REQ-VCU-02.
+
 ## Paso 4 · Unidad de control v0 (dic–ene)
 
 La ESP32 lee el acelerador y manda la corriente al VESC por CAN. Sin control: solo pasar
 la orden con protecciones. Antes de que el gas pase por la ESP32:
 
-1. **Timeout de CAN en el VESC.** Si la ESP32 se cuelga, el VESC corta solo. La
-   documentación del VESC insiste en no desactivarlo nunca. La orden de corriente se
-   reenvía continuamente, no una vez. Probarlo con la rueda en el aire.
-2. **Acelerador**: divisor (su salida pasa de 3,3 V) y un pin de ADC1 (GPIO 32–39). Fuera
-   de rango → par cero.
+1. ~~**Timeout de CAN en el VESC.**~~ **Hecho el 5-nov:** 100 ms, medido 105–121 ms con la
+   rueda en el aire (REQ-VCU-03 verificado). Nunca se desactiva.
+2. ~~**Acelerador**~~ **Hecho en la mesa el 5-nov:** alimentado a 3,3 V, sin divisor, GPIO 35;
+   fuera de 600–2800 mV → par cero. Falta montarlo en placa con el filtro RC y la R de 100 kΩ.
 3. **Freno**: el delantero en el GPIO 32 (el trasero no se cablea); freno + gas → par cero,
    desde la v0. Como es normalmente abierto, un cable cortado se lee como «sin frenar».
 4. **Bucle de tierra**: con la ESP32 mandando par, EXP-001 vuelve a importar.
