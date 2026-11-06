@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-11-06 — Axle loads and CG height: results</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128225;</text></svg>">
+<style>
+/* NEWS_Engineering — hoja de estilo unica para los documentos en HTML.
+   La incrusta tools/render.py dentro de cada fichero generado, para que el HTML
+   sea autocontenido: se puede mover, enviar o abrir sin internet y sigue bien.
+   Si quieres cambiar el aspecto de TODOS los documentos, se cambia aqui. */
+
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#f3f4ef; --surface:#ffffff; --surface-2:#eceee6;
+  --ink:#1b2229; --ink-dim:#5c6570; --ink-faint:#8b939c;
+  --line:#d7d9d0;
+  --accent:#b1560f; --accent-ink:#ffffff; --accent-soft:#f1e3d4;
+  --teal:#1f6f78; --teal-soft:#e0edee;
+  --good:#3f7d43; --good-soft:#e3ede1;
+  --warn:#8d2f2f; --warn-soft:#f2e0df;
+  --shadow:0 1px 2px rgba(20,20,15,.06), 0 6px 20px -10px rgba(20,20,15,.18);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12161b; --surface:#181d24; --surface-2:#1e242b;
+    --ink:#e7e9e4; --ink-dim:#a4acb3; --ink-faint:#717a82;
+    --line:#2b323a;
+    --accent:#e2892f; --accent-ink:#12161b; --accent-soft:#2c2118;
+    --teal:#5fbcc4; --teal-soft:#182529;
+    --good:#7fbf82; --good-soft:#182a1a;
+    --warn:#e08585; --warn-soft:#2b1a1a;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -12px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12161b; --surface:#181d24; --surface-2:#1e242b;
+  --ink:#e7e9e4; --ink-dim:#a4acb3; --ink-faint:#717a82;
+  --line:#2b323a;
+  --accent:#e2892f; --accent-ink:#12161b; --accent-soft:#2c2118;
+  --teal:#5fbcc4; --teal-soft:#182529;
+  --good:#7fbf82; --good-soft:#182a1a;
+  --warn:#e08585; --warn-soft:#2b1a1a;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -12px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Source Serif 4',Georgia,'Times New Roman',serif;
+  font-size:17px; line-height:1.6;
+  padding:24px 16px 72px;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:720px;margin-inline:auto}
+h1,h2,h3,.disp{font-family:'Big Shoulders Display','Arial Narrow',sans-serif;text-transform:uppercase;text-wrap:balance;letter-spacing:.01em}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+a{color:var(--accent);text-underline-offset:2px}
+p{margin:0 0 .85em}
+strong{font-weight:600}
+em{font-style:italic}
+
+/* ---------- Barra de control ---------- */
+.bar{
+  position:sticky; top:0; z-index:20;
+  display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  margin:-24px -16px 20px; padding:10px 16px;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.bar button,.bar a.boton{
+  font-family:'IBM Plex Mono',ui-monospace,monospace;
+  font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink-dim); background:var(--surface);
+  border:1px solid var(--line); border-radius:999px;
+  padding:5px 12px; cursor:pointer;
+}
+.bar a.boton{text-decoration:none}
+.bar button:hover,.bar a.boton:hover{color:var(--ink);border-color:var(--ink-faint)}
+.bar .spacer{flex:1}
+.bar .src{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--ink-faint)}
+
+/* ---------- Cabecera ---------- */
+header.mast{
+  border:1px solid var(--line); background:var(--surface);
+  border-radius:4px; padding:22px; box-shadow:var(--shadow);
+  position:relative; overflow:hidden; margin-bottom:26px;
+}
+header.mast::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--accent)}
+.eyebrow{
+  font-family:'IBM Plex Mono',ui-monospace,monospace;
+  font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-faint); margin-bottom:10px;
+}
+header.mast h1{font-size:clamp(30px,7vw,46px);line-height:.95;margin:0 0 4px}
+.lede{
+  margin-top:18px; padding:14px 16px;
+  background:var(--surface-2); border-left:3px solid var(--accent); border-radius:0 3px 3px 0;
+  font-size:.96em;
+}
+.lede p:last-child{margin-bottom:0}
+.lede blockquote{border:none;background:none;padding:0;margin:0}  /* dentro del lede va plano */
+
+/* ---------- Indice ---------- */
+nav.toc{
+  border:1px solid var(--line); background:var(--surface);
+  border-radius:4px; padding:16px 18px; margin-bottom:30px; box-shadow:var(--shadow);
+}
+nav.toc .eyebrow{margin-bottom:12px}
+nav.toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+nav.toc li{margin:0 0 7px;padding-left:30px;position:relative;font-size:.92em;line-height:1.35}
+nav.toc li::before{
+  counter-increment:t; content:counter(t,decimal-leading-zero);
+  position:absolute; left:0; top:.15em;
+  font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px;
+  color:var(--ink-faint);
+}
+nav.toc li.grp{padding-left:0;margin:14px 0 8px;font-family:'Big Shoulders Display','Arial Narrow',sans-serif;
+  text-transform:uppercase;font-size:1.02em;color:var(--ink-dim);letter-spacing:.04em}
+nav.toc li.grp:first-child{margin-top:0}
+nav.toc li.grp::before{content:none}
+nav.toc a{color:inherit;text-decoration:none;border-bottom:1px solid transparent}
+nav.toc a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ---------- Seccion ---------- */
+section.vert{margin-bottom:34px}
+.vhead{display:flex;gap:12px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:16px}
+.vnum{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);font-weight:600}
+.vhead h2{margin:0;font-size:clamp(20px,4.5vw,27px);line-height:1}
+
+/* ---------- Ficha desplegable ---------- */
+details.item{
+  border:1px solid var(--line); background:var(--surface);
+  border-radius:4px; margin-bottom:10px; box-shadow:var(--shadow); overflow:hidden;
+}
+details.item[open]{border-color:var(--ink-faint)}
+details.item>summary{
+  cursor:pointer; list-style:none; padding:14px 16px 14px 40px; position:relative;
+  font-family:'Big Shoulders Display','Arial Narrow',sans-serif;
+  text-transform:uppercase; font-size:1.18em; line-height:1.1; color:var(--ink);
+}
+details.item>summary::-webkit-details-marker{display:none}
+details.item>summary::before{
+  content:"+"; position:absolute; left:16px; top:13px;
+  font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:15px; color:var(--accent);
+}
+details.item[open]>summary::before{content:"–"}
+details.item>summary:hover{background:var(--surface-2)}
+details.item[open]>summary{border-bottom:1px solid var(--line);background:var(--surface-2)}
+.body{padding:16px}
+.body>:last-child{margin-bottom:0}
+
+/* Etiqueta de apartado dentro de una ficha */
+.lbl{
+  font-family:'IBM Plex Mono',ui-monospace,monospace;
+  font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--accent); margin:18px 0 6px; font-weight:600;
+}
+.body>.lbl:first-child{margin-top:0}
+
+/* ---------- Tira de metadatos + distintivos ---------- */
+.meta{
+  display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center;
+  font-family:'IBM Plex Mono',ui-monospace,monospace;
+  font-size:11.5px; color:var(--ink-dim); margin:0 0 14px;
+}
+.badge{
+  display:inline-block; padding:2px 9px; border-radius:999px;
+  font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; font-weight:500;
+  background:var(--surface-2); color:var(--ink-dim); border:1px solid var(--line);
+}
+.badge.b-neutral{background:var(--surface-2)}
+.badge.b-teal{background:var(--teal-soft);color:var(--teal);border-color:var(--teal)}
+.badge.b-accent{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.badge.b-good{background:var(--good-soft);color:var(--good);border-color:var(--good)}
+.badge.b-warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+
+/* ---------- Puntuacion ---------- */
+.score{
+  display:flex; flex-wrap:wrap; gap:14px; align-items:center;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:4px;
+  padding:12px 14px; margin:0 0 16px;
+}
+.score-total{display:flex;align-items:baseline;gap:5px;font-family:'IBM Plex Mono',ui-monospace,monospace}
+.score-total b{font-size:26px;color:var(--accent);font-weight:600;line-height:1}
+.score-total span{font-size:12px;color:var(--ink-faint)}
+.score-crit{display:flex;gap:11px;flex-wrap:wrap}
+.crit{text-align:center;font-family:'IBM Plex Mono',ui-monospace,monospace}
+.crit .k{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:3px}
+.dots{display:flex;gap:2px;justify-content:center}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line);display:block}
+.dots i.on{background:var(--accent)}
+.score-note{flex-basis:100%;font-size:.86em;color:var(--ink-dim);font-family:'Source Serif 4',Georgia,serif}
+
+/* ---------- Elementos de texto ---------- */
+blockquote{
+  margin:0 0 1em; padding:10px 14px;
+  border-left:3px solid var(--teal); background:var(--teal-soft); border-radius:0 3px 3px 0;
+}
+blockquote p:last-child{margin-bottom:0}
+ul,ol{margin:0 0 1em;padding-left:1.3em}
+li{margin-bottom:.35em}
+li>ul,li>ol{margin-top:.35em;margin-bottom:.35em}
+code{
+  font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:.85em;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:3px; padding:1px 5px;
+}
+pre{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:4px;
+  padding:12px 14px; overflow-x:auto; margin:0 0 1em;
+}
+pre code{background:none;border:none;padding:0;font-size:.82em;line-height:1.5}
+hr{border:none;border-top:1px solid var(--line);margin:22px 0}
+table{width:100%;border-collapse:collapse;margin:0 0 1em;font-size:.92em}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{
+  font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); font-weight:600;
+  border-bottom:2px solid var(--line);
+}
+h3.plain{font-size:1.15em;margin:22px 0 8px;color:var(--ink)}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.1em;
+   text-transform:uppercase;color:var(--ink-faint);margin:18px 0 6px}
+footer.foot{
+  margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
+  font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--ink-faint);
+  display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+}
+
+/* ---------- Esquemas SVG dentro de un item ----------
+   En el .md van como <figure class="esquema"><svg>...</svg><figcaption>...</figcaption></figure>.
+   Los colores se ponen AQUI con clases: dentro de un atributo fill="var(...)" no se aplican. */
+figure.esquema{margin:6px 0 1.1em;padding:12px;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:4px;overflow-x:auto}
+figure.esquema svg{display:block;width:100%;height:auto;min-width:300px;max-width:640px;margin-inline:auto}
+figure.esquema figcaption{font-size:.84em;color:var(--ink-dim);margin-top:8px;line-height:1.45}
+.esquema .trazo{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.esquema .tenue{fill:none;stroke:var(--ink-faint);stroke-width:1.5;stroke-dasharray:4 4}
+.esquema .suelo{fill:none;stroke:var(--ink-dim);stroke-width:2}
+.esquema .peligro{fill:none;stroke:var(--warn);stroke-width:2.5;stroke-linecap:round}
+.esquema .bien{fill:none;stroke:var(--good);stroke-width:2.5;stroke-linecap:round}
+.esquema .relleno{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+.esquema .punto{fill:var(--accent);stroke:none}
+.esquema .punto-peligro{fill:var(--warn);stroke:none}
+.esquema .punto-bien{fill:var(--good);stroke:none}
+.esquema text{fill:var(--ink);font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px}
+.esquema text.tit{font-weight:600;font-size:12.5px;letter-spacing:.06em}
+.esquema text.dim{fill:var(--ink-dim);font-size:11px}
+.esquema text.t-peligro{fill:var(--warn)}
+.esquema text.t-bien{fill:var(--good)}
+
+/* ---------- Indice del archivo de briefs (reports/index.html) ---------- */
+.idx-list{display:flex;flex-direction:column;gap:12px}
+.idx-card{
+  display:block; background:var(--surface); border:1px solid var(--line); border-radius:4px;
+  padding:16px 18px; box-shadow:var(--shadow); text-decoration:none; color:inherit;
+  transition:border-color .15s;
+}
+.idx-card:hover{border-color:var(--accent)}
+.idx-wk{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.1em;
+  color:var(--accent);font-weight:600}
+.idx-card h2{font-size:1.3em;margin:5px 0 6px;text-transform:none;
+  font-family:'Source Serif 4',Georgia,serif;font-weight:600}
+.idx-card p{font-size:.9em;color:var(--ink-dim);margin:0}
+
+/* ---------- Impresion / PDF ---------- */
+@media print{
+  @page{size:A4;margin:14mm 13mm}
+  :root{--bg:#fff;--surface:#fff;--surface-2:#f4f4f0;--ink:#000;--ink-dim:#333;--line:#bbb;--shadow:none}
+  body{background:#fff;font-size:10.5pt;padding:0;line-height:1.45}
+  .bar{display:none}
+  .wrap{max-width:none}
+  details.item{break-inside:avoid;box-shadow:none;margin-bottom:8px}
+  details.item>summary{list-style:none}
+  details.item>summary::before{content:"" !important}
+  details:not([open])>.body{display:block}   /* en papel se imprime todo */
+  header.mast,nav.toc{box-shadow:none;break-inside:avoid}
+  section.vert{break-before:auto}
+  a{color:var(--ink);text-decoration:none}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:8pt;color:#555;word-break:break-all}
+  nav.toc a::after{content:none}
+}
+
+/* Texto para copiar tal cual (un post de LinkedIn): ```texto en el .md */
+pre.texto{white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:.95em;
+  line-height:1.55;background:var(--surface)}
+/* Imagen local metida en el HTML: ![pie](fichero.png) sola en su linea */
+figure.foto{margin:6px 0 1.1em}
+figure.foto img{display:block;width:100%;max-width:540px;height:auto;margin-inline:auto;
+  border:1px solid var(--line);border-radius:6px}
+figure.foto figcaption{font-size:.84em;color:var(--ink-dim);margin-top:6px;text-align:center}
+
+</style>
+</head>
+<body>
+<div class="bar">
+  <a class="boton" href="../../../PANEL.html">Panel</a>
+  <button id="todo">Abrir todo</button>
+  <button id="tema">Tema</button>
+  <button id="pdf" onclick="window.print()">PDF</button>
+  <span class="spacer"></span>
+  <span class="src">PROJECT_ePWT/06_data/2026-11-06_mass-cg/results.md</span>
+</div>
+<div class="wrap">
+  <header class="mast">
+    <div class="eyebrow">NEWS_Engineering · generado el 6 de noviembre de 2026</div>
+    <h1>2026-11-06 — Axle loads and CG height: results</h1>
+    <div class="lede"><p>Raw readings in <code>readings.md</code>. Wheelbase L = 0.72 m, track 0.46 m front / 0.44 m rear.</p></div>
+  </header>
+  
+  <section class="vert"><div class="vhead"><div class="vnum">01</div><h2>Weight split (level)</h2></div><span id="weight-split-level"></span><table><thead><tr><th></th><th>Front</th><th>Rear</th><th>Rear fraction</th></tr></thead><tbody><tr><td>Empty</td><td>19.9 kg</td><td>19.5 kg</td><td><strong>0.50</strong></td></tr><tr><td>With rider</td><td>40.7 kg</td><td>80.0 kg</td><td><strong>0.66</strong></td></tr></tbody></table><ul><li>The scales over-read at high load: 120.7 kg against 113.9 kg known. <strong>Fractions are trusted, absolute kg are not.</strong> Vehicle mass stays at the 38 kg of the 2026-10-08 single-scale reading.</li><li>CG along the wheelbase: empty <strong>36 cm</strong> ahead of the rear axle; with rider <strong>24 cm</strong>. The rider sits ≈ 18 cm ahead of the rear axle.</li><li>Front axle left/right: 11.5 / 8.4 kg empty, but the rear goes the other way (9.5 / 10.0). Not a lateral CG offset: most likely a <strong>diagonal load</strong> from the larger front-left tyre on a rigid four-wheel chassis (FL + RR carry more), or a scale bias. Swapping the scales would separate them.</li></ul></section><section class="vert"><div class="vhead"><div class="vnum">02</div><h2>CG height, empty (tilt test)</h2></div><span id="cg-height-empty-tilt-test"></span><p>Moments about the contact of the lifted axle, with h′ the CG height above the axle-centre line:</p><pre><code>N_lower = W · [ a_lower/L + (h′/L) · tanθ ]      sinθ = Δh / L</code></pre><p class="meta"><span><code>a_lower</code> is the horizontal distance from the CG to the raised axle on level ground, i.e. the lower axle's share of the wheelbase. N_lower rises linearly with tanθ; the slope is W</span><span>h′/L. Δh = block − 3 cm scale = 6.5 and 13 cm.</span></p><table><thead><tr><th>Series</th><th>Slope (kg per unit tanθ)</th><th>h′</th></tr></thead><tbody><tr><td>Front lifted, rear on scales</td><td>11.0</td><td>0.20 m</td></tr><tr><td>Rear lifted, front on scales</td><td>4.8</td><td>0.09 m</td></tr><tr><td><strong>Both, joint fit</strong></td><td>7.9</td><td><strong>0.15 m</strong></td></tr></tbody></table><ul><li><strong>h_cg empty = h′ + loaded wheel radius (≈ 0.16 m, ASSUMED) ≈ 0.31 m, ± 0.08 m.</strong></li><li>The two series disagree by a factor of two: the signal is only 1–2.5 kg against ±0.5 kg per scale. The number is good to about ±25 %.</li><li>3 cm scale correction: W·h′·tan(3/72)/L ≈ 0.3 kg. Below the scale noise, so ignored.</li></ul></section><section class="vert"><div class="vhead"><div class="vnum">03</div><h2>CG height with rider (estimated, not measured)</h2></div><span id="cg-height-with-rider-estimated-not-measured"></span><ul><li>The rider's CG is <strong>not</strong> at the seat (0.45 m). Seated, knees at 90°: trunk, head and arms (~2/3 of body mass) sit well above the seat, legs below it → body CG ≈ 0.15–0.20 m above the seat → <strong>≈ 0.62 m</strong>.</li><li>Combined: (38 × 0.31 + 74.5 × 0.62) / 112.5 ≈ <strong>0.51 m</strong> (range 0.45–0.55 m). Putting the rider at the seat would give 0.40 m: 20 % too low.</li><li>h_cg / L ≈ 0.7. A tall vehicle for its wheelbase: the rider dominates.</li></ul></section><section class="vert"><div class="vhead"><div class="vnum">04</div><h2>What it means (with rider, h = 0.51 m)</h2></div><span id="what-it-means-with-rider-h-0-51-m"></span><table><thead><tr><th>Effect</th><th>Formula</th><th>Number</th></tr></thead><tbody><tr><td>Load transfer under acceleration</td><td>ΔN = m·a·h/L</td><td><strong>≈ 8 kg to the rear per 0.1 g</strong></td></tr><tr><td>Front wheels lift (wheelie)</td><td>a/g = b/h, b = CG to rear axle</td><td>0.24 / 0.51 ≈ <strong>0.47 g</strong></td></tr><tr><td>Rear wheelspin limit (rear drive)</td><td>a/g = μ·(l_f/L) / (1 − μ·h/L)</td><td>μ = 0.4 → 0.37 g; μ = 0.6 → 0.70 g</td></tr><tr><td>Static rollover (rigid, no compliance)</td><td>a_y/g = t/(2h)</td><td>0.44 / 1.02 ≈ <strong>0.43 g</strong></td></tr></tbody></table><ul><li><strong>Dirt (μ ≈ 0.4): the rears spin before the front lifts.</strong> On high grip the front would lift first, if the drivetrain can push ≈ 520 N at the wheels (not checked).</li><li><strong>Rollover ≈ 0.43 g</strong> is an upper bound: tyre and frame compliance lower it. On dirt the quad slides before it tips (μ &lt; 0.43); on asphalt it can tip first. That is why you lean in.</li><li>Traction control on the VCU needs h and the split: <strong>both now have numbers.</strong></li></ul></section><section class="vert"><div class="vhead"><div class="vnum">05</div><h2>If it is ever repeated</h2></div><span id="if-it-is-ever-repeated"></span><p>Rider on board for the tilt; lift 25–30 cm instead of 13 (a bigger signal against the same noise); swap the scales left/right once; one scale per wheel, all four at the same time.</p></section>
+  <footer class="foot">
+    <span>Fuente: PROJECT_ePWT/06_data/2026-11-06_mass-cg/results.md</span>
+    <span>python tools/render.py PROJECT_ePWT/06_data/2026-11-06_mass-cg/results.md</span>
+  </footer>
+</div>
+<script>
+(function(){
+  var fichas = function(){ return document.querySelectorAll('details.item'); };
+  var b = document.getElementById('todo');
+  b.addEventListener('click', function(){
+    var abrir = b.textContent.indexOf('Abrir') === 0;
+    fichas().forEach(function(d){ d.open = abrir; });
+    b.textContent = abrir ? 'Cerrar todo' : 'Abrir todo';
+  });
+
+  // Un enlace del indice abre la ficha a la que apunta.
+  document.querySelectorAll('nav.toc a').forEach(function(a){
+    a.addEventListener('click', function(){
+      var d = document.querySelector(a.getAttribute('href'));
+      if (d && d.tagName === 'DETAILS') d.open = true;
+    });
+  });
+
+  // Dentro del Artifact la pagina va en un marco que no deja imprimir.
+  try { if (window.self !== window.top) document.getElementById('pdf').hidden = true; }
+  catch(e) { document.getElementById('pdf').hidden = true; }
+
+  // Al imprimir se abre todo y despues se deja como estaba.
+  var previo = [];
+  window.addEventListener('beforeprint', function(){
+    previo = [];
+    fichas().forEach(function(d){ previo.push(d.open); d.open = true; });
+  });
+  window.addEventListener('afterprint', function(){
+    fichas().forEach(function(d, i){ d.open = previo[i]; });
+  });
+
+  // Tema: sigue al sistema hasta que se toca el boton.
+  var guardado = null;
+  try { guardado = localStorage.getItem('tema'); } catch(e) {}
+  if (guardado) document.documentElement.setAttribute('data-theme', guardado);
+  document.getElementById('tema').addEventListener('click', function(){
+    var oscuro = getComputedStyle(document.body).backgroundColor === 'rgb(18, 22, 27)';
+    var nuevo = oscuro ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', nuevo);
+    try { localStorage.setItem('tema', nuevo); } catch(e) {}
+  });
+})();
+</script>
+</body>
+</html>

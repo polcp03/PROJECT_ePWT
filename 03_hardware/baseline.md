@@ -22,11 +22,19 @@ Converted to Li-ion and a 48 V-class PMSM.
 | Item | Value | Tag |
 |---|---|---|
 | Vehicle mass (no rider) | **38 kg** | MEASURED, scale, 2026-10-08 |
-| Rider mass | 72 kg | MEASURED, scale, 2026-10-08 |
-| Total | 110 kg | — |
-| Wheelbase | 0.71 m | ASSUMED (commercial reference) |
-| Static rear weight fraction | 0.65 | ASSUMED — needs a scale under each axle |
-| CG height `h_cg` | — | **MISSING** — needed for load transfer |
+| Rider mass | 74.5 kg | MEASURED, scale, clothed, 2026-11-06 (was 72) |
+| Total | 112.5 kg | — |
+| Wheelbase | 0.72 m | MEASURED, tape, hub to hub, 2026-11-06 |
+| Track | 0.46 m front, 0.44 m rear | MEASURED, tape, tyre centres, 2026-11-06 |
+| Static rear weight fraction, empty | 0.50 (19.5 / 39.4 kg) | MEASURED, two scales per axle, 2026-11-06 |
+| Static rear weight fraction, with rider | **0.66** (80.0 / 120.7 kg) | MEASURED, same test |
+| Rider position | ≈ 18 cm ahead of the rear axle | DERIVED from the two splits |
+| CG height `h_cg`, empty | 0.31 m ± 0.08 | MEASURED, tilt test, 2026-11-06 |
+| CG height `h_cg`, with rider | **0.51 m** [0.45–0.55] | ESTIMATED (empty measured + seated rider CG ≈ 0.62 m) |
+
+Axle weights: bathroom scales repeat to ±0.5 kg but read high (the four wheels with rider add
+up to 120.7 kg against 113.9 kg known), so **fractions are trusted and absolute kg are not**.
+Raw readings and full results: `06_data/2026-11-06_mass-cg/`.
 
 Subjective: very good on dirt, drifts, rear wheels rarely spin (weight sits rearward).
 

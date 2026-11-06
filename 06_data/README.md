@@ -111,11 +111,12 @@ Conclusions in [EXP-003](../07_experiments/EXP-003-low-speed-control.md).
 
 ## `2026-11-06_mass-cg` — axle loads and CG height (task `{#cg}`)
 
-Two bathroom scales (3 cm tall) under one axle at a time: level empty, level with Pol on board,
-and tilt tests empty (other axle lifted 9.5 and 16 cm). No raw files: the dictated readings are
-in [`readings.md`](2026-11-06_mass-cg/readings.md).
+Two bathroom scales (3 cm tall) under one axle at a time: level empty, level with the rider on
+board, and tilt tests empty (other axle lifted 9.5 and 16 cm). No raw files: the dictated
+readings are in [`readings.md`](2026-11-06_mass-cg/readings.md).
 
-**Analysis:** derived with Pol in a session; results go to `03_hardware/baseline.md`.
+**Results:** [`results.md`](2026-11-06_mass-cg/results.md) — rear fraction 0.50 empty, 0.66 with
+rider; CG height 0.31 m empty (measured), ≈ 0.51 m with rider (estimated).
 
 ---
 
