@@ -1,53 +1,52 @@
-# Sesión: firmware / embebido
+# Session: firmware / embedded
 
-Contexto adicional para trabajar en `05_firmware/`. Se suma al `CLAUDE.md` raíz.
+Extra context for working in `05_firmware/`. It adds to the root `CLAUDE.md`.
 
-## Regla nº1 — Aquí no se inventa control
+## Rule no. 1 — Control is not invented here
 
-La lógica de control se diseña y se valida en `04_model/`. Este directorio la
-**implementa**. Si aparece una constante mágica que no viene del modelo, es un bug
-de proceso, no una optimización.
+Control logic is designed and validated in `04_model/`. This directory **implements** it. If a
+magic constant shows up that does not come from the model, it is a process bug, not an
+optimisation.
 
-## Regla nº2 — Los límites de seguridad son código, no configuración
+## Rule no. 2 — Safety limits are code, not configuration
 
-Límites de corriente, temperatura y estado del BMS se comprueban en el firmware, no
-solo en el VESC Tool. Ver las reglas de seguridad del `CLAUDE.md` raíz.
+Current, temperature and BMS-state limits are checked in the firmware, not only in VESC Tool.
+See the safety rules in the root `CLAUDE.md`.
 
-## Regla nº3 — Antes de escribir, buscar
+## Rule no. 3 — Search before writing
 
-Existen implementaciones de referencia (VESC Express para ESP32,
-`syssi/esphome-jk-bms` para el protocolo del BMS). Revisarlas antes de hacer
-ingeniería inversa desde cero. Primeros principios se reservan para el dominio
-que quiero dominar, no para protocolos.
+Reference implementations exist (VESC Express for the ESP32, `syssi/esphome-jk-bms` for the
+BMS protocol). Review them before reverse-engineering from scratch. First principles are kept
+for the domain I want to master, not for protocols.
 
-## Cómo enseñarme
+## How to teach me
 
-Quiero aprender **arquitectura de software**, no solo que compile: separación de
-responsabilidades, módulos, interfaces, dependencias. Cuando propongas código,
-explica primero cómo se reparten las responsabilidades y por qué.
+I want to learn **software architecture**, not just that it compiles: separation of
+responsibilities, modules, interfaces, dependencies. When you propose code, first explain how
+the responsibilities are split and why.
 
-Nada de un `.ino` gigante. Módulos con una responsabilidad cada uno.
+No giant `.ino`. Modules with one responsibility each.
 
-**Cómo aprendo software: skill `software-con-ia`.** Yo escribo el contrato de cada módulo
-(en la cabecera del `.h`) y elijo la prueba con su número; la IA escribe el código; en cada
-cambio aprendo una trampa de C en mi propio código.
+**How I learn software: skill `software-con-ia`.** I write each module's contract (in the
+`.h` header) and choose the test with its number; the AI writes the code; with every change I
+learn one C pitfall in my own code.
 
-## Cómo se compila y se ve (el Arduino IDE no funciona)
+## How it is compiled and seen (the Arduino IDE doesn't work)
 
-Skill `esp32`: el código abierto en el panel de ficheros y el monitor serie en una
-pestaña visible del Terminal, con `esp32.py` (compilar, flashear, monitor, enviar).
-Nunca flashear a ciegas en segundo plano: Pol tiene que verlo.
+Skill `esp32`: the code open in the file pane and the serial monitor in a visible Terminal tab,
+with `esp32.py` (compile, flash, monitor, send). Never flash blind in the background: Pol has
+to see it.
 
-## Estructura de la carpeta
+## Folder structure
 
 ```
-arduino/    sketches y experimentos rápidos
+arduino/      sketches and quick experiments
+vcu-design/   VCU board: pinout and perfboard layout
 ```
 
-`src/` (módulos) y `docs/` (protocolos, pinouts) se crean **cuando empiece la VCU**,
-no antes. Una carpeta vacía es ruido: promete algo que no existe.
+`src/` (modules) is created **when the VCU starts**, not before. An empty folder is noise: it
+promises something that doesn't exist.
 
-Aquí **solo va código mío**. Lo del VESC está repartido a propósito:
-la configuración de mi equipo en `03_hardware/vesc/`, sus logs en `06_data/`,
-y el firmware y la herramienta de terceros en `_tools/` (fuera de Git).
-Ver `03_hardware/vesc/README.md`.
+**Only my own code goes here.** The VESC material is split on purpose: my unit's configuration
+in `03_hardware/vesc/`, its logs in `06_data/`, and the third-party firmware and tool in
+`_tools/` (outside Git). See `03_hardware/vesc/README.md`.

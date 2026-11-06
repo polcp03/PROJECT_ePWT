@@ -9,7 +9,7 @@
 %    F_grip                still the static value. Load transfer goes here.
 %
 %  The hooks are deliberately left for Pol to fill (C01 exam, G9 and the
-%  L2 questions in 01_plan/C01-examen.md). The agent built the scaffolding
+%  L2 questions in 01_plan/C01-exam.md). The agent built the scaffolding
 %  only, on request (2026-10-09).
 %
 %  Regression: run_regression_L1_L2.m must show L2 == L1 until a hook is
@@ -69,7 +69,7 @@ end
 set_param([mdl '/4 Vehicle/F_grip'], 'Description', ['L2 HOOK - static rear ', ...
     'load today: mu * x_cg * m * g. Under acceleration the rear normal force ', ...
     'changes. Which extra term, and which parameter is still MISSING for it? ', ...
-    'Pol to add (see 01_plan/C01-examen.md, block H).']);
+    'Pol to add (see 01_plan/C01-exam.md, block H).']);
 set_param([mdl '/4 Vehicle/F_grip'], 'Name', 'F_grip (static - L2 hook)');
 
 %% Name the ports after the signals they carry, so the top level reads alone

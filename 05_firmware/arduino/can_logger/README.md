@@ -6,7 +6,7 @@ a second ESP32) never changes the firmware.
 
 **Status (2026-11-01):** works under throttle. 137 s recording, 33 783 frames,
 peaks of 49 A motor / 29 A battery: 0 corrupted frames, 0 SPI errors, 0 overflows,
-0 bus errors. How it got there: [EXP-002](../../../07_experiments/EXP-002-ruido-spi-can-logger.md).
+0 bus errors. How it got there: [EXP-002](../../../07_experiments/EXP-002-spi-noise-can-logger.md).
 
 **Wheel speed added (2026-11-01):** `wheel_rx` stamps each front-wheel magnet into the
 same file, on the same clock. Compiled and flashed; the Hall input itself was validated

@@ -144,7 +144,7 @@ run, so it is a VESC Tool plot limitation, not a control fault. Cause not checke
 |---|---|
 | **A. Keep the handover at 1000/2000 erpm** | **Chosen.** Halls only where the observer cannot work (standstill and launches) |
 | B. Re-detect the Hall table | No: done twice, same 19°. The error is where the sensors sit; the table stores one angle per state and cannot move an edge |
-| C. Inspect the sensors | When the motor is opened for the rotor photos (`01_plan/tareas-quad.md`, `03_hardware/open-questions.md` Risk 3) |
+| C. Inspect the sensors | When the motor is opened for the rotor photos (`01_plan/tasks/tasks.md`, `03_hardware/open-questions.md` Risk 3) |
 | D. HFI (sensorless at standstill by signal injection) | Not now: needs saliency, and the motor has little (Lq/Ld ≈ 1.14); audible whine |
 | Sensorless everywhere | No: at standstill E = λω = 0, nothing to read; a launch under load needs the Halls (errores #21) |
 
@@ -153,7 +153,7 @@ run, so it is a VESC Tool plot limitation, not a control fault. Cause not checke
    current ±120 A by choice.
 2. Chain back on at a measured tension, then the same duty sweep with the chain. Compare with
    these two runs.
-3. Under load, when the logger records to the SD again (`tareas-quad.md`, test F): does the
+3. Under load, when the logger records to the SD again (`tasks/tasks.md`, test F): does the
    observer at 1000–2000 erpm hold? If not, raise the handover 500 erpm at a time.
 4. Check the observer's own parameters against the measured motor: `foc_motor_flux_linkage`
    16.19 mWb vs λm 16.86 mWb measured (−4 %); `foc_motor_r` 18.8 mΩ vs 28.0 mΩ in
@@ -171,7 +171,7 @@ run, so it is a VESC Tool plot limitation, not a control fault. Cause not checke
   angles (what `hall_analyze` prints) instead: that needs custom firmware. Not now.
 - **Others with the same symptom:** the usual community advice goes the **other way**, raising
   the handover to 4000–7000 erpm for torque at low speed, because the observer is weak under
-  load. That is why the load test decides (`01_plan/tareas-quad.md`, test F).
+  load. That is why the load test decides (`01_plan/tasks/tasks.md`, test F).
 - An open report (VESC forum, Jan 2026, no reply) says the interpolation under-predicts speed
   at low erpm because `foc_hall_interp_erpm` also sets a rate limit (`fmaxf` in
   `foc_correct_hall`). Seen in our source; not tested here.

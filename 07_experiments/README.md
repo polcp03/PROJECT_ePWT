@@ -1,10 +1,10 @@
 # Experiments
 
-Un archivo por experimento: `EXP-001-nombre.md`. Hipótesis -> medida -> conclusión.
+One file per experiment: `EXP-00N-name.md`. Hypothesis -> measurement -> conclusion.
 
-- **Pregunta:** qué quiero averiguar
-- **Hipótesis:** qué espero que pase, y por qué
-- **Método:** cómo lo mido
-- **Datos:** qué obtuve (enlace a `data/`)
-- **Conclusión:** confirma o refuta
-- **Limitaciones:** qué no cubre esto
+- **Question:** what I want to find out
+- **Hypothesis:** what I expect to happen, and why
+- **Method:** how I measure it
+- **Data:** what I got (link to `06_data/`)
+- **Conclusion:** confirms or refutes
+- **Limitations:** what this doesn't cover

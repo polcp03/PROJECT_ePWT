@@ -146,7 +146,7 @@ mot.tau_e_q      = mot.Lq / mot.Rs;              % [s] 6.03 ms
 
 % Rotor inertia and drag, motor alone (chain off).
 % MEASURED 2026-09-07 from a VESC log: three spin-ups to the no-load speed
-% followed by free coast-downs. 06_data/inercia/2026-09-07_test_inercia.csv
+% followed by free coast-downs. 06_data/inercia/2026-09-07_inertia_test.csv
 % Script: 04_model/scripts/inertia_from_vesc_log.py
 %
 % Drag model:  T_drag(w) = T0 + b*w

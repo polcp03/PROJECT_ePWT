@@ -1,6 +1,6 @@
 # ePWT — Electric Powertrain Learning Bench
 
-![The quad, its architecture, the measured back-EMF and a CAN log under throttle](docs/cover.png)
+![The quad, its architecture, the measured back-EMF and a CAN log under throttle](09_reviews/cover/cover.png)
 
 An electric mini-quad used as a hands-on learning platform for power electronics,
 electric machines, control and model-based development.
@@ -22,27 +22,26 @@ each reviewed change, with its full commit history.
 
 | Result | Number | Evidence |
 |---|---|---|
-| Motor characterised without a reliable datasheet | 3 pole pairs (25 Hall pulses vs 25.1 predicted); magnet flux λm = 16.86 mWb, three methods agree within 0.02 % | [`03_hardware/motor-parameters.md`](03_hardware/motor-parameters.md), [`01_plan/cerrados/C00.md`](01_plan/cerrados/C00.md) |
-| The inverter's own motor estimate is off | VESC estimate 15.92 mWb, 5.5 % below the measurement; gear ratio (1 → 8.364) and pole count (14 → 6) corrected in its configuration | [`03_hardware/vesc/`](03_hardware/vesc/), [`01_plan/cerrados/C00.md`](01_plan/cerrados/C00.md) |
-| Longitudinal vehicle model, predictions frozen before measuring | Two fidelity levels in Simulink, built by script, L1 = L2 regression exact | [`01_plan/cerrados/C01.md`](01_plan/cerrados/C01.md), [`04_model/`](04_model/) |
-| Every number in a review deck traced to its source | 65 figures audited automatically, 0 without an origin | [`01_plan/cerrados/C01.md`](01_plan/cerrados/C01.md) |
-| CAN logger for the inverter, on the vehicle under throttle | 137 s, 33 783 frames, peaks of 49 A: 0 corrupted frames, 0 SPI errors, 0 overflows | [`05_firmware/arduino/can_logger/`](05_firmware/arduino/can_logger/), [EXP-002](07_experiments/EXP-002-ruido-spi-can-logger.md) |
+| Motor characterised without a reliable datasheet | 3 pole pairs (25 Hall pulses vs 25.1 predicted); magnet flux λm = 16.86 mWb, three methods agree within 0.02 % | [`03_hardware/motor-parameters.md`](03_hardware/motor-parameters.md), [`01_plan/cycles/closed/C00.md`](01_plan/cycles/closed/C00.md) |
+| The inverter's own motor estimate is off | VESC estimate 15.92 mWb, 5.5 % below the measurement; gear ratio (1 → 8.364) and pole count (14 → 6) corrected in its configuration | [`03_hardware/vesc/`](03_hardware/vesc/), [`01_plan/cycles/closed/C00.md`](01_plan/cycles/closed/C00.md) |
+| Longitudinal vehicle model, predictions frozen before measuring | Two fidelity levels in Simulink, built by script, L1 = L2 regression exact | [`01_plan/cycles/closed/C01.md`](01_plan/cycles/closed/C01.md), [`04_model/`](04_model/) |
+| Every number in a review deck traced to its source | 65 figures audited automatically, 0 without an origin | [`01_plan/cycles/closed/C01.md`](01_plan/cycles/closed/C01.md) |
+| CAN logger for the inverter, on the vehicle under throttle | 137 s, 33 783 frames, peaks of 49 A: 0 corrupted frames, 0 SPI errors, 0 overflows | [`05_firmware/arduino/can_logger/`](05_firmware/arduino/can_logger/), [EXP-002](07_experiments/EXP-002-spi-noise-can-logger.md) |
 
 What went wrong is written down too: an ESP32 destroyed by a ground loop between the
 inverter and the PC is an open experiment with a hypothesis and a method
-([EXP-001](07_experiments/EXP-001-bucle-tierra-vesc-pc.md)).
+([EXP-001](07_experiments/EXP-001-ground-loop-vesc-pc.md)).
 
 ## Where to start
 
 1. [`START-HERE.md`](START-HERE.md): the current cycle and what is being done now.
 2. [`08_decisions/`](08_decisions/): why things are the way they are, with the discarded
    alternatives. The latest is the vehicle control unit architecture
-   ([DEC-005](08_decisions/DEC-005-arquitectura-vcu.md)).
+   ([DEC-005](08_decisions/DEC-005-vcu-architecture.md)).
 3. [`05_firmware/arduino/can_logger/`](05_firmware/arduino/can_logger/): embedded C++ on the
    ESP32, one job per module, with its acceptance test and result in the README.
 
-Internal notes (`01_plan/`, `02_knowledge/`, `07_experiments/`, `08_decisions/`) are in
-Spanish; code, commits, READMEs and review decks are in English.
+Everything is in English: plans, notes, experiments, decisions, code, commits and decks.
 
 ## How the work is done
 
@@ -59,14 +58,16 @@ Spanish; code, commits, READMEs and review decks are in English.
 
 | Path | Contents |
 |---|---|
-| `01_plan/` | Two-week work cycles, roadmap, long-term direction, deferred scope, review decks and their images |
-| `02_knowledge/` | Engineering notes |
-| `03_hardware/` | Vehicle specs, measured parameters, inverter configuration |
+| `00_system/` | Requirements with IDs and numbers, and how each one is verified (light V cycle) |
+| `01_plan/` | Two-week work cycles, the task list, the learning app, roadmap, long-term direction, deferred scope |
+| `02_knowledge/` | Engineering notes and the mistakes log |
+| `03_hardware/` | Vehicle specs, measured parameters, inverter configuration, EMC study |
 | `04_model/` | Simulink model — digital twin, parameters, analysis scripts, results |
-| `05_firmware/` | Embedded code (ESP32 / Arduino) |
+| `05_firmware/` | Embedded code (ESP32 / Arduino) and the vehicle control unit board design |
 | `06_data/` | Test campaigns, one folder per run: `YYYY-MM-DD_<test>` |
 | `07_experiments/` | Hypothesis, measurement, conclusion |
 | `08_decisions/` | Engineering decisions and discarded alternatives |
+| `09_reviews/` | Mentor review decks, the scripts that build them, and their images |
 
 ## Toolchain
 

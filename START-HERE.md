@@ -1,46 +1,48 @@
-# ePWT — empieza aquí
+# ePWT — start here
 
-Banco de aprendizaje de powertrain eléctrico. **El quad es la planta física, Simulink es
-el gemelo digital, y el ciclo de dos semanas con mentores es el motor de progreso.**
-Objetivo 0: convertirme en mejor ingeniero, desde primeros principios, con un portfolio
-que lo demuestre.
+A learning bench for electric powertrains. **The quad is the physical plant, Simulink is the
+digital twin, and the two-week cycle with mentors is the engine of progress.**
+Goal 0: become a better engineer, from first principles, with a portfolio that proves it.
 
-## Hoy
+## Today
 
-**Study here: [ePWT Bench](https://claude.ai/artifact/JwjbfzLRg98SpwrJfADjBX)**. Open *Today*: it shows the first lesson you have not finished, in calendar order. Do the *Review* tab first. Claude grades every answer on the page; your mistakes come back by themselves. Old per-lesson artifacts are retired.
+**Study here: [ePWT Bench](https://claude.ai/artifact/JwjbfzLRg98SpwrJfADjBX)**. Open *Today*: it shows the first lesson you have not finished, in calendar order. Do the *Review* tab first. Claude grades every answer on the page; your mistakes come back by themselves.
 
-**C03 — dq, limits and the current loop · review Fri 13 Nov (with C02).** Order, gate and open points in [C03](01_plan/C03.md). **Gate:** REQ-MOD-001 drafted in C03-LM (10 Nov).
+**Tick off here: [Quad Tasks](https://claude.ai/artifact/4hkig3fuuywMzBDRh6fefu)**. Purchases (to buy → ordered → arrived), measurements, wiring, tests. A tick is saved by itself: no need to tell a chat.
 
-## Dónde está cada cosa
+**C03 — dq, limits and the current loop · review Fri 13 Nov (with C02).** Order, gate and open points in [C03](01_plan/cycles/C03.md). **Gate:** REQ-MOD-001 drafted in C03-LM (10 Nov).
 
-| Carpeta | Qué hay | ¿La abro? |
+## Where everything is
+
+| Folder | What is there | Do I open it? |
 |---|---|---|
-| `01_plan/` | Ciclo activo, roadmap, backlog, decks. `cerrados/` = ciclos terminados | **A diario** |
-| `02_knowledge/` | Lo que he aprendido, en mis palabras, y mis errores | Antes de cada examen |
-| `03_hardware/` | El quad: lo medido. Fuente de verdad | Cuando necesito un número |
-| `04_model/` | Simulink: gemelo digital | En las tareas de modelo |
-| `05_firmware/` | ESP32 / Arduino. **Registrador CAN funcionando** (`arduino/can_logger/`) | Al grabar |
-| `06_data/` | Ensayos por campaña | Cuando haya datos |
-| `07_experiments/` · `08_decisions/` | Hipótesis → medida; decisiones con su porqué | Al cerrar algo |
-| `../BOOKS/` | Biblioteca, en la raíz del repositorio (fuera de Git). Índice en [fuentes](02_knowledge/fuentes.md) | Lo filtra Claude |
+| `01_plan/` | `tasks/` (Quad Tasks), `cycles/` (active and `closed/`), `bench/` (the learning app), roadmap, backlog | **Daily** |
+| `02_knowledge/` | What I have learned, in my words, and my mistakes | Before each exam |
+| `03_hardware/` | The quad: what was measured. Source of truth | When I need a number |
+| `04_model/` | Simulink: digital twin | In model tasks |
+| `05_firmware/` | ESP32 / Arduino code (`arduino/`) and the VCU board (`vcu-design/`). **CAN logger working** (`arduino/can_logger/`) | When recording |
+| `06_data/` | Tests by campaign | When there is data |
+| `07_experiments/` · `08_decisions/` | Hypothesis → measurement; decisions with their why | When closing something |
+| `09_reviews/` | Mentor review decks and their images | Before a review |
+| `../BOOKS/` | Library, at the repository root (outside Git). Index in [sources](02_knowledge/sources.md) | Claude filters it |
 
-## Mis tres reglas
+## My three rules
 
-1. **Solo existe el ciclo activo.** Toda idea nueva va a [backlog](01_plan/backlog.md).
-2. **Si un día se cae, se cae.** No se recupera acumulando.
-3. **Si importa, se escribe y se commitea.** Cerrar cada sesión con una línea en la
-   bitácora del ciclo y un commit.
+1. **Only the active cycle exists.** Every new idea goes to the [backlog](01_plan/backlog.md).
+2. **If a day falls through, it falls through.** It is not recovered by piling up.
+3. **If it matters, it is written down and committed.** Close each session with a line in the
+   cycle log and a commit.
 
-## Seguridad — no negociable
+## Safety — not negotiable
 
-Batería 13S5P Li-ion. Picos de **~40 A** contra una asunción de diseño de 25 A, y el
-BMS corta a 40 A continuos. Ningún ensayo de corriente alta sin: límite configurado en
-el VESC · comprobar temperatura del pack al terminar · **nunca cargar sin supervisión**.
+13S5P Li-ion battery. Peaks of **~40 A** against a design assumption of 25 A, and the BMS cuts
+at 40 A continuous. No high-current test without: limit set in the VESC · pack temperature
+checked at the end · **never charge unattended**.
 
-## Si eres una sesión nueva
+## If you are a new session
 
-1. `CLAUDE.md` — cómo trabajar con Pol (modo ingeniero senior, cerebro primero).
-2. Este archivo — qué toca hoy.
-3. El ciclo activo en `01_plan/`.
-4. Si el trabajo cae en `04_model/` o `05_firmware/`, lee su `CLAUDE.md` antes de responder.
-5. Lecciones → skill `leccion`. Corregir respuestas → skill `corregir`. Deck → skill `review-deck`.
+1. `CLAUDE.md` — how to work with Pol (senior engineer mode, brain first).
+2. This file — what is on today.
+3. The active cycle in `01_plan/cycles/`, and the ticks in Quad Tasks.
+4. If the work falls in `04_model/` or `05_firmware/`, read its `CLAUDE.md` before answering.
+5. Lessons → skill `leccion`. Grading answers → skill `corregir`. Deck → skill `review-deck`.

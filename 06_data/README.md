@@ -1,105 +1,98 @@
-# Datos de ensayo
+# Test data
 
-Una carpeta por campaña: `AAAA-MM-DD_<ensayo>`. Dentro, `raw/` son los archivos tal
-y como los escupe el instrumento — **no se editan nunca**.
+One folder per campaign: `YYYY-MM-DD_<test>`. Inside, `raw/` holds the files exactly as the
+instrument spits them out — **they are never edited**.
 
-> [!warning] `raw/` no está en Git
-> Los crudos de osciloscopio pesan cientos de MB y no admiten diff. Viven en disco
-> local y están ignorados. **Este README es el índice: si un crudo no está listado
-> aquí, no existe.** Lo que sí entra al repo: CSV pequeños, y las figuras de
-> análisis, que van a `04_model/results/`.
+> [!warning] `raw/` is not in Git
+> Oscilloscope raw files weigh hundreds of MB and cannot be diffed. They live on the local disk
+> and are ignored. **This README is the index: if a raw file is not listed here, it does not
+> exist.** What does go into the repo: small CSVs, and the analysis figures, which go to
+> `04_model/results/`.
 
 ---
 
-## `2026-09-07_back-emf` — back-EMF en circuito abierto
+## `2026-09-07_back-emf` — open-circuit back-EMF
 
-Motor desconectado del VESC, sonda entre fase A y fase B, motor girado con un
-taladro. Ventana de 500 ms, rango ±20 V. Es la medida que da `λm = 16,86 mWb`
-(ver `03_hardware/motor-parameters.md`).
+Motor disconnected from the VESC, probe between phase A and phase B, motor spun with a drill.
+500 ms window, ±20 V range. This is the measurement that gives `λm = 16.86 mWb`
+(see `03_hardware/motor-parameters.md`).
 
-| Ruta | Qué es | Tamaño |
+| Path | What | Size |
 |---|---|---|
-| `raw/low_speed/*.BMP` | 12 pantallazos del MaxiScope | 67 MB |
-| `raw/mid_speed/*.BMP` | 13 pantallazos | 73 MB |
-| `raw/high_speed/*.BMP` | 32 pantallazos | 179 MB |
-| `raw/scope_txt/*.txt` | 2 exportaciones numéricas del osciloscopio, a 1310 y 2510 rpm mecánicos | 56 MB |
+| `raw/low_speed/*.BMP` | 12 MaxiScope screenshots | 67 MB |
+| `raw/mid_speed/*.BMP` | 13 screenshots | 73 MB |
+| `raw/high_speed/*.BMP` | 32 screenshots | 179 MB |
+| `raw/scope_txt/*.txt` | 2 numeric exports from the oscilloscope, at 1310 and 2510 mechanical rpm | 56 MB |
 
-**Análisis:** `04_model/scripts/backemf_extract.py` (lee los BMP) →
-`backemf_fit.py` (ajusta λm y genera la figura) y `backemf_from_csv.py` (misma
-medida desde los TXT, inmune al jitter del taladro).
-
----
-
-## `2026-09-07_inercia` — inercia y fricción del rotor
-
-Log del VESC Tool durante una deceleración libre. CSV con `;` como separador.
-
-| Ruta | Qué es |
-|---|---|
-| `2026-09-07_test_inercia.csv` | Log del VESC Tool (195 KB, sí versionado) |
-
-**Análisis:** `04_model/scripts/inertia_from_vesc_log.py`.
+**Analysis:** `04_model/scripts/backemf_extract.py` (reads the BMPs) →
+`backemf_fit.py` (fits λm and makes the figure) and `backemf_from_csv.py` (same measurement
+from the TXT files, immune to the drill's jitter).
 
 ---
 
-## `2026-10-31_can_logger_bench` — registrador CAN en banco
+## `2026-09-07_inertia` — rotor inertia and friction
 
-Tráfico CAN crudo del VESC grabado por el registrador propio
-(`05_firmware/arduino/can_logger/`), ruedas en el aire. Formato en el README del
-registrador. Historia completa en `07_experiments/EXP-002-ruido-spi-can-logger.md`.
+VESC Tool log during a free deceleration. CSV with `;` as the separator.
 
-| Ruta | Qué es |
+| Path | What |
 |---|---|
-| `raw/log_003…010.csv` | Primeras grabaciones, cortadas por reinicios del ESP32 |
-| `raw/log_012.csv` | Ensayo A: ESP32 solo, sin VESC (138 s) |
-| `raw/log_013.csv` | Ensayo B: VESC encendido, motor parado (144 s) |
-| `raw/log_014.csv` | Ensayo C: con gas, antes del arreglo de hardware (70 s, tramas corruptas) |
-| `raw/log_017.csv` | **Con gas, después del arreglo** (137 s, 0 corruptas). Fusión por mayoría de `log_017_dl1…3.csv` |
-| `raw/log_017_dl1…3.csv` | Las tres descargas por USB tal cual, con la basura del puerto serie |
+| `2026-09-07_inertia_test.csv` | VESC Tool log (195 KB, versioned) |
 
-013, 014 y 017 se descargaron por USB tres veces y se fusionaron por mayoría: la
-descarga por puerto serie mete alguna línea basura. Con lector de tarjetas no hace falta.
+**Analysis:** `04_model/scripts/inertia_from_vesc_log.py`.
 
-**Análisis:** `04_model/scripts/can_log_decode.py` → figura
+---
+
+## `2026-10-31_can_logger_bench` — CAN logger on the bench
+
+Raw CAN traffic from the VESC recorded by our own logger (`05_firmware/arduino/can_logger/`),
+wheels in the air. Format in the logger's README. Full story in
+`07_experiments/EXP-002-spi-noise-can-logger.md`.
+
+| Path | What |
+|---|---|
+| `raw/log_003…010.csv` | First recordings, cut short by ESP32 resets |
+| `raw/log_012.csv` | Test A: ESP32 alone, no VESC (138 s) |
+| `raw/log_013.csv` | Test B: VESC on, motor stopped (144 s) |
+| `raw/log_014.csv` | Test C: with throttle, before the hardware fix (70 s, corrupt frames) |
+| `raw/log_017.csv` | **With throttle, after the fix** (137 s, 0 corrupt). Majority merge of `log_017_dl1…3.csv` |
+| `raw/log_017_dl1…3.csv` | The three USB downloads as they came, with the serial port's garbage |
+
+013, 014 and 017 were downloaded over USB three times and merged by majority: downloading over
+the serial port slips in the odd garbage line. With a card reader it is not needed.
+
+**Analysis:** `04_model/scripts/can_log_decode.py` → figure
 `04_model/results/can_logger_log017.png`.
 
 ---
 
-## `2026-11-01_wheel_hall` — sensor de velocidad de rueda
+## `2026-11-01_wheel_hall` — wheel speed sensor
 
-Rueda delantera girada a mano, quad en el caballete. Un Hall 3144 en GPIO 34 y 10 imanes
-en un círculo de 160 mm de diámetro. Capturado con `05_firmware/arduino/wheel_capture/`
-(lee el nivel del pin y el contador de interrupciones, CSV a 921600).
+Front wheel turned by hand, quad on the stand. A 3144 Hall on GPIO 34 and 10 magnets on a
+160 mm diameter circle. Captured with `05_firmware/arduino/wheel_capture/` (reads the pin level
+and the interrupt counter, CSV at 921600).
 
-| Ruta | Qué es |
+| Path | What |
 |---|---|
-| `raw/run1.csv` | Imanes colocados a ojo. `t_us,level,isr_edges`, ~575 imanes |
-| `raw/run2_spacing_fixed.csv` | Imanes recolocados con compás (cuerda 4,94 cm). Mismo formato |
-| `speed_raw.png` | Run 1: velocidad imán a imán y media de una vuelta |
-| `speed_run2.png` | Run 2: lo mismo después de recolocar |
+| `raw/run1.csv` | Magnets placed by eye. `t_us,level,isr_edges`, ~575 magnets |
+| `raw/run2_spacing_fixed.csv` | Magnets re-placed with a compass (chord 4.94 cm). Same format |
+| `speed_raw.png` | Run 1: magnet-by-magnet speed and the one-turn average |
+| `speed_run2.png` | Run 2: the same after re-placing |
 
-**Qué salió:**
-- **1 flanco de interrupción por imán y 0 falsos** en las dos capturas. El cableado vale.
-- **El error de separación entre imanes se repite cada 10 pulsos**, con el mismo porcentaje
-  a cualquier velocidad: ±20 % a ojo, **±8 %** con compás.
-- **La media de una vuelta lo cancela del todo** (queda un 0,7 % de ruido), a costa de una
-  vuelta de retraso: 0,7 s a 5 km/h.
-- Queda una oscilación de una vez por vuelta: el círculo de imanes no está centrado en el eje.
-- **Siguiente:** calibrar el ángulo real de cada hueco (como un ABS con la rueda fónica
-  imperfecta) y elegir el filtro con datos del quad rodando. Grabará el `can_logger`
-  (líneas `#wheel`) en cuanto haya tarjeta nueva.
+**What came out:**
+- **1 interrupt edge per magnet and 0 false ones** in both captures. The wiring is fine.
+- **The magnet spacing error repeats every 10 pulses**, with the same percentage at any speed:
+  ±20 % by eye, **±8 %** with a compass.
+- **The one-turn average cancels it completely** (0.7 % of noise is left), at the cost of one
+  turn of delay: 0.7 s at 5 km/h.
+- A once-per-turn wobble remains: the magnet circle is not centred on the axle.
+- **Next:** calibrate the real angle of each gap (like an ABS with an imperfect tone wheel) and
+  choose the filter with data from the quad rolling. The `can_logger` will record it (`#wheel`
+  lines) as soon as there is a new card.
 
-**Análisis:** hecho en la sesión, sin script guardado. El primero que haga falta para los
-logs del quad irá a `04_model/scripts/`.
+**Analysis:** done in the session, no script saved. The first one needed for the quad's logs
+will go to `04_model/scripts/`.
 
 ---
-
-## Cómo añadir una campaña
-
-1. `mkdir 06_data/AAAA-MM-DD_<ensayo>/raw`.
-2. Volcar los archivos del instrumento en `raw/`, sin renombrar ni recortar.
-3. Añadir una sección aquí: qué se midió, con qué montaje y qué script lo lee.
-4. La figura de salida va a `04_model/results/`, nunca junto a los datos.
 
 ## `2026-11-05_low-speed-no-chain` — VESC low-speed control, chain off (EXP-003)
 
@@ -113,3 +106,22 @@ twice, then a duty sweep 2 → 48 %.
 
 **Analysis:** `plot.py` → `1_session.png`, `2_negative_current.png`, `3_ripple_vs_speed.png`; `compare.py` → `4_before_after.png`.
 Conclusions in [EXP-003](../07_experiments/EXP-003-low-speed-control.md).
+
+---
+
+## `2026-11-06_mass-cg` — axle loads and CG height (task `{#cg}`)
+
+Two bathroom scales (3 cm tall) under one axle at a time: level empty, level with Pol on board,
+and tilt tests empty (other axle lifted 9.5 and 16 cm). No raw files: the dictated readings are
+in [`readings.md`](2026-11-06_mass-cg/readings.md).
+
+**Analysis:** derived with Pol in a session; results go to `03_hardware/baseline.md`.
+
+---
+
+## How to add a campaign
+
+1. `mkdir 06_data/YYYY-MM-DD_<test>/raw`.
+2. Drop the instrument's files into `raw/`, without renaming or trimming.
+3. Add a section here: what was measured, with which setup and which script reads it.
+4. The output figure goes to `04_model/results/`, never next to the data.

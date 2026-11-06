@@ -1,149 +1,158 @@
-# Backlog — todo lo que NO se hace ahora
+# Backlog — everything NOT done now
 
-Destino único de las ideas. Si algo no cabe en el ciclo activo, viene aquí y se sale
-de la cabeza. Nada de esto está descartado; está **aplazado con criterio de entrada**.
+The single destination for ideas. If something does not fit the active cycle, it comes here and
+leaves my head. None of this is discarded; it is **postponed with an entry condition**.
 
-Regla: una entrada solo se activa cuando se cumple su condición, y entonces se
-convierte en el objetivo de un ciclo.
-
----
-
-## Proyectos separados (fuera de este repo, por decisión propia)
-
-**Second brain personal + LLM sobre él.** Conocimiento de universidad, Formula Student,
-calibración, trabajo, proyectos. Obsidian como candidato. Referencia mencionada:
-el trabajo de Karpathy sobre wiki/LLM en GitHub.
-*Por qué fuera:* es un proyecto de gestión del conocimiento, no de ingeniería de
-powertrain. Mezclarlo aquí fue la causa de la saturación inicial.
-*Nota:* `02_knowledge/` de este repo ya es Markdown plano y se puede abrir con cualquier visor
-sin conversión. El second brain personal puede absorberlo más adelante.
-
-**Agentes de información / actualidad.** Síntesis semanal sobre robótica, defensa,
-drones, semiconductores, IA, ecosistema israelí, y referentes técnicos concretos.
-*Argumento a favor (suyo, válido):* no quiere perder tiempo en redes; prefiere
-señal filtrada de gente cuyas acciones tienen consecuencias reales.
-*Riesgo a vigilar:* una síntesis que se acepta sin cuestionar es cognición delegada.
-Debe entregar **fuentes + preguntas**, no conclusiones.
-*Hecho desde septiembre de 2026:* es el brief semanal de los lunes, fuera de esta carpeta.
+Rule: an entry is only activated when its condition is met, and then it becomes the goal of a cycle.
+Concrete to-dos that are already decided (buy, wire, test) live in [Quad Tasks](tasks/), not here.
 
 ---
 
-## Dentro de este proyecto, más adelante
+## Separate projects (outside this repo, by my own decision)
 
-| Idea | Condición de entrada |
+**Personal second brain + an LLM on it.** Knowledge from university, Formula Student,
+calibration, work, projects. Obsidian as a candidate. Reference mentioned: Karpathy's work on a
+wiki/LLM on GitHub.
+*Why outside:* it is a knowledge management project, not a powertrain engineering one. Mixing it
+in here was the cause of the initial overload.
+*Note:* this repo's `02_knowledge/` is already plain Markdown and opens in any viewer without
+conversion. The personal second brain can absorb it later.
+
+**Information / news agents.** A weekly synthesis on robotics, defence, drones, semiconductors,
+AI, the Israeli ecosystem, and specific technical voices.
+*Argument for (his, valid):* he does not want to waste time on social media; he prefers filtered
+signal from people whose actions have real consequences.
+*Risk to watch:* a synthesis accepted without questioning is delegated cognition. It must
+deliver **sources + questions**, not conclusions.
+*Done since September 2026:* it is the Monday weekly brief, outside this folder.
+
+---
+
+## Inside this project, later
+
+| Idea | Entry condition |
 |---|---|
-| **Agente examinador** (alimentado con libros de texto, me cuestiona antes de las reviews) | Que exista material de referencia elegido y ≥3 ciclos de rutina que codificar |
-| ~~**Skills propias**~~ | **Activado 2026-10-25:** `review-deck`, `leccion` y `corregir` existen. Siguientes (analizar datos, documentar decisión): misma regla, 3 veces a mano |
-| **CI: compilar el firmware en cada push** | Condición cumplida (2026-10-31): ya hay firmware propio. Pendiente de decidir cuándo |
-| ~~**Logger de telemetría propio (ESP32 + CAN)**~~ | **Hecho 2026-10-31**, adelantado por Pol: `05_firmware/arduino/can_logger/`. Graba con gas sin errores (EXP-002) |
-| **Dashboard / análisis en Python de los logs** | Condición cumplida: ya hay CSV. Hoy existe `04_model/scripts/can_log_decode.py` (resumen + figura); más, cuando el análisis lo pida |
-| **Hook de fin de sesión: avisar de trabajo sin commitear** | Haber cerrado 3 sesiones más olvidando el commit. Ver la nota de abajo |
-| **Control de tracción, launch control** | Modelo validado + control de par funcionando |
-| **Launch: take up the chain backlash first** (Pol, 2026-11-05) — a small torque (~1–2 A) before the launch so the slack is already gone, instead of a very tight chain, which only adds friction | With launch control. Needs the chain at its proper tension first (EXP-003) |
+| **Examiner agent** (fed with textbooks, questions me before reviews) | Chosen reference material exists and ≥3 cycles of routine to encode |
+| ~~**Own skills**~~ | **Activated 2026-10-25:** `review-deck`, `leccion` and `corregir` exist. Next ones (analyse data, document a decision): same rule, 3 times by hand |
+| **CI: compile the firmware on every push** | Condition met (2026-10-31): there is own firmware now. When to do it still to be decided |
+| ~~**Own telemetry logger (ESP32 + CAN)**~~ | **Done 2026-10-31**, brought forward by Pol: `05_firmware/arduino/can_logger/`. Records under throttle without errors (EXP-002) |
+| **Dashboard / Python analysis of the logs** | Condition met: there are CSVs. Today `04_model/scripts/can_log_decode.py` exists (summary + figure); more when the analysis asks for it |
+| **End-of-session hook: warn about uncommitted work** | Having closed 3 more sessions forgetting the commit. See the note below |
+| **Traction control, launch control** | Validated model + torque control working |
+| **Launch: take up the chain backlash first** (Pol, 2026-11-05) — a small torque (~1–2 A) before the launch so the slack is already gone, instead of a very tight chain, which only adds friction | With launch control. The chain is refitted one link longer (6 Nov, EXP-003) |
 | **VESC status rate over CAN** — today ~21 ms, so a timeout is measured with ±21 ms resolution | When a requirement needs a finer measurement than 21 ms |
-| **MPC** | Modelo validado. MPC sin modelo es imposible por definición |
-| **Percepción, cámaras, autonomía, robot acompañante** | Muy lejos. Mantener como horizonte, no planificar |
-| **Diagnóstico del corte de USB del VESC bajo carga** | Fallo conocido en la comunidad VESC (EMI / bucle de tierra / pull-ups). 30 min de osciloscopio antes de construir nada para evitarlo |
-| **Decidir `l_in_current_max` (hoy 40 A = límite continuo del BMS)** | Salió del modelo C01: por encima de 9 km/h cada aceleración a fondo va pegada a 40 A. Llevado a la review C01 como pregunta a los mentores |
-| ~~**Medir `R_int` del pack**~~ | **Hecho 2026-10-31:** ≈ 0,18 Ω batería + cables + BMS, de un log CAN (EXP-002). Falta pasarlo a `04_model/params/` |
-| **`si_wheel_diameter` 0,30 m vs `2·r_roll` 0,31 m** | Decidir cuál vale cuando se haga el roll-out con neumáticos nuevos |
-| **Altura del CG (`h_cg`)** | MISSING. La necesita el load transfer del L2 (examen C01, bloque I) |
-| **EXP-001 (bucle de tierra) sin medir** | **Condition met 2026-11-05:** the ESP32 now sends torque to the VESC (can_throttle). Done safely by running the laptop on battery with the VESC USB unplugged. Measure it before the VCU rides with a laptop attached |
-| **Velocidad de rueda: método de filtrado** | Datos del `can_logger` con el quad rodando (hace falta tarjeta nueva). Comparar media de una vuelta, calibración por hueco y filtro; solo entonces se pasa al ESP32 (Pol, 2026-11-01) |
-| **IMU al registrador** | Que llegue la GY-LSM6DS3 nueva. I2C en GPIO 21/22, 10 kΩ a 3V3, dirección 0x6A |
-| **BMS por CAN** | Solo si hace falta la tensión o la temperatura por celda. La tensión y la corriente del pack ya llegan del VESC, y el foco es motor e inversor (Pol, 2026-11-01). El BMS queda de respaldo pasivo, sin tocar ([DEC-005](../08_decisions/DEC-005-arquitectura-vcu.md)) |
-| **Interruptores de freno a la VCU** | Con la unidad de control v0. Antes, medir con multímetro que son contacto seco y si son NA o NC (DEC-005) |
+| **MPC** | Validated model. MPC without a model is impossible by definition |
+| **Perception, cameras, autonomy, companion robot** | Very far. Keep as a horizon, don't plan |
+| **Diagnose the VESC's USB dropout under load** | Known failure in the VESC community (EMI / ground loop / pull-ups). 30 min of oscilloscope before building anything to avoid it |
+| **Decide `l_in_current_max` (today 40 A = the BMS continuous limit)** | Came out of the C01 model: above 9 km/h every full-throttle acceleration sits at 40 A. Taken to the C01 review as a question for the mentors. **2026-11-05:** Pol says it was set to 50 A ("let the BMS cut"), now going to **39 A**. Rule: the VESC limits below the BMS so the BMS never opens the pack under load. 1 A margin is about the VESC's current-reading error; 35–38 A is safer. Re-export the XML and write the number into `baseline.md`. Also in Quad Tasks, section 8 |
+| **id–iq operating map** (Pol, 2026-11-05) — current-limit circle, voltage-limit ellipses at several speeds (centre at id = −λ/Ld), MTPA curve, field-weakening path, and the measured operating points from the CAN logs on top | dq model reliable enough (after C03-SA). Rotor construction known since 6 Nov (inset magnets, `03_hardware/motor-parameters.md`) |
+| **Field weakening and MTPA settings from the model** — choose `foc_fw_current_max`, `foc_fw_duty_start` and `foc_mtpa_mode` in Simulink before touching the quad. The VESC firmware (FW 7.01) already implements both; nothing to rewrite. **Safety first:** with field weakening, a VESC trip at high speed lets the back-EMF exceed the 57 V limit → simulate the overshoot before enabling it | id–iq map done; REQ-SAF-02 (bus voltage) written |
+| **Torque from vehicle data** (Pol, 2026-11-05) — estimate wheel torque from acceleration (F = m·a + drag + rolling + slope) to check Kt and an MTPA table without a dynamometer | Working IMU + wheel speed on the logger, and a flat run. Needs an estimate of rolling resistance |
+| **Current-loop decoupling** (`foc_cc_decoupling`, off) — feedforward of the ω·L·i and ω·λ cross terms. At 5480 rpm the electrical speed (~1720 rad/s) is close to the 2000 rad/s loop bandwidth, so it may matter at top speed. Test in the model first: current tracking error at high speed, with and without | dq model with the current loop (C03-SA onwards) |
+| ~~**Measure the pack's `R_int`**~~ | **Done 2026-10-31:** ≈ 0.18 Ω battery + cables + BMS, from a CAN log (EXP-002). Still to go into `04_model/params/` (Quad Tasks, section 2) |
+| **`si_wheel_diameter` 0.30 m vs `2·r_roll` 0.31 m** | Decide which is right when the roll-out is done with new tyres |
+| **CG height (`h_cg`)** | MISSING. Needed by the L2 load transfer (C01 exam, block I) |
+| **EXP-001 (ground loop) not measured** | **Condition met 2026-11-05:** the ESP32 now sends torque to the VESC (can_throttle). Done safely by running the laptop on battery with the VESC USB unplugged. Measure it before the VCU rides with a laptop attached |
+| **Wheel speed: filtering method** | `can_logger` data with the quad rolling (needs the new card). Compare a one-turn average, per-gap calibration and a filter; only then move it to the ESP32 (Pol, 2026-11-01) |
+| **IMU to the logger** | The new GY-LSM6DS3 arriving. I2C on GPIO 21/22, address 0x6A. On the VCU board since 6 Nov (DEC-008) |
+| **BMS over CAN** | Only if per-cell voltage or temperature is needed. Pack voltage and current already come from the VESC, and the focus is motor and inverter (Pol, 2026-11-01). The BMS stays as a passive backup, untouched ([DEC-005](../08_decisions/DEC-005-vcu-architecture.md)) |
+| ~~**Brake switches to the VCU**~~ | **Measured 2 Nov:** normally open, dry contact; only the front one works. Wiring it is in Quad Tasks, section 7 |
 
 ---
 
-## Hacia robótica — apuntado, sin plan
+## Towards robotics — noted, no plan
 
-**Decidido el 31 de octubre de 2026: primero se termina el quad.** Nada de ROS 2 ni de
-sensores de robot dentro de los ciclos actuales. El orden:
+**Decided on 31 October 2026: the quad gets finished first.** No ROS 2 and no robot sensors
+inside the current cycles. The order:
 
-1. **Terminar el quad**: el modelo validado contra el vehículo (C02–C06).
-2. **Vehicle Control Unit propia**: la unidad que manda sobre el inversor.
-3. **Programar en C** sobre esa unidad: el lazo de control del modelo, corriendo en el
-   microcontrolador. Es lo que convierte "sé Simulink" en "sé hacer firmware".
-4. **Telemetría**: sacar los datos del vehículo en marcha (ver el logger de arriba).
-5. **Después, decidir** entre dos caminos:
-   - **Quad autónomo**: ROS 2, lidar, cámara, fusión de sensores (unidad inercial + velocidad de
-     rueda en un filtro de Kalman). Exige un actuador de dirección, que es hardware nuevo.
-   - **Dron autónomo**: proyecto nuevo, donde ROS 2 y la percepción son el centro.
+1. **Finish the quad**: the model validated against the vehicle (C02–C06).
+2. **Own Vehicle Control Unit**: the unit that commands the inverter.
+3. **Programming in C** on that unit: the model's control loop, running on the microcontroller.
+   It is what turns "I know Simulink" into "I can do firmware".
+4. **Telemetry over ROS 2** (decided 2026-11-04, [DEC-007](../08_decisions/DEC-007-skill-gates-and-ros2-telemetry.md)):
+   a Raspberry Pi above the VCU reads its CAN, records it and sends it to the PC over radio.
+   This is how robotics enters the quad. The radio is chosen from `REQ-TEL`, not before.
+5. **Not on the quad:** autonomy (Pol, 2026-11-04: no need for it). An **autonomous drone**
+   (ArduPilot or PX4, Raspberry Pi, camera or lidar) is a separate project, decided after the
+   quad is done.
 
-El motivo de fondo no cambia: las startups de robótica piden C/C++, Linux, ROS 2 y
-comunicaciones, y hoy el repositorio no tiene código que lo demuestre. Los pasos 2–4 empiezan a
-cubrirlo sin salir del quad; el 5 se decide juntos cuando llegue.
+**Parked, with an entry condition:**
 
----
+| Idea | Entry condition |
+|---|---|
+| **Learned controller (reinforcement learning) trained on the twin** | (1) Pol writes the requirement it would meet, with a number; (2) model validated (C06); (3) VCU commanding torque with a safety envelope. Then: compare it on the quad against the classic PI controller |
+| **Machine learning on the CAN logs** (motor parameter estimation, fault detection) | Enough logs with load, and a question the physics model cannot answer |
 
-## Higiene de Git: qué automatizar y qué no
-
-> **Actualizado el 2026-10-30: ya se automatiza, con revisión.** Pol decidió que no quiere
-> hacer el trabajo de git a mano: lo hace un agente y él es el revisor. La tarea
-> «Sincronizar con GitHub» (cada domingo, en el PC; cada noche hasta el 31-oct-2026) agrupa los cambios por tema en
-> commits con su porqué, abre un Pull Request y Pol lo fusiona. Eso responde a la objeción
-> de abajo: el criterio lo pone el agente y Pol lo valida en el PR, en vez de un commit
-> automático a ciegas. Procedimiento en `../prompts/sincronizar.md`. Lo de abajo queda
-> como historia.
-
-Abierto el 2026-09-09, tras una operación de rescate: 46 archivos nuevos y 24
-modificados llevaban hasta dos semanas sin commitear. Todo el trabajo técnico de C00
-—caracterización del motor, inercia, EXP-001, decks— vivía solo en el disco.
-
-**Fontanería, hecho o inmediato.** No requiere criterio, así que se automatiza sin
-debate: `push.autoSetupRemote` (mata el `-u` de la primera subida), `fetch.prune`
-(limpia referencias a ramas remotas muertas), y en GitHub desactivar el squash merge
-y activar el borrado de rama al mergear.
-
-Lo del squash no es cosmético: el PR #4 aplastó 7 commits temáticos en uno solo
-titulado como el primero de ellos, así que ahora `a3e6f9b` dice "versiona la config
-del VESC" y contiene además el motor, la inercia, EXP-001 y las presentaciones.
-El contenido está intacto; la trazabilidad no. Desactivar la opción en el repo hace
-el error irrepetible, que es mejor que recordar no cometerlo.
-
-**Criterio, NO se automatiza.** Agrupar los cambios por tema y escribir por qué el
-VESC se queda un 5,5 % corto en λm son decisiones de ingeniería. Un commit automático
-produciría exactamente la historia inútil que este proyecto intenta evitar.
-
-**El punto intermedio, aplazado.** El fallo real fue olvidarse, no no saber. Un hook
-de fin de sesión que *avise* (nunca que commitee) es la herramienta correcta. Pero
-aplica la regla de entrada de las skills propias: tres repeticiones a mano antes de
-codificar nada. Va una.
-
-Mientras tanto, la disciplina es manual: al cerrar sesión, `add` por tema → `commit`
-→ `push`, aunque el trabajo esté a medias. Un WIP con mensaje honesto vale más que
-46 archivos en el limbo.
-
-**Integración continua, aplazada (2-nov-2026).** Se valoró que GitHub compile el firmware y
-haga comprobaciones en cada PR. Hoy aporta poco: un solo autor, sketches pequeños y ninguna
-prueba que corra en el PC. Se monta con la unidad de control del vehículo, cuando haya lógica
-con test en el PC (escalón 6 de la skill `software-con-ia`): entonces sí atrapa fallos y sí
-cuenta en el CV.
+The underlying reason does not change: robotics startups ask for C/C++, Linux, ROS 2 and
+communications, and today the repository has no code that shows it. The skill gates in the
+[roadmap](roadmap.md) make sure each cycle adds some.
 
 ---
 
-## Marca personal, contenido y empresa
+## Git hygiene: what to automate and what not
 
-Reconocido como objetivo real a largo plazo. **Cero acción de investigación ahora.**
+> **Updated 2026-10-30: it is automated now, with review.** Pol decided he does not want to do
+> the git work by hand: an agent does it and he is the reviewer. The «Sincronizar con GitHub»
+> task (every Sunday, on the PC; every night until 31 Oct 2026) groups the changes by topic into
+> commits with their why, opens a Pull Request and Pol merges it. That answers the objection
+> below: the agent applies the judgement and Pol checks it in the PR, instead of a blind
+> automatic commit. Procedure in `../prompts/sincronizar.md`. What follows stays as history.
 
-- **LinkedIn:** activo, pero como *subproducto*. Cada review con mentores produce
-  material; publicar es copiar y traducir, no un proyecto aparte. Sin agente.
-- **Portfolio para entrevistas — decidido el 2026-10-30.** Tres piezas, en este orden de
-  importancia: (1) **este repositorio público** (`polcp03/epwt`), que se actualiza solo;
-  (2) **una presentación** que cuente el proyecto y lo hecho, sacada de los decks de las
-  reviews; (3) **un vídeo de 30 segundos** para enseñar a la gente: el quad, el gemelo
-  digital y un número medido, sin explicar teoría. Para el vídeo, **graba desde ya** clips
-  cortos de cada hito (el banco, una medida en el osciloscopio, el modelo corriendo): el
-  material que no se graba cuando pasa ya no se puede grabar después. Se monta cuando haya
-  una entrevista cerca o cuando el quad se mueva con control propio.
-- **YouTube / newsletter / formación:** más adelante. Doble función reconocida —
-  construir marca y forzar comprensión real. La excusa del vídeo es aprender a
-  explicar y perder vergüenza; ese objetivo ya lo cubren las presentaciones por ahora.
-- **Empresa tecnológica (robótica u otra):** horizonte a años. Primero: conocimiento,
-  experiencia, entender sectores y detectar problemas reales. No forzar una idea.
-- **Organización AI-first como laboratorio:** aprender a trabajar con IA como capa
-  común de conocimiento antes de tener equipo. Este repo ya es la versión mínima.
+Opened on 2026-09-09, after a rescue operation: 46 new files and 24 modified ones had gone up
+to two weeks without a commit. All of C00's technical work — motor characterisation, inertia,
+EXP-001, decks — lived only on the disk.
+
+**Plumbing, done or immediate.** It needs no judgement, so it is automated without debate:
+`push.autoSetupRemote` (kills the `-u` on the first push), `fetch.prune` (cleans references to
+dead remote branches), and on GitHub disable squash merge and enable deleting the branch on merge.
+
+The squash point is not cosmetic: PR #4 squashed 7 topical commits into one titled like the
+first of them, so `a3e6f9b` now says "version the VESC config" and also contains the motor, the
+inertia, EXP-001 and the presentations. The content is intact; the traceability is not.
+Disabling the option in the repo makes the mistake unrepeatable, which beats remembering not to
+make it.
+
+**Judgement, NOT automated.** Grouping changes by topic and writing why the VESC's detection is
+no reference for λm are engineering decisions. An automatic commit would produce exactly the
+useless history this project tries to avoid.
+
+**The middle ground, postponed.** The real failure was forgetting, not not knowing. An
+end-of-session hook that *warns* (never commits) is the right tool. But the entry rule for own
+skills applies: three repetitions by hand before encoding anything. One so far.
+
+Meanwhile, the discipline is manual: when closing a session, `add` by topic → `commit` →
+`push`, even if the work is half done. A WIP with an honest message is worth more than 46 files
+in limbo.
+
+**Continuous integration, postponed (2 Nov 2026).** Having GitHub compile the firmware and run
+checks on every PR was considered. Today it adds little: one author, small sketches and no test
+that runs on the PC. It goes in with the vehicle control unit, when there is logic with a test
+on the PC (step 6 of the `software-con-ia` skill): then it does catch failures and does count on
+the CV.
+
+---
+
+## Personal brand, content and company
+
+Recognised as a real long-term goal. **Zero research action now.**
+
+- **LinkedIn:** active, but as a *by-product*. Each review with mentors produces material;
+  publishing is copying and translating, not a separate project. No agent.
+- **Portfolio for interviews — decided on 2026-10-30.** Three pieces, in this order of
+  importance: (1) **this public repository** (`polcp03/PROJECT_ePWT`), which updates by itself;
+  (2) **a presentation** that tells the project and what was done, taken from the review decks;
+  (3) **a 30-second video** to show people: the quad, the digital twin and a measured number,
+  without explaining theory. For the video, **record from now on** short clips of each
+  milestone (the bench, a measurement on the oscilloscope, the model running): material not
+  recorded when it happens cannot be recorded later. It gets edited when an interview is near
+  or when the quad moves with its own control.
+- **YouTube / newsletter / teaching:** later. Dual function recognised — build a brand and
+  force real understanding. The excuse for video is learning to explain and losing shyness;
+  the presentations cover that goal for now.
+- **Tech company (robotics or other):** a horizon of years. First: knowledge, experience,
+  understanding sectors and spotting real problems. Don't force an idea.
+- **AI-first organisation as a lab:** learn to work with AI as a shared knowledge layer before
+  having a team. This repo is already the minimal version.
 
 ## Bench: next retrospective
 

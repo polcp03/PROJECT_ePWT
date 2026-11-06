@@ -1,10 +1,10 @@
-"""backemf_extract.py - lee las capturas BMP del MaxiScope y saca (f, amplitud).
+"""backemf_extract.py - reads the MaxiScope BMP captures and extracts (f, amplitude).
 
-Ensayo: back-EMF en circuito abierto, 2026-09-07. Motor desconectado del VESC,
-sonda entre fase A y fase B, ventana de 500 ms, rango +-20 V.
+Test: open-circuit back-EMF, 2026-09-07. Motor disconnected from the VESC,
+probe between phase A and phase B, 500 ms window, +-20 V range.
 
-Salida: 04_model/results/backemf_peaks.json, una entrada por captura.
-Uso:  ./.venv/Scripts/python.exe 04_model/scripts/backemf_extract.py   (desde la raiz)
+Output: 04_model/results/backemf_peaks.json, one entry per capture.
+Usage:  ./.venv/Scripts/python.exe 04_model/scripts/backemf_extract.py   (from the root)
 """
 
 import numpy as np, glob, os, json
@@ -29,7 +29,7 @@ def trace(path):
     v = np.array([20.0 + (np.where(o[:, c])[0].mean() - ROW_TOP) * V_PER_ROW
                   for c in cols])
     t = (cols - COL_L) * MS_PER_COL * 1e-3            # s
-    # rejilla uniforme: las columnas tienen huecos y la FFT los necesita uniformes
+    # uniform grid: the columns have gaps and the FFT needs them uniform
     tu = np.linspace(t[0], t[-1], len(t))
     return tu, np.interp(tu, t, v)
 
@@ -52,7 +52,7 @@ def measure(t, v):
         if j + 2 < len(mag):
             harm.append(mag[j - 1:j + 2].max())
     thd = np.sqrt(np.sum(np.square(harm))) / A1
-    # cruces por cero, como control independiente de la FFT
+    # zero crossings, as an independent check on the FFT
     s = np.sign(v)
     s[s == 0] = 1
     f_zc = np.sum(s[:-1] * s[1:] < 0) / 2 / (t[-1] - t[0])
@@ -81,15 +81,15 @@ for grp in ["low_speed", "mid_speed", "high_speed"]:
           f"{g('thd').mean():>7.1%}{g('lam').mean()*1e3:>11.3f} ±{g('lam').std()*1e3:.3f}")
 
 lam = np.array([r["lam"] for r in rows])
-print(f"\nTODAS ({len(lam)}): lambda = {lam.mean()*1e3:.3f} ± {lam.std()*1e3:.3f} mWb "
+print(f"\nALL ({len(lam)}): lambda = {lam.mean()*1e3:.3f} ± {lam.std()*1e3:.3f} mWb "
       f"(dispersion {100*lam.std()/lam.mean():.1f} %)")
 print(f"VESC              : 16.016 mWb  ->  desviacion {100*(lam.mean()-0.016016)/0.016016:+.1f} %")
 
-# regresion A1 vs f forzada por el origen y libre
+# A1 vs f regression, through the origin and free
 f = np.array([r["f"] for r in rows]); A = np.array([r["A1"] for r in rows])
 sl = (f @ A) / (f @ f)
-print(f"\nAjuste por el origen : A1 = {sl:.5f}*f  ->  lambda = {sl/(SQ3*2*np.pi)*1e3:.3f} mWb")
+print(f"\nFit through origin : A1 = {sl:.5f}*f  ->  lambda = {sl/(SQ3*2*np.pi)*1e3:.3f} mWb")
 m, b0 = np.polyfit(f, A, 1)
 print(f"Ajuste libre         : A1 = {m:.5f}*f {b0:+.3f}  ->  lambda = {m/(SQ3*2*np.pi)*1e3:.3f} mWb")
-print(f"  ordenada en el origen {b0:+.3f} V  (deberia ser ~0)")
+print(f"  intercept at the origin {b0:+.3f} V  (should be ~0)")
 print(f"  R^2 = {1 - np.sum((A-(m*f+b0))**2)/np.sum((A-A.mean())**2):.4f}")

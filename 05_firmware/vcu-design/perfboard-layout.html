@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>VCU Perfboard Layout</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: one board drawing on top, the inspector right under it, then build notes.
+   The board itself is a physical object (phenolic, copper, coloured wires): its
+   colours stay the same in both themes; the page around it follows the theme. */
+:root{
+  --bg:#eef0ea; --panel:#ffffff; --panel-2:#e4e7df; --ink:#1c232b; --ink-dim:#56606b;
+  --line:#cfd3c9; --accent:#b1560f; --accent-soft:#f3e2d1; --warn:#a33232; --warn-soft:#f5e1e0;
+  --good:#3d7a42; --good-soft:#e2eee1;
+  --f-disp:'Big Shoulders Display','Arial Narrow',sans-serif;
+  --f-body:'Source Serif 4',Georgia,serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#13171c; --panel:#1a2027; --panel-2:#212831; --ink:#e6e8e3; --ink-dim:#a3abb3;
+  --line:#2d353e; --accent:#e58b33; --accent-soft:#2d2118; --warn:#e48a8a; --warn-soft:#2c1b1b;
+  --good:#86c48a; --good-soft:#18281a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#13171c; --panel:#1a2027; --panel-2:#212831; --ink:#e6e8e3; --ink-dim:#a3abb3;
+  --line:#2d353e; --accent:#e58b33; --accent-soft:#2d2118; --warn:#e48a8a; --warn-soft:#2c1b1b;
+  --good:#86c48a; --good-soft:#18281a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16.5px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 60px}
+.wrap{max-width:1040px;margin-inline:auto;display:flex;flex-direction:column;gap:18px}
+h1,h2{font-family:var(--f-disp);text-transform:uppercase;letter-spacing:.01em;line-height:1;margin:0;text-wrap:balance}
+h1{font-size:clamp(30px,6vw,44px)}
+h2{font-size:22px;margin-bottom:10px}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-dim)}
+.lede{max-width:68ch;margin:8px 0 0}
+.lede b{color:var(--accent)}
+.controls{display:flex;flex-wrap:wrap;gap:8px}
+.controls button{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;padding:7px 12px;border-radius:999px;
+  border:1px solid var(--line);background:var(--panel);color:var(--ink-dim);cursor:pointer}
+.controls button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.controls button:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px;overflow-x:auto}
+.stage svg{display:block;width:100%;min-width:680px;height:auto}
+.hint{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-dim);margin-top:6px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px;min-width:0}
+#info h3{font-family:var(--f-disp);text-transform:uppercase;font-size:24px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+#info .sw{width:22px;height:8px;border-radius:4px;border:1px solid #0006;display:inline-block}
+#info p{margin:6px 0}
+.tag{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;
+  background:var(--panel-2);color:var(--ink-dim);display:inline-block;margin-right:6px}
+.tag.plan{background:var(--accent-soft);color:var(--accent)}
+.tag.ok{background:var(--good-soft);color:var(--good)}
+.tag.risk{background:var(--warn-soft);color:var(--warn)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--f-mono);font-size:11.5px;display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:999px;
+  border:1px solid var(--line);background:var(--panel-2);color:var(--ink);cursor:pointer}
+.chip i{width:14px;height:6px;border-radius:3px;border:1px solid #0007;display:block}
+.chip.dash{border-style:dashed}
+ol,ul{margin:0;padding-left:1.25em}
+li{margin-bottom:.45em}
+table{border-collapse:collapse;width:100%;font-size:.93em}
+td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim)}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tw{overflow-x:auto}
+.warn{background:var(--warn-soft);border-left:3px solid var(--warn);padding:10px 12px;border-radius:0 4px 4px 0;margin:12px 0 0}
+.small{font-size:.9em;color:var(--ink-dim)}
+.back{font-family:var(--f-mono);font-size:12px;color:var(--accent);text-decoration:none}
+.checks li{list-style:none;margin-left:-1.25em;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:baseline}
+@media (prefers-reduced-motion:no-preference){svg .hl{transition:opacity .15s}}
+</style>
+
+<div class="wrap">
+  <a class="back" href="index.html">← Sheets 1–2 · architecture, schematic and pinout</a>
+  <header>
+    <div class="eyebrow">ePWT · CAN logger → vehicle control unit · 38-pin ESP32 DevKitC · revision C, 6-Nov-2026: IMU on the board, wheel filter C9 (DEC-008) · B, 5-Nov: throttle at 3.3 V with RC filter</div>
+    <h1>VCU perfboard</h1>
+    <p class="lede">Today's ESP32, CAN module, microSD and wheel, plus the control unit's throttle, brakes and IMU,
+      <b>at real scale: each dot is a 2.54 mm hole</b>. Tap a wire or a part to see what it is and why it is there.
+      No module gets desoldered: the SD stands upright on its side pins and the CAN sits on standoffs, with a cable.</p>
+  </header>
+
+  <div class="controls" role="group" aria-label="View">
+    <button id="bPlan" aria-pressed="true">Control unit (dashed)</button>
+    <button id="bGhost" aria-pressed="false">Transparent modules</button>
+    <button id="bFlip" aria-pressed="false">View from below (solder side)</button>
+    <button id="bDims" aria-pressed="false">Dimensions</button>
+  </div>
+
+  <div class="stage"><svg id="board" role="img" aria-label="Perfboard layout drawing"></svg>
+    <div class="hint" id="hint">View from above (component side). The wires run under the board.</div></div>
+
+  <div class="grid2">
+    <div class="card" id="info" aria-live="polite"></div>
+    <div class="card">
+      <h2>Wires</h2>
+      <div class="chips" id="chips"></div>
+      <p class="small" style="margin-top:10px">Grey track with a coloured line = bare copper wire (buses only).
+        Coloured wire = insulated wire: it can cross over another one. Dashed = control unit, soldered later.</p>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>The modules, nothing desoldered</h2>
+      <ul>
+        <li><b>microSD: standing.</b> Its pins come out sideways (right angle). They plug as they are into a straight female header soldered on the board, and the module stands vertical, like a card in a slot. It takes a single row, rises 42 mm and the card goes in from the top. If the pins end up reversed from the drawing, turn the module 180°: the order flips.</li>
+        <li><b>CAN: lying on standoffs, with a cable.</b> Its pins face up, so it cannot be plugged in. It sits on 4 nylon 10 mm standoffs (if your module has no holes, thick double-sided tape). From its 7 pins a ribbon of 7 female-female 10 cm dupont wires, all together, goes to a male header on the board. A drop of hot glue at each end so they don't come loose.</li>
+        <li><b>ESP32: plugged</b> into two 19-pin female headers, with the rows 10 holes apart.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>The IMU goes on the board (DEC-008)</h2>
+      <p>Changed on 6-nov. Until then the IMU sat on the chassis at the end of a cable. <b>An I2C cable is an antenna</b> next to the VESC: open-drain and single-ended, so noise corrupts bits or locks the bus. On the board there is no cable.</p>
+      <ul>
+        <li><b>Where:</b> a 1×8 female socket at column 36, rows 6–13, right of the ESP32. Four pins are wired: VCC, GND, SCL, SDA.</li>
+        <li><b>Pin order:</b> drawn as VCC, GND, SCL, SDA, SDO, CS, INT1, INT2. <b>Check your module's silkscreen before soldering</b> and move the wires if it differs.</li>
+        <li><b>SDO and CS:</b> for I2C at 0x6A, SDO goes to GND and CS to 3V3. Most GY-LSM6DS3 modules do this on board: check with the multimeter. If yours doesn't, bridge them on the module.</li>
+        <li><b>Pull-ups:</b> the module usually carries its own (often 10 kΩ). With no cable, at 100 kHz, they are enough. Only if it has none, add 4.7 kΩ to 3V3 (R8, R9 on sheet 2).</li>
+        <li><b>The box is now the IMU's mount:</b> bolt the VCU box rigidly to the chassis, near the middle of the quad, with no rubber or foam. Mark X forward and Z up on the box, so the code does not have to rotate anything.</li>
+        <li><b>Soldering its pins without breaking it:</b> pins pushed into the breadboard, module on top, fine tip at ~330 °C and 2 seconds per pin. Never lever with the iron.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>Build order</h2>
+      <ol>
+        <li><b>Mark the board.</b> 9×15 cm double-sided: the layout takes 44×34 holes (112×86 mm). Cut off the rest or leave it as margin.</li>
+        <li><b>Sockets:</b> 2×19 female for the ESP32, 1×6 female for the SD and 1×7 male for the CAN cable. Solder with the module plugged in, so they stay straight.</li>
+        <li><b>Terminal blocks on the edges,</b> screws facing out.</li>
+        <li><b>Bare buses:</b> GND (row 2), +5 V (row 4) and +3.3 V (row 6). Ground continues along the left edge and the bottom.</li>
+        <li><b>Test with nothing plugged in:</b> continuity between +5 V and GND, and between +3.3 V and GND. <b>It must not beep.</b></li>
+        <li><b>Power to each socket</b> and capacitors C6, C7 and C8. DC-DC to J1: measure 5.3 V on the ESP32's 5V pin, on the CAN's VCC and on the SD's, still without modules.</li>
+        <li><b>CAN SPI</b> with R1 and R2, and <b>SD SPI</b>. Short wires, flat against the board.</li>
+        <li><b>Wheel:</b> J3 and R3.</li>
+        <li><b>Plug in the modules</b> and record with the wheel turned by hand. Then with throttle: 0 corrupt frames, as in EXP-002.</li>
+        <li><b>Later:</b> J2 and J4 with their resistors, the IMU socket and its 4 wires, and C9 (1 nF) on the wheel input. The holes are already reserved.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h2>What this board needs</h2>
+      <div class="tw"><table>
+        <thead><tr><th>Part</th><th>Qty</th><th>For</th></tr></thead>
+        <tbody>
+          <tr><td>Perfboard 9×15 cm, double-sided</td><td class="n">2</td><td>the board, and a spare</td></tr>
+          <tr><td>Female pin header 1×40</td><td class="n">3</td><td>ESP32 (19+19), SD (6), IMU socket (8)</td></tr>
+          <tr><td>Male pin header 1×40</td><td class="n">1</td><td>CAN cable (7)</td></tr>
+          <tr><td>Screw terminal 5.08 mm, 2-pole</td><td class="n">1</td><td>J1 (J6 for the IMU is gone)</td></tr>
+          <tr><td>Screw terminal 5.08 mm, 3-pole</td><td class="n">4</td><td>J3, J5 today; J2, J4 later</td></tr>
+          <tr><td>Bare tinned copper wire 0.6 mm</td><td class="n">1 m</td><td>buses</td></tr>
+          <tr><td>Insulated solid wire 22 AWG, colours</td><td class="n">1 kit</td><td>everything else</td></tr>
+          <tr><td>Dupont female-female 10 cm (ribbon)</td><td class="n">7 wires</td><td>CAN to the board</td></tr>
+          <tr><td>Nylon standoffs M3 10 mm</td><td class="n">kit</td><td>CAN, board in the box</td></tr>
+          <tr><td>Shielded cable, 4 wires</td><td class="n">1 m</td><td>to the wheel Hall (bought). Shield to GND at the board only</td></tr>
+          <tr><td>Ceramic 1 nF</td><td class="n">1</td><td>C9, wheel input (to buy)</td></tr>
+          <tr><td>Resistors 1 kΩ, 2 kΩ, 10 kΩ</td><td class="n">1, 1, 1</td><td>R1, R2, R3 (you have them)</td></tr>
+          <tr><td>Ceramic 100 nF</td><td class="n">2 (+4)</td><td>C7, C8 (C2–C4 and the IMU's)</td></tr>
+          <tr><td>Electrolytic 220 µF</td><td class="n">1</td><td>C6 (you have it)</td></tr>
+          <tr><td>Later: 1 kΩ ×1, 100 kΩ ×1, 10 kΩ ×2</td><td class="n">4</td><td>R4 (filter), R5 (pull-down), R6–R7</td></tr>
+          <tr><td>Sealed ABS box ~150×110×70</td><td class="n">1</td><td>at least 60 mm tall inside</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Electrical review</h2>
+    <ul class="checks">
+      <li><span class="tag ok">ok</span><span><b>Every pin, against Espressif's documentation.</b> Left column from 3V3 to 5V and right from GND to CLK, as on the ESP32-DevKitC V4. They match vcu-pinout.md: wheel 34, throttle 35, brakes 32/33, CAN 14/13/27/26, SD 18/19/23/5, IMU 21/22.</span></li>
+      <li><span class="tag ok">ok</span><span><b>No ESP32 input sees 5 V.</b> The CAN's SO comes down through R1/R2 to 3.3 V; the throttle is powered at 3.3 V (2.60 V maximum measured); the pull-ups go to +3.3 V. The SD module has its own regulator and its outputs are already 3.3 V.</span></li>
+      <li><span class="tag ok">ok</span><span><b>Delicate pins left free.</b> 12 without a pull-up (otherwise it won't boot), 6 to 11 untouched (flash memory), 1 and 3 for USB. 5 is a strapping pin, but CS rests high.</span></li>
+      <li><span class="tag ok">ok</span><span><b>Analog inputs on ADC1</b> (35 and the free 36/39): ADC2 doesn't read with Wi-Fi on.</span></li>
+      <li><span class="tag ok">ok</span><span><b>A single ground,</b> which touches the vehicle only through J5 (DEC-004). The board floats on its 12 V battery.</span></li>
+      <li><span class="tag ok">ok</span><span><b>Filtering:</b> 220 µF at the input and 100 nF next to each module and each sensor.</span></li>
+      <li><span class="tag risk">risk</span><span><b>The CAN module gets 3.3 V on its SPI inputs while powered at 5 V.</b> If the MCP2515's input threshold is 85 % of its supply (that is how I remember it, but I couldn't check it in the datasheet), 3.3 V is below what the manufacturer guarantees. It works: EXP-002 recorded 33,783 frames without an error. If odd errors ever show up, it is the first thing to look at.</span></li>
+      <li><span class="tag risk">to measure</span><span><b>Consumption:</b> ESP32 with Wi-Fi (~250 mA peaks), CAN (~70 mA) and SD writing (~100 mA peaks) add up to ~0.5 A. Check that your DC-DC gives at least 1 A.</span></li>
+      <li><span class="tag risk">to measure</span><span><b>Interference (DEC-008):</b> the box under the chassis plate, cables leaving on the side away from the VESC; CAN twisted with its GND; the wheel Hall on the shielded cable, shield to GND <b>at the board only</b>; IMU on the board, no cable. Measured in EXP-004.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>What if I have the board made?</h2>
+    <p><b>It is doable and cheap.</b> It is designed in <b>KiCad</b> (free) and ordered from a maker like JLCPCB: 5 two-layer boards up to 100×100 mm cost about $2, plus $10–15 shipping to Spain and sometimes import VAT. They arrive in 1–2 weeks.</p>
+    <ul>
+      <li><b>For:</b> no wires coming loose and no crossings, smaller (fits in 100×100 mm) and repeatable. And <b>designing a PCB in KiCad is a skill systems engineering jobs in robotics ask for</b>: it goes in the portfolio.</li>
+      <li><b>Against:</b> 2–4 design sessions and 1–2 weeks of waiting, and if there is a mistake, another round. And the control unit circuit (throttle, brakes, IMU) hasn't been tested yet.</li>
+      <li><b>My recommendation:</b> perfboard now, so the logger records straight away and the full circuit gets tested. The PCB, once the control unit works on the perfboard: you move to KiCad something you already know works.</li>
+      <li><b>A question for then:</b> the ESP32 already has a CAN controller inside (it is called TWAI; it is what VESC Express uses). With a 3.3 V transceiver like the SN65HVD230 (~€2) the MCP2515 would not be needed: no SPI, no divider and none of the level risk above. It would change the firmware's <span class="mono">can_rx</span> module. We decide it together before designing the PCB.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function(){
+const W=44,H=34,P=17,ML=46,MT=50,MR=34,MB=40;
+const VW=ML+(W-1)*P+MR, VH=MT+(H-1)*P+MB;
+let flip=false, showPlan=true, ghost=false, dims=false, sel=null;
+const X=x=>ML+(flip?(W-1-x):x)*P, Y=y=>MT+y*P;
+
+const NETS={
+ GND:{n:'GND · ground',c:'#1d1d1d',d:'A single node: top bus (row 2), spine along the left edge and bottom rail, all bare wire. It touches the vehicle only through J5, the CAN cable GND: the board floats on its 12 V battery (DEC-004).'},
+ V5:{n:'+5 V',c:'#d63a2c',d:'5.3 V from the DC-DC, powered by the separate 12 V battery. Never from the 13S pack. Bare bus on row 4; it reaches the ESP32 through an insulated wire along the left edge to its 5V pin. It powers the CAN, the SD and the wheel.'},
+ V33:{n:'+3.3 V',c:'#f08c1a',d:'Comes from the ESP32 regulator (3V3 pin, top left) to the bus on row 6. For the pull-ups, the IMU and the throttle (since 5-Nov). An ESP32 input is never pulled to 5 V: it does not tolerate it.'},
+ CSCK:{n:'CAN · SCK',c:'#c99700',g:'GPIO 14',d:'SPI clock of the CAN module (HSPI, 4 MHz). Straight, 5 holes: the shortest wire on the board.'},
+ CSI:{n:'CAN · SI',c:'#2d6fd8',g:'GPIO 13',d:'Data from the ESP32 to the MCP2515.'},
+ CSO:{n:'CAN · SO (0–5 V)',c:'#2e9e4c',d:'Data from the MCP2515 to the ESP32. The module runs at 5 V, so this line goes up to 5 V: it goes into R1 before reaching the ESP32.'},
+ CSON:{n:'CAN · SO at 3.3 V',c:'#86d39a',g:'GPIO 27',d:'After the divider R1 1 kΩ / R2 2 kΩ: 5 V × 2/3 = 3.3 V. It is the fix that already works on the bench.'},
+ CCS:{n:'CAN · CS',c:'#8a52d6',g:'GPIO 26',d:'CAN chip select.'},
+ DSCK:{n:'SD · SCK',c:'#c99700',g:'GPIO 18',d:'SPI clock of the microSD (VSPI). It goes up one hole from the ESP32 to the SD.'},
+ DMOSI:{n:'SD · MOSI',c:'#2d6fd8',g:'GPIO 23',d:'Data from the ESP32 to the card. The only long wire on the right side: GPIO 23 is at the top of the column.'},
+ DMISO:{n:'SD · MISO',c:'#2e9e4c',g:'GPIO 19',d:'Data from the card to the ESP32. Straight, on the same row. The module has its own 3.3 V regulator: no divider needed.'},
+ DCS:{n:'SD · CS',c:'#8a52d6',g:'GPIO 5',d:'Card select. GPIO 5 is a strapping pin, but it does no harm because CS rests high.'},
+ WHL:{n:'Wheel',c:'#13a3b6',g:'GPIO 34',d:'Front wheel 3144 Hall, open collector. R3 10 kΩ to 3.3 V, because GPIO 34 has no internal pull-up. Its 100 nF capacitor (C1) sits next to the sensor, not on the board. On the board, C9 1 nF to GND at the pin (DEC-008): it kills the switching spikes and keeps the edges sharp; 100 nF would blur the pulse timing.'},
+ THRI:{n:'Throttle (0.80–2.60 V)',c:'#d9469c',plan:1,d:'Output of the Hall throttle, powered at 3.3 V (measured 5-Nov: 0.80 V at rest, 2.60 V fully open). No divider needed. It goes into the RC filter before the ESP32.'},
+ THR:{n:'Filtered throttle',c:'#f29bcd',g:'GPIO 35',plan:1,d:'R4 1 kΩ in series and C2 100 nF to ground: a 1.6 kHz filter, which attenuates the inverter 30 kHz about 19 times before the ADC. R5 100 kΩ to ground: if the cable breaks, the pin falls to 0 V and the code sets zero torque. ADC1, because ADC2 does not read with Wi-Fi on.'},
+ BRL:{n:'Front brake',c:'#a4d94a',g:'GPIO 32',plan:1,d:'Switch to ground, normally open (measured 2-Nov): it closes only when braking. R7 10 kΩ to 3.3 V and C4 100 nF to ground; 10–20 ms debounce in code. If the cable breaks, it reads «not braking».'},
+ BRR:{n:'Rear brake (not connected)',c:'#5c8f1f',g:'GPIO 33',plan:1,d:'Reserved. Its switch is faulty, so for now it is not wired: R6 and C3 can stay unsoldered. A rear lock-up still shows in the log, because its speed is the motor speed.'},
+ SDA:{n:'IMU · SDA',c:'#f5f5f5',g:'GPIO 21',plan:1,d:'The ESP32\'s default I2C data pin, to the IMU socket on the board: about 3 cm of wire, no cable (DEC-008). The module usually has its own pull-ups; only if not, add 4.7 kΩ to 3V3.'},
+ SCL:{n:'IMU · SCL',c:'#8f969e',g:'GPIO 22',plan:1,d:'I2C clock, at 100 kHz. Firmware: bus-lockup recovery (up to 9 clock pulses) and an I2C error counter in the log.'},
+ CANH:{n:'CAN H',c:'#ffd23f',d:'To the CAH pin of the VESC. Twisted with L. The 120 Ω termination is the J1 jumper on the module itself.'},
+ CANL:{n:'CAN L',c:'#3cb44b',d:'To the CAL pin of the VESC.'}
+};
+
+const WIRES=[
+ {n:'GND',b:1,p:[[1,0],[1,33],[22,33]]},
+ {n:'GND',b:1,p:[[1,2],[42,2]]},
+ {n:'V5',b:1,p:[[2,4],[42,4]]},
+ {n:'V5',p:[[3,0],[3,4]]},
+ {n:'V33',b:1,p:[[4,6],[31,6]]},
+ {n:'V33',p:[[24,13],[24,6]]},
+ {n:'V5',p:[[2,4],[2,31],[24,31]]},
+ {n:'GND',p:[[34,13],[34,2]]},
+ // CAN: board header at x=19, module on standoffs to the left
+ {n:'V5',p:[[19,29],[19,31]]},
+ {n:'GND',p:[[19,28],[18,28],[18,33]]},
+ {n:'CSCK',p:[[19,24],[24,24]]},
+ {n:'CCS',p:[[19,27],[21,27],[21,22],[24,22]]},
+ {n:'CSI',p:[[19,25],[22,25],[22,27],[24,27]]},
+ {n:'CSO',p:[[19,26],[20,26]]},
+ {n:'CSON',b:1,p:[[20,30],[23,30]]},
+ {n:'CSON',p:[[23,30],[23,23],[24,23]]},
+ {n:'GND',b:1,p:[[0,27],[1,27]]},
+ {n:'CANH',fly:1,p:[[0,23],[2.6,24.2]]},
+ {n:'CANL',fly:1,p:[[0,25],[2.6,26]]},
+ // wheel
+ {n:'GND',p:[[19,0],[19,2]]},
+ {n:'V5',p:[[21,0],[21,4]]},
+ {n:'WHL',p:[[23,0],[23,17],[24,17]]},
+ {n:'WHL',p:[[22,10],[23,10]]},
+ // brakes
+ {n:'GND',plan:1,p:[[7,0],[7,14]]},
+ {n:'BRR',plan:1,p:[[5,0],[5,20],[24,20]]},
+ {n:'BRL',plan:1,p:[[9,0],[9,19],[24,19]]},
+ {n:'BRR',plan:1,p:[[4,10],[5,10]]},
+ {n:'BRL',plan:1,p:[[10,10],[9,10]]},
+ // throttle
+ {n:'GND',plan:1,p:[[12,0],[12,15]]},
+ {n:'V33',plan:1,p:[[16,0],[16,6]]},
+ {n:'THRI',plan:1,p:[[14,0],[14,8]]},
+ {n:'THR',plan:1,p:[[14,12],[14,18],[24,18]]},
+ // SD, standing in a 1x6 socket at x=39, rows 18..23
+ {n:'GND',p:[[39,18],[40,18],[40,2]]},
+ {n:'V5',p:[[39,19],[41,19],[41,4]]},
+ {n:'DMISO',p:[[34,20],[39,20]]},
+ {n:'DMOSI',p:[[34,14],[38,14],[38,21],[39,21]]},
+ {n:'DSCK',p:[[34,21],[37,21],[37,22],[39,22]]},
+ {n:'DCS',p:[[34,22],[36,22],[36,23],[39,23]]},
+ // IMU socket on the board, column 36 rows 6-13 (DEC-008)
+ {n:'V33',plan:1,p:[[31,6],[36,6]]},
+ {n:'GND',plan:1,p:[[36,7],[35,7],[35,2]]},
+ {n:'SCL',plan:1,p:[[34,15],[37,15],[37,8],[36,8]]},
+ {n:'SDA',plan:1,p:[[34,18],[35,18],[35,9],[36,9]]},
+ // wheel input filter C9
+ {n:'WHL',plan:1,p:[[22,12],[23,12]]},
+ {n:'GND',plan:1,p:[[20,12],[20,2]]}
+];
+
+const RES={'1 kΩ':['#7b4a1e','#111','#d33'],'2 kΩ':['#d33','#111','#d33'],'10 kΩ':['#7b4a1e','#111','#f08c1a'],'12 kΩ':['#7b4a1e','#d33','#f08c1a'],'100 kΩ':['#7b4a1e','#111','#f5c400']};
+const PARTS=[
+ {id:'R1',t:'r',a:[20,26],b:[20,30],v:'1 kΩ',nets:['CSO','CSON'],d:'Upper half of the SO divider. With R2 it brings the MCP2515 5 V down to 3.3 V.'},
+ {id:'R2',t:'r',a:[22,30],b:[22,33],v:'2 kΩ',nets:['CSON','GND'],d:'Lower half of the SO divider, to ground (bottom rail).'},
+ {id:'R3',t:'r',a:[22,6],b:[22,10],v:'10 kΩ',nets:['V33','WHL'],d:'Wheel pull-up to 3.3 V. The 3144 Hall only pulls to ground: without this resistor the pin floats.'},
+ {id:'C6',t:'e',a:[27,2],b:[27,4],v:'220 µF',nets:['GND','V5'],d:'Reservoir on +5 V for the ESP32 Wi-Fi peaks (~250 mA). The stripe of the electrolytic (−) to GND.'},
+ {id:'C7',t:'c',a:[40,16],b:[41,16],v:'100 nF',nets:['GND','V5'],d:'SD filter, right by its socket: it removes the fast noise the 220 µF does not see.'},
+ {id:'C8',t:'c',a:[18,30],b:[19,30],v:'100 nF',nets:['GND','V5'],d:'CAN module filter, next to its cable header.'},
+ {id:'R4',t:'r',a:[14,8],b:[14,12],v:'1 kΩ',plan:1,nets:['THRI','THR'],d:'Series resistor of the throttle RC filter. With C2 it cuts at 1.6 kHz.'},
+ {id:'R5',t:'r',a:[14,13],b:[12,13],v:'100 kΩ',plan:1,nets:['THR','GND'],d:'Pull-down: if the cable breaks, the pin falls to 0 V and the code sets zero torque. High enough not to load the throttle: check that rest and full-open move less than 10 mV when fitting it. Mounted standing.'},
+ {id:'C2',t:'c',a:[14,15],b:[12,15],v:'100 nF',plan:1,nets:['THR','GND'],d:'RC filter capacitor (1 kΩ · 100 nF = 0.1 ms): removes the inverter noise without the rider noticing. As close to the pin as possible.'},
+ {id:'R6',t:'r',a:[4,6],b:[4,10],v:'10 kΩ',plan:1,nets:['V33','BRR'],d:'Rear brake pull-up. Optional while it is not connected.'},
+ {id:'R7',t:'r',a:[10,6],b:[10,10],v:'10 kΩ',plan:1,nets:['V33','BRL'],d:'Front brake pull-up. The internal one (~45 kΩ) is weak for a long cable next to the VESC.'},
+ {id:'C3',t:'c',a:[5,12],b:[7,12],v:'100 nF',plan:1,nets:['BRR','GND'],d:'Rear brake filter; optional while it is not connected.'},
+ {id:'C4',t:'c',a:[9,13],b:[7,13],v:'100 nF',plan:1,nets:['BRL','GND'],d:'Front brake filter.'},
+ {id:'C9',t:'c',a:[22,12],b:[20,12],v:'1 nF',plan:1,nets:['WHL','GND'],d:'Wheel input filter (DEC-008): with R3 10 kΩ, τ = 10 µs, corner 16 kHz. The wheel sends ~115 pulses/s at 40 km/h, so the pulses pass untouched and the switching spikes do not. Ground wire straight to the GND bus.'}
+];
+
+const TERMS=[
+ {id:'J1',pins:[[1,0],[3,0]],lab:['GND','+5V'],nets:['GND','V5'],side:'top',name:'J1 · 5 V',d:'DC-DC output: 5.3 V and GND. The DC-DC and its 12 V battery sit off the board, screwed into the box.'},
+ {id:'J4',pins:[[5,0],[7,0],[9,0]],lab:['REAR','GND','FRNT'],nets:['BRR','GND','BRL'],plan:1,side:'top',name:'J4 · brakes',d:'Switches to ground, normally open. Today only the front one (FRNT) is connected; the rear one is faulty and its terminal stays free.'},
+ {id:'J2',pins:[[12,0],[14,0],[16,0]],lab:['GND','SIG','+3V3'],nets:['GND','THRI','V33'],plan:1,side:'top',name:'J2 · throttle',d:'The Hall throttle, powered at 3.3 V. Before connecting it here, disconnect it completely from the VESC ADC: never two ground paths.'},
+ {id:'J3',pins:[[19,0],[21,0],[23,0]],lab:['GND','+5V','SIG'],nets:['GND','V5','WHL'],side:'top',name:'J3 · wheel',d:'Front wheel 3144 Hall (10 magnets). Already fitted on the quad.'},
+ {id:'J5',pins:[[0,23],[0,25],[0,27]],lab:['H','L','GND'],nets:['CANH','CANL','GND'],side:'left',name:'J5 · CAN to the VESC',d:'A single connector to the VESC: CAH, CAL and its − (GND). H and L jump to the terminal on the module itself. The 5V pin of the VESC is not used.'}
+];
+
+const ESP_L=['3V3','EN','VP','VN','34','35','32','33','25','26','27','14','12','GND','13','D2','D3','CMD','5V'];
+const ESP_R=['GND','23','22','TX','RX','21','GND','19','18','5','17','16','4','0','2','15','D1','D0','CLK'];
+const USED=new Set(['3V3','34','35','32','33','26','27','14','13','5V','23','22','21','19','18','5']);
+const MODS=[
+ {id:'ESP',name:'ESP32 DevKitC (38 pins)',x0:23.5,x1:34.5,y0:10.4,y1:32.1,c:'#20262d',d:'Plugged into two 19-pin female headers, rows 10 holes apart (25.4 mm). 55×28 mm. The USB faces the bottom edge so it can be programmed in place. Pin order checked against the Espressif DevKitC V4 guide.'},
+ {id:'MCP',name:'MCP2515 + TJA1050',x0:1.3,x1:18.4,y0:20.5,y1:31.5,c:'#1e4f9c',d:'44×28 mm, lying on 4 nylon 10 mm standoffs, with its pins facing up as they come. A 7-wire female-female 10 cm dupont cable goes from its pins to the male header on the board (column 19). It runs at 5 V because the TJA1050 needs at least 4.75 V.'},
+ {id:'IMU',name:'IMU GY-LSM6DS3',plan:1,x0:35.4,x1:41.6,y0:5.4,y1:13.6,c:'#5b2a86',d:'Plugged into a 1×8 female socket at column 36, rows 6–13, lying flat over the board (DEC-008). Only VCC, GND, SCL and SDA are wired. Pin order drawn as VCC, GND, SCL, SDA, SDO, CS, INT1, INT2: check your module\'s silkscreen first. SDO to GND and CS to 3V3 for I2C at 0x6A, usually already done on the module. The wires underneath (SD power, CAN) do not touch it.'},
+ {id:'SD',name:'microSD, standing',x0:39.1,x1:40.4,y0:15.8,y1:25.2,c:'#2a3f7a',d:'Its pins come out sideways: they plug into a straight 6-pin female header (column 39, rows 18–23) and the module stands vertical, like a card in a slot. It rises 42 mm; the card goes in from the top. Order top to bottom: GND, VCC, MISO, MOSI, SCK, CS. If yours ends up reversed, turn it 180°.'}
+];
+
+function el(t,a,inner){let s='<'+t;for(const k in a)if(a[k]!==undefined&&a[k]!==null)s+=' '+k+'="'+a[k]+'"';return s+(inner===undefined?'/>':'>'+inner+'</'+t+'>');}
+const vis=o=>showPlan||!o.plan;
+function dimOf(netList,id){ if(!sel)return 1;
+  if(sel.k==='net') return netList.includes(sel.v)?1:.13;
+  return id===sel.v?1:.13; }
+const MONO='IBM Plex Mono,monospace';
+const txt=(x,y,t,o)=>el('text',Object.assign({x,y,'font-family':MONO},o),t);
+
+function drawModules(){
+  let mods='';
+  for(const m of MODS){ if(!vis(m))continue;
+    const op=dimOf([],m.id)*(ghost?.28:1)*(m.plan?.9:1);
+    const x0=Math.min(X(m.x0),X(m.x1)), x1=Math.max(X(m.x0),X(m.x1)), cx=(x0+x1)/2;
+    let g='';
+    if(m.id==='ESP'){
+      g+=el('rect',{x:x0,y:Y(m.y0),width:x1-x0,height:Y(m.y1)-Y(m.y0),rx:4,fill:m.c,stroke:'#0008'});
+      g+=el('rect',{x:Math.min(X(25.6),X(32.4)),y:Y(10.9),width:Math.abs(X(32.4)-X(25.6)),height:Y(17.3)-Y(10.9),rx:2,fill:'#b9bec4',stroke:'#7d838a'});
+      g+=txt(cx,Y(14.6),'ESP32-WROOM-32',{'text-anchor':'middle','font-size':11,fill:'#2b3036','font-weight':600});
+      g+=el('rect',{x:cx-14,y:Y(31.2),width:28,height:Y(32.9)-Y(31.2),rx:2,fill:'#c4c8cc',stroke:'#7d838a'});
+      g+=txt(cx,Y(30.1),'USB ↓',{'text-anchor':'middle','font-size':10,fill:'#d6dbe0'});
+      if(!ghost){
+        ESP_L.forEach((n,i)=>{g+=txt(X(24)+(flip?-9:9),Y(13+i)+3.5,n,{'text-anchor':flip?'end':'start','font-size':9,fill:USED.has(n)?'#ffd9a8':'#7d8790'});});
+        ESP_R.forEach((n,i)=>{g+=txt(X(34)+(flip?9:-9),Y(13+i)+3.5,n,{'text-anchor':flip?'start':'end','font-size':9,fill:USED.has(n)?'#ffd9a8':'#7d8790'});});
+      }
+      for(let i=0;i<19;i++) for(const px of [24,34]) g+=el('rect',{x:X(px)-4.5,y:Y(13+i)-4.5,width:9,height:9,rx:1.5,fill:'#111',stroke:'#444'});
+    }
+    if(m.id==='MCP'){
+      g+=el('rect',{x:x0,y:Y(m.y0),width:x1-x0,height:Y(m.y1)-Y(m.y0),rx:4,fill:m.c,stroke:'#0008'});
+      for(const s of [[2,21.3],[17.6,21.3],[2,30.7],[17.6,30.7]]) g+=el('circle',{cx:X(s[0]),cy:Y(s[1]),r:5,fill:'#ece6d6',stroke:'#8b8576'});
+      g+=el('rect',{x:Math.min(X(8),X(12)),y:Y(23.4),width:Math.abs(X(12)-X(8)),height:Y(27.6)-Y(23.4),rx:2,fill:'#15171a'});
+      g+=txt((X(8)+X(12))/2,Y(25.8),'MCP2515',{'text-anchor':'middle','font-size':9,fill:'#cfd6de'});
+      g+=el('rect',{x:Math.min(X(13.3),X(16)),y:Y(22),width:Math.abs(X(16)-X(13.3)),height:Y(24.4)-Y(22),rx:2,fill:'#15171a'});
+      g+=txt((X(13.3)+X(16))/2,Y(23.5),'TJA1050',{'text-anchor':'middle','font-size':7.5,fill:'#cfd6de'});
+      g+=el('ellipse',{cx:X(14.6),cy:Y(28.6),rx:15,ry:6,fill:'#c9ccd1',stroke:'#7d838a'});
+      g+=txt(X(14.6),Y(28.6)+3,'8 MHz',{'text-anchor':'middle','font-size':7,fill:'#333'});
+      g+=el('rect',{x:Math.min(X(1.7),X(3.5)),y:Y(23.2),width:Math.abs(X(3.5)-X(1.7)),height:Y(27)-Y(23.2),rx:2,fill:'#2f8a55',stroke:'#1d5a37'});
+      g+=el('circle',{cx:X(2.6),cy:Y(24.2),r:5,fill:'#c9ccd1',stroke:'#555'})+el('circle',{cx:X(2.6),cy:Y(26),r:5,fill:'#c9ccd1',stroke:'#555'});
+      g+=txt(X(4.6),Y(30.3),'J1 = 120 Ω fitted · M3 standoffs',{'text-anchor':flip?'end':'start','font-size':8,fill:'#cfd6de'});
+      // module's own upward pins on its right edge, and the 7-wire ribbon to the board header
+      for(let i=0;i<7;i++){
+        const yy=Y(23+i);
+        g+=el('rect',{x:X(17.4)-3.5,y:yy-3.5,width:7,height:7,rx:1,fill:'#e0c25a',stroke:'#6b5a1c'});
+        g+=el('path',{d:'M'+X(17.4)+' '+yy+' C'+X(18)+' '+(yy-9)+' '+X(18.6)+' '+(yy-9)+' '+X(19)+' '+yy,fill:'none',stroke:['#8a8f96','#c99700','#2d6fd8','#2e9e4c','#8a52d6','#1d1d1d','#d63a2c'][i],'stroke-width':2.6});
+        if(!ghost) g+=txt(X(17.4)+(flip?8:-8),yy+3.5,['INT','SCK','SI','SO','CS','GND','VCC'][i],{'text-anchor':flip?'start':'end','font-size':8.5,fill:'#ffd9a8'});
+      }
+      g+=txt((x0+x1)/2,Y(m.y1)-6,m.name,{'text-anchor':'middle','font-size':10,fill:'#e9edf1','font-weight':600});
+    }
+    if(m.id==='IMU'){
+      g+=el('rect',{x:x0,y:Y(m.y0),width:x1-x0,height:Y(m.y1)-Y(m.y0),rx:3,fill:m.c,stroke:'#0008','stroke-dasharray':'6 4'});
+      for(let i=0;i<8;i++) g+=el('rect',{x:X(36)-4.5,y:Y(6+i)-4.5,width:9,height:9,rx:1.5,fill:'#111',stroke:'#444'});
+      if(!ghost) ['VCC','GND','SCL','SDA','SDO','CS','INT1','INT2'].forEach((n,i)=>{g+=txt(X(36)+(flip?-9:9),Y(6+i)+3.5,n,{'text-anchor':flip?'end':'start','font-size':8.5,fill:i<4?'#ffd9a8':'#b9a6cc'});});
+      g+=el('rect',{x:Math.min(X(38.6),X(40.4)),y:Y(8.6),width:Math.abs(X(40.4)-X(38.6)),height:Y(10.4)-Y(8.6),rx:2,fill:'#15171a'});
+      if(!flip&&!ghost){
+        g+=txt(x1-5,Y(7)+3.5,'IMU',{'text-anchor':'end','font-size':10,fill:'#efe6f7','font-weight':600});
+        g+=txt(x1-5,Y(11)+3,'X → front',{'text-anchor':'end','font-size':7.5,fill:'#d9c9ea'});
+      }
+    }
+    if(m.id==='SD'){
+      g+=el('rect',{x:x0,y:Y(m.y0),width:x1-x0,height:Y(m.y1)-Y(m.y0),rx:2,fill:m.c,stroke:'#0008'});
+      g+=el('rect',{x:x1-4,y:Y(m.y0)+6,width:4,height:Y(m.y1)-Y(m.y0)-12,fill:'#c9ccd1'});
+      for(let i=0;i<6;i++) g+=el('rect',{x:X(39)-4.5,y:Y(18+i)-4.5,width:9,height:9,rx:1.5,fill:'#111',stroke:'#444'});
+      if(!ghost) ['GND','VCC','MISO','MOSI','SCK','CS'].forEach((n,i)=>{g+=txt(X(39)+(flip?-50:50),Y(18+i)+3.5,n,{'text-anchor':flip?'end':'start','font-size':8.5,fill:'#2a1d0b','font-weight':600,'paint-order':'stroke',stroke:'#e8cf9f','stroke-width':3});});
+      const lx=X(39.6);
+      g+=txt(lx,Y(26.6),'microSD, standing',{'text-anchor':'middle','font-size':10,fill:'#2a1d0b','font-weight':600,'paint-order':'stroke',stroke:'#e8cf9f','stroke-width':3});
+      g+=txt(lx,Y(27.5)+2,'rises 42 mm · card on top',{'text-anchor':'middle','font-size':8.5,fill:'#2a1d0b','paint-order':'stroke',stroke:'#e8cf9f','stroke-width':3});
+    }
+    g+=el('rect',{x:x0-4,y:Y(m.y0)-4,width:x1-x0+8,height:Y(m.y1)-Y(m.y0)+8,fill:'transparent','data-part':m.id,style:'cursor:pointer'});
+    mods+=el('g',{class:'hl',opacity:op},g);
+  }
+  return mods;
+}
+
+function render(){
+  let s='';
+  s+=el('defs',{},'<pattern id="holes" width="'+P+'" height="'+P+'" patternUnits="userSpaceOnUse" x="'+(ML-P/2)+'" y="'+(MT-P/2)+'">'+
+     el('circle',{cx:P/2,cy:P/2,r:3.4,fill:'#b8792f'})+el('circle',{cx:P/2,cy:P/2,r:1.5,fill:'#3a2a18'})+'</pattern>');
+  const bx=ML-P/2, by=MT-P/2, bw=W*P, bh=H*P;
+  s+=el('rect',{x:bx,y:by,width:bw,height:bh,rx:6,fill:'#c8a165',stroke:'#8e6a35','stroke-width':1.5});
+  s+=el('rect',{x:bx,y:by,width:bw,height:bh,rx:6,fill:'url(#holes)'});
+  for(let x=0;x<W;x+=5) s+=txt(X(x),by-6,x,{'font-size':9,'text-anchor':'middle',fill:'#8e6a35'});
+  for(let y=0;y<H;y+=5) s+=txt(flip?bx+bw+12:bx-12,Y(y)+3,y,{'font-size':9,'text-anchor':'middle',fill:'#8e6a35'});
+
+  const mods=flip?'':drawModules();
+  if(ghost) s+=mods;
+
+  let under='',over='';
+  for(const w of WIRES){ if(!vis(w))continue;
+    const net=NETS[w.n], op=dimOf([w.n]), pts=w.p.map(q=>X(q[0])+','+Y(q[1])).join(' ');
+    let g='';
+    if(w.fly){
+      const a=w.p[0],b=w.p[1], ax=X(a[0]),ay=Y(a[1]),bx2=X(b[0]),by2=Y(b[1]);
+      const d='M'+ax+' '+ay+' C'+(ax+(flip?-24:24))+' '+(ay-6)+' '+(bx2+(flip?24:-24))+' '+(by2+6)+' '+bx2+' '+by2;
+      g+=el('path',{d,fill:'none',stroke:'#0009','stroke-width':6,'stroke-linecap':'round'})+el('path',{d,fill:'none',stroke:net.c,'stroke-width':4,'stroke-linecap':'round'});
+    } else if(w.b){
+      g+=el('polyline',{points:pts,fill:'none',stroke:'#cfd3d8','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'});
+      g+=el('polyline',{points:pts,fill:'none',stroke:net.c,'stroke-width':1.6,'stroke-linecap':'round','stroke-linejoin':'round'});
+    } else {
+      const dash=w.plan?'7 5':null;
+      g+=el('polyline',{points:pts,fill:'none',stroke:net.c==='#1d1d1d'?'#9a9a9a':'#000a','stroke-width':6.5,'stroke-linecap':'round','stroke-linejoin':'round','stroke-dasharray':dash});
+      g+=el('polyline',{points:pts,fill:'none',stroke:net.c,'stroke-width':4,'stroke-linecap':'round','stroke-linejoin':'round','stroke-dasharray':dash});
+    }
+    for(const q of [w.p[0],w.p[w.p.length-1]]) if(Number.isInteger(q[0])) g+=el('circle',{cx:X(q[0]),cy:Y(q[1]),r:3,fill:'#d9dde2',stroke:'#6b7076','stroke-width':.8});
+    g+=el('polyline',{points:pts,fill:'none',stroke:'transparent','stroke-width':14,'data-net':w.n,style:'cursor:pointer'});
+    if(w.b) under+=el('g',{class:'hl',opacity:op*(w.plan?.75:1)},g); else over+=el('g',{class:'hl',opacity:op*(w.plan?.8:1)},g);
+  }
+  s+=under+over;
+
+  // the CAN board header (male pins) is part of the board, always visible
+  for(let i=0;i<7;i++) s+=el('rect',{x:X(19)-3.5,y:Y(23+i)-3.5,width:7,height:7,rx:1,fill:'#e0c25a',stroke:'#6b5a1c'});
+
+  for(const p of PARTS){ if(!vis(p))continue;
+    const op=dimOf(p.nets,p.id)*(p.plan?.85:1);
+    const ax=X(p.a[0]),ay=Y(p.a[1]),bx2=X(p.b[0]),by2=Y(p.b[1]);
+    const L=Math.hypot(bx2-ax,by2-ay), ang=Math.atan2(by2-ay,bx2-ax)*180/Math.PI, cx=(ax+bx2)/2, cy=(ay+by2)/2;
+    let g=el('line',{x1:ax,y1:ay,x2:bx2,y2:by2,stroke:'#9aa0a6','stroke-width':1.6});
+    if(p.t==='r'){
+      if(L>2.5*P){
+        const bl=Math.min(L-12,34);
+        let body=el('rect',{x:-bl/2,y:-5,width:bl,height:10,rx:4,fill:'#e2c99a',stroke:'#8a6d3b'});
+        RES[p.v].forEach((c,i)=>{body+=el('rect',{x:-bl/2+5+i*5.5,y:-5,width:3,height:10,fill:c});});
+        body+=el('rect',{x:bl/2-8,y:-5,width:3,height:10,fill:'#c9a227'});
+        g+=el('g',{transform:'translate('+cx+' '+cy+') rotate('+ang+')'},body);
+      } else g+=el('circle',{cx:ax,cy:ay,r:6.5,fill:'#e2c99a',stroke:'#8a6d3b'});
+    } else if(p.t==='c'){
+      g+=el('ellipse',{cx,cy,rx:7,ry:5.5,fill:'#d9a33f',stroke:'#8a5e14'});
+    } else if(p.t==='e'){
+      g+=el('circle',{cx,cy,r:11,fill:'#1d3557',stroke:'#0c1a2c'})+el('path',{d:'M'+(cx-9)+' '+(cy-6)+' A11 11 0 0 1 '+(cx-9)+' '+(cy+6),fill:'none',stroke:'#cfd8e3','stroke-width':3});
+    }
+    for(const q of [p.a,p.b]) g+=el('circle',{cx:X(q[0]),cy:Y(q[1]),r:2.6,fill:'#d9dde2',stroke:'#6b7076','stroke-width':.8});
+    const vert=Math.abs(Math.abs(ang)-90)<1;
+    g+=txt(vert?cx+(flip?-13:13):cx,vert?cy+3:cy-9,p.id,{'text-anchor':'middle','font-size':9,fill:'#2a1d0b','font-weight':600,'paint-order':'stroke',stroke:'#e8cf9f','stroke-width':3});
+    g+=el('rect',{x:Math.min(ax,bx2)-9,y:Math.min(ay,by2)-9,width:Math.abs(bx2-ax)+18,height:Math.abs(by2-ay)+18,fill:'transparent','data-part':p.id,style:'cursor:pointer'});
+    s+=el('g',{class:'hl',opacity:op},g);
+  }
+
+  if(!ghost&&!flip) s+=mods;
+  if(flip){
+    for(const m of MODS){ if(!vis(m))continue; const x0=Math.min(X(m.x0),X(m.x1)),x1=Math.max(X(m.x0),X(m.x1));
+      s+=el('rect',{x:x0,y:Y(m.y0),width:x1-x0,height:Y(m.y1)-Y(m.y0),rx:4,fill:'none',stroke:'#20262d','stroke-width':1.5,'stroke-dasharray':'5 4','data-part':m.id,style:'cursor:pointer'});
+      s+=txt((x0+x1)/2,Y(m.y0)-5,m.id==='SD'?'SD':m.name,{'text-anchor':'middle','font-size':10,fill:'#3a2a18','font-weight':600});}
+  }
+
+  for(const t of TERMS){ if(!vis(t))continue;
+    const op=dimOf(t.nets,t.id)*(t.plan?.85:1); let g='';
+    if(t.side==='top'){
+      const xs=t.pins.map(p=>X(p[0])), x0=Math.min(...xs)-P*0.95, x1=Math.max(...xs)+P*0.95;
+      g+=el('rect',{x:x0,y:Y(0)-P*1.25,width:x1-x0,height:P*1.7,rx:3,fill:t.plan?'#5f9f78':'#2f8a55',stroke:'#1d5a37','stroke-dasharray':t.plan?'4 3':null});
+      t.pins.forEach((p,i)=>{g+=el('circle',{cx:X(p[0]),cy:Y(0)-P*0.55,r:5.5,fill:'#c9ccd1',stroke:'#555'});
+        g+=txt(X(p[0]),Y(0)+P*0.95,t.lab[i],{'text-anchor':'middle','font-size':8.5,fill:'#2a1d0b','font-weight':600,'paint-order':'stroke',stroke:'#d9b97f','stroke-width':3});});
+      g+=el('text',{x:(x0+x1)/2,y:Y(0)-P*1.45,'text-anchor':'middle','font-size':10,fill:'var(--ink)','font-family':MONO,'font-weight':600},t.name);
+      g+=el('rect',{x:x0,y:Y(0)-P*2.2,width:x1-x0,height:P*3.4,fill:'transparent','data-part':t.id,style:'cursor:pointer'});
+    } else {
+      const ys=t.pins.map(p=>Y(p[1])), y0=Math.min(...ys)-P*0.95, y1=Math.max(...ys)+P*0.95, xx=X(0);
+      const xl=flip?xx-P*0.45:xx-P*1.25;
+      g+=el('rect',{x:xl,y:y0,width:P*1.7,height:y1-y0,rx:3,fill:'#2f8a55',stroke:'#1d5a37'});
+      t.pins.forEach((p,i)=>{g+=el('circle',{cx:xx+(flip?P*0.55:-P*0.55),cy:Y(p[1]),r:5.5,fill:'#c9ccd1',stroke:'#555'});
+        g+=txt(xx+(flip?-P*0.85:P*0.85),Y(p[1])-6,t.lab[i],{'text-anchor':'middle','font-size':8,fill:'#2a1d0b','font-weight':600,'paint-order':'stroke',stroke:'#d9b97f','stroke-width':3});});
+      const tx=flip?xx+P*1.6:xx-P*1.6;
+      g+=el('text',{x:tx,y:(y0+y1)/2,'text-anchor':'middle','font-size':10,fill:'var(--ink)','font-family':MONO,'font-weight':600,transform:'rotate(-90 '+tx+' '+((y0+y1)/2)+')'},'J5 · to VESC');
+      g+=el('rect',{x:xl-P,y:y0,width:P*3,height:y1-y0,fill:'transparent','data-part':t.id,style:'cursor:pointer'});
+    }
+    s+=el('g',{class:'hl',opacity:op},g);
+  }
+
+  if(dims){
+    const c='#a33232', f=(x,y,t)=>txt(x,y,t,{'text-anchor':'middle','font-size':11,fill:c,'font-weight':600,'paint-order':'stroke',stroke:'#f3e5c8','stroke-width':3.5});
+    const yb=by+bh+18; s+=el('line',{x1:bx,y1:yb,x2:bx+bw,y2:yb,stroke:c,'stroke-width':1.4})+f(bx+bw/2,yb+14,'112 mm · 44 holes (from a 9×15 cm board)');
+    const xr=flip?bx-18:bx+bw+14; s+=el('line',{x1:xr,y1:by,x2:xr,y2:by+bh,stroke:c,'stroke-width':1.4});
+    s+=el('text',{x:xr+(flip?-6:6),y:by+bh/2,'text-anchor':'middle','font-size':11,fill:c,'font-family':MONO,'font-weight':600,transform:'rotate(90 '+(xr+(flip?-6:6))+' '+(by+bh/2)+')'},'86 mm · 34');
+    s+=f((X(23.5)+X(34.5))/2,Y(20.5),'55 × 28 mm')+f((X(23.5)+X(34.5))/2,Y(21.5)+4,'rows 25.4 mm apart');
+    s+=f((X(1.3)+X(18.4))/2,Y(21.9),'44 × 28 mm');
+    s+=el('line',{x1:X(19),y1:Y(32.6),x2:X(24),y2:Y(32.6),stroke:c,'stroke-width':1.4})+f((X(19)+X(24))/2,Y(33.15)+4,'12.7 mm');
+    s+=el('line',{x1:X(34),y1:Y(29.6),x2:X(39),y2:Y(29.6),stroke:c,'stroke-width':1.4})+f((X(34)+X(39))/2+20,Y(30.5)+3,'12.7 mm');
+  }
+  const svg=document.getElementById('board');
+  svg.setAttribute('viewBox',(flip?-16:0)+' 0 '+(VW+16)+' '+VH);
+  svg.innerHTML=s;
+}
+
+function info(){
+  const box=document.getElementById('info');
+  if(!sel){box.innerHTML='<h3>Tap something</h3><p>A wire, a part, a module or a terminal. It lights up with everything joined to it, and here you get what it is and why it is there.</p><p class="small">To see the wires under the CAN and the ESP32, turn on <b>Transparent modules</b>. For soldering, <b>View from below</b>: it is what you will see when you turn the board over, mirrored.</p>';return;}
+  let h='';
+  if(sel.k==='net'){const n=NETS[sel.v];
+    h='<h3><span class="sw" style="background:'+n.c+'"></span>'+n.n+'</h3>'+(n.g?'<span class="tag">'+n.g+'</span>':'')+(n.plan?'<span class="tag plan">control unit, later</span>':'<span class="tag">today</span>')+'<p>'+n.d+'</p>';}
+  else{const p=PARTS.find(x=>x.id===sel.v)||TERMS.find(x=>x.id===sel.v)||MODS.find(x=>x.id===sel.v);
+    const name=p.name||(p.id+' · '+p.v);
+    h='<h3>'+name+'</h3>'+(p.plan?'<span class="tag plan">control unit, later</span>':'<span class="tag">today</span>')+'<p>'+p.d+'</p>';
+    if(p.nets) h+='<p class="small">Joins: '+[...new Set(p.nets)].map(k=>NETS[k].n).join(' · ')+'</p>';}
+  box.innerHTML=h;
+}
+function chips(){
+  document.getElementById('chips').innerHTML=Object.entries(NETS).filter(([k,n])=>showPlan||!n.plan)
+    .map(([k,n])=>'<button class="chip'+(n.plan?' dash':'')+'" data-net="'+k+'"><i style="background:'+n.c+'"></i>'+n.n+'</button>').join('');
+}
+function all(){render();info();chips();}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-net],[data-part]');
+  if(!t){ if(e.target.closest('#board')){sel=null;render();info();} return;}
+  const k=t.dataset.net?'net':'part', v=t.dataset.net||t.dataset.part;
+  sel=(sel&&sel.k===k&&sel.v===v)?null:{k,v}; render();info();
+});
+function tog(id,fn){const b=document.getElementById(id);b.addEventListener('click',()=>{const on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on);fn(on);all();});}
+tog('bPlan',v=>{showPlan=v;if(sel&&!v)sel=null;});
+tog('bGhost',v=>ghost=v);
+tog('bDims',v=>dims=v);
+tog('bFlip',v=>{flip=v;document.getElementById('hint').textContent=v?'View from below (solder side), mirrored: this is how you will see it when you turn it over to solder the wires.':'View from above (component side). The wires run under the board.';});
+all();
+})();
+</script>

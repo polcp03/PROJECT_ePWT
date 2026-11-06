@@ -1,8 +1,8 @@
-// Sketch de verificacion de la cadena de compilacion.
-// No hace nada util: solo demuestra que arduino-cli compila para ESP32.
+// Sketch that checks the build chain.
+// It does nothing useful: it only proves arduino-cli compiles for the ESP32.
 #include <Arduino.h>
 
-// La placa generica esp32:esp32:esp32 no define LED_PIN.
+// The generic esp32:esp32:esp32 board does not define LED_PIN.
 static const uint8_t LED_PIN = 2;
 
 static const uint32_t LOOP_PERIOD_MS = 500;

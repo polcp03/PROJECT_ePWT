@@ -97,7 +97,7 @@ CAH, 5V (5V unused). Termination on the VESC side **unclear**: with the logger's
 fitted, CAN-H–CAN-L read 88 Ω, and the readings do not add up; the bus runs with
 0 errors on a short cable, so it is left as is. **Any link VESC ↔ mains-referenced
 equipment needs galvanic isolation** (EXP-001); the logger avoids it by floating on its
-own 12 V battery ([DEC-004](../08_decisions/DEC-004-can-sin-aislar-logger-flotante.md)).
+own 12 V battery ([DEC-004](../08_decisions/DEC-004-non-isolated-can-floating-logger.md)).
 
 Observed in use: battery current peaks ~40 A, typical 20 A; at launch the motor-current
 limit is reached, then duty becomes the limit as speed rises.
@@ -107,7 +107,7 @@ limit is reached, then duty becomes the limit as speed rises.
 13S5P, 65 × SINC ISR18650-26A (no verified datasheet), ~13 Ah.
 48.1 V nominal, 54.6 V full, 39.0 V empty.
 Pack resistance **≈ 0.18 Ω, battery + wiring + BMS** — MEASURED 2026-10-31, CAN log
-(50.9 V at rest → 45.8 V at 29 A; [EXP-002](../07_experiments/EXP-002-ruido-spi-can-logger.md)).
+(50.9 V at rest → 45.8 V at 29 A; [EXP-002](../07_experiments/EXP-002-spi-noise-can-logger.md)).
 Replaces the 0.10 Ω assumption. ~70 mΩ per cell equivalent: part of it is wiring.
 Design assumption 5 A/cell = 25 A continuous; observed peaks ~40 A. **Risk 1** in
 [open-questions](open-questions.md).
@@ -115,7 +115,7 @@ Design assumption 5 A/cell = 25 A continuous; observed peaks ~40 A. **Risk 1** i
 BMS: JK-BD4A17S4P, 40 A continuous, active balancing, Bluetooth only in use.
 Pol reports a CAN output with a closed protocol (`syssi/esphome-jk-bms` documents JK
 protocols); not connected. The VESC already reports pack voltage and current.
-**Decided 2026-11-01 ([DEC-005](../08_decisions/DEC-005-arquitectura-vcu.md)):** the BMS stays a
+**Decided 2026-11-01 ([DEC-005](../08_decisions/DEC-005-vcu-architecture.md)):** the BMS stays a
 passive backup, untouched, and no pack temperature sensor is fitted.
 
 ## 7. Driver inputs and sensors
@@ -141,7 +141,7 @@ to the vehicle control unit (the logger ESP32); the rotor Halls stay on the VESC
 |---|---|
 | ESP32-WROOM-32 (original) | **Destroyed** 2026-09-07 (ground loop, EXP-001) |
 | ESP32 ×3 (new) | No. 2 runs the CAN logger (verified 2026-10-31); two spare |
-| MCP2515 + TJA1050 CAN module | **In use** in the logger, 5 V, SO through a 1k/2k divider ([DEC-004](../08_decisions/DEC-004-can-sin-aislar-logger-flotante.md)) |
+| MCP2515 + TJA1050 CAN module | **In use** in the logger, 5 V, SO through a 1k/2k divider ([DEC-004](../08_decisions/DEC-004-non-isolated-can-floating-logger.md)) |
 | microSD module (AMS1117) + 16 GB card | In use in the logger |
 | 12 V battery + DC-DC to 5 V (5.3 V out) | Powers the logger, floating from the 13S pack |
 | D4184 module, protoboard | Available. D4184 was listed as a DC/DC; the part number is a MOSFET switch module — check |
