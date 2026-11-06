@@ -73,14 +73,19 @@ veh.r_roll_range = [0.150 0.160];  % [m] plausible band until measured
 % 2026-10-08: WEIGHED on a scale -> 38 kg. The 40 kg estimate was 5 % high,
 % i.e. inside its own declared +/-5 % band.
 veh.m_vehicle    = 38;             % [kg] MEASURED (scale, tyres flat)
-veh.m_driver     = 72;             % [kg] MEASURED (scale, 2026-10-08)
-veh.m_total      = veh.m_vehicle + veh.m_driver;   % 110 kg
+veh.m_driver     = 74.5;           % [kg] MEASURED (scale, clothed, 2026-11-06; was 72)
+veh.m_total      = veh.m_vehicle + veh.m_driver;   % 112.5 kg
 
-veh.wheelbase    = 0.71;           % [m] ASSUMED (commercial reference)
-veh.h_cg         = NaN;            % [m] CG height  MISSING - needed for load
-                                   %     transfer, i.e. for any traction work
-veh.x_cg         = 0.65;           % [-] static rear weight fraction  ASSUMED (C01)
-veh.x_cg_range   = [0.55 0.75];    % [-] needs one scale under each axle
+veh.wheelbase    = 0.72;           % [m] MEASURED (tape, hub to hub, 2026-11-06)
+veh.track_front  = 0.46;           % [m] MEASURED (tape, tyre centres, 2026-11-06)
+veh.track_rear   = 0.44;           % [m] MEASURED (tape, tyre centres, 2026-11-06)
+veh.h_cg         = 0.51;           % [m] CG height with rider  ESTIMATED [0.45-0.55]
+                                   %     empty 0.31 m MEASURED (tilt test 2026-11-06)
+                                   %     + seated rider CG ~0.62 m. See 06_data/2026-11-06_mass-cg
+veh.x_cg         = 0.66;           % [-] static rear weight fraction, with rider
+                                   %     MEASURED 2026-11-06 (two scales per axle):
+                                   %     80.0 / 120.7 kg. Empty quad: 0.50.
+veh.x_cg_range   = [0.63 0.69];    % [-] bathroom scales; fractions trusted, kg are not
 veh.mu           = 0.60;           % [-] tyre-road peak friction  ASSUMED (C01)
 veh.mu_range     = [0.45 0.75];    % [-] dirt / loose ground, where the quad is
                                    %     driven. Textbook order of magnitude, no
