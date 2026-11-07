@@ -1,10 +1,10 @@
-"""La velocidad del taladro no es constante dentro de la ventana. Eso ensancha
-el pico de la FFT y hace que la amplitud del fundamental salga BAJA.
-El RMS de la banda del fundamental es inmune a ese ensanchamiento."""
+"""The drill speed is not constant within the window. That widens the FFT peak
+and makes the fundamental amplitude come out LOW.
+The RMS of the fundamental band is immune to that widening."""
 import numpy as np, glob, os
 
 P, SQ3 = 3, np.sqrt(3)
-print(f"{'captura':<26}{'f [Hz]':>9}{'jitter':>9}{'A1 FFT':>9}{'A1 RMS':>9}"
+print(f"{'capture':<26}{'f [Hz]':>9}{'jitter':>9}{'A1 FFT':>9}{'A1 RMS':>9}"
       f"{'lam FFT':>10}{'lam RMS':>10}")
 print("-" * 82)
 out = []

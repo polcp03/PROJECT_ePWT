@@ -1,15 +1,21 @@
 # Decisions
 
-Un archivo por decisión con impacto real: `DEC-001-nombre.md`.
-Solo arquitectura y trade-offs, no detalles menores.
+One file per decision with real impact: `DEC-00N-name.md`.
+Only architecture and trade-offs, not minor details.
 
-- **Decisión:** qué se decidió
-- **Alternativas:** qué más había, y por qué se descartó
-- **Razonamiento:** por qué esta
-- **Asunciones:** qué doy por hecho (y podría ser falso)
-- **Consecuencias:** qué me cierra y qué me abre
+- **Decision:** what was decided
+- **Alternatives:** what else there was, and why it was rejected
+- **Reasoning:** why this one
+- **Assumptions:** what I take for granted (and could be false)
+- **Consequences:** what it closes and what it opens for me
 
-| | Decisión |
+| | Decision |
 |---|---|
-| DEC-004 | CAN sin aislar, con el registrador flotante |
-| DEC-005 | Arquitectura de la VCU y sensores: acelerador y freno a la VCU, BMS sin tocar |
+| DEC-001 | Organisation tool: Obsidian on the repo (replaced by DEC-003) |
+| DEC-002 | Technical environment: MATLAB R2023b, Python venv, arduino-cli, git/gh |
+| DEC-003 | Obsidian out; the repo is read in VS Code and GitHub |
+| DEC-004 | Non-isolated CAN, with the logger floating |
+| DEC-005 | VCU architecture and sensors: throttle and brake to the VCU, BMS untouched |
+| DEC-006 | Light V cycle: requirements with numbers, verification matrix, no paperwork |
+| DEC-007 | Software gates per cycle; ROS 2 comes in as telemetry on a Raspberry Pi; the quad is not made autonomous |
+| DEC-008 | Grounds and EMC: floating in DC, bonded to the chassis by a capacitor at the inverter; IMU on the VCU board |

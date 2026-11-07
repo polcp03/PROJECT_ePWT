@@ -22,11 +22,19 @@ Converted to Li-ion and a 48 V-class PMSM.
 | Item | Value | Tag |
 |---|---|---|
 | Vehicle mass (no rider) | **38 kg** | MEASURED, scale, 2026-10-08 |
-| Rider mass | 72 kg | MEASURED, scale, 2026-10-08 |
-| Total | 110 kg | — |
-| Wheelbase | 0.71 m | ASSUMED (commercial reference) |
-| Static rear weight fraction | 0.65 | ASSUMED — needs a scale under each axle |
-| CG height `h_cg` | — | **MISSING** — needed for load transfer |
+| Rider mass | 74.5 kg | MEASURED, scale, clothed, 2026-11-06 (was 72) |
+| Total | 112.5 kg | — |
+| Wheelbase | 0.72 m | MEASURED, tape, hub to hub, 2026-11-06 |
+| Track | 0.46 m front, 0.44 m rear | MEASURED, tape, tyre centres, 2026-11-06 |
+| Static rear weight fraction, empty | 0.50 (19.5 / 39.4 kg) | MEASURED, two scales per axle, 2026-11-06 |
+| Static rear weight fraction, with rider | **0.66** (80.0 / 120.7 kg) | MEASURED, same test |
+| Rider position | ≈ 18 cm ahead of the rear axle | DERIVED from the two splits |
+| CG height `h_cg`, empty | 0.31 m ± 0.08 | MEASURED, tilt test, 2026-11-06 |
+| CG height `h_cg`, with rider | **0.51 m** [0.45–0.55] | ESTIMATED (empty measured + seated rider CG ≈ 0.62 m) |
+
+Axle weights: bathroom scales repeat to ±0.5 kg but read high (the four wheels with rider add
+up to 120.7 kg against 113.9 kg known), so **fractions are trusted and absolute kg are not**.
+Raw readings and full results: `06_data/2026-11-06_mass-cg/`.
 
 Subjective: very good on dirt, drifts, rear wheels rarely spin (weight sits rearward).
 
@@ -36,13 +44,24 @@ Front 13×4.10-6, rear 13×5.00-6 TR13, 6 in rims, pneumatic knobby, tubed.
 
 | Item | Value | Tag |
 |---|---|---|
-| Nominal radius | 165.1 mm | MEASURED (tyre size) |
-| Loaded rolling radius `r_roll` | 155 mm [150–160] | ASSUMED — **most leveraged unmeasured number** |
+| Rear nominal radius | 165.1 mm | From the tyre size (13 in) |
+| Front nominal radius | unknown | The front sidewall reads only "4.10-6" (width 4.10 in, rim 6 in): no overall diameter. Measure the free circumference with a tape |
+| **Front-left loaded rolling radius `r_front_roll`** | **146 mm ±2** (Ø 292 mm) | **MEASURED 2026-11-06** — roll-out, Pol seated, ~1.5 bar ([data](../06_data/2026-11-06_rollout/readings.md)) |
+| Rear loaded rolling radius `r_roll` (driven) | 155 mm [150–160] | ASSUMED — **most leveraged unmeasured number** |
 
-Measure `r_roll` by roll-out (rider seated, 10 revolutions, `r = D/(20π)`), never with a
-ruler. Since 2026-11-01 the wheel sensor counts the revolutions: push the quad slowly,
-rider on board, over a measured 10 m and count magnets (10 per turn). Procedure in `04_model/params/vehicle_params.m`. New tyres bought (reported
-2026-10-20): measure once they are fitted — the old 155 mm guess does not carry over.
+**Front roll-out, 2026-11-06.** Straight 4.5 m by tape, mark on the tyre at the start line,
+4.9 turns (49 magnets) counted by eye: `r = 4.5 / (4.9 · 2π) = 0.146 m`. The last tenth of a
+turn was read by eye, so ±1 % (±2 mm). This is the radius for **every speed and distance
+from the wheel sensor**: one magnet = 2π·0.146/10 = **91.7 mm**. The old 155 mm would have
+read every speed **6 % too high**.
+
+**It does not replace the rear `r_roll`.** The front tyre is a different size and carries
+about half the load of a rear one with the rider seated. Traction force, top speed and the
+VESC's `si_wheel_diameter` all use the rear. Measure it the same way: mark on a rear tyre,
+rider seated, count turns over a taped distance, `r = D / (2π · turns)`, never with a ruler.
+
+Still open: the front squash. If the front tyre is 165 mm free, 146 mm loaded is a 19 mm
+(12 %) squash, a lot for ~20 kg at 1.5 bar. A tape round the free tyre settles it.
 
 ## 3. Transmission
 
@@ -60,9 +79,9 @@ the measured Kt. Treat any datasheet number as belonging to another motor.
 |---|---|---|
 | Topology | Radial flux, **inner rotor**, outer wound stator, 3 phases | Observed by Pol |
 | Pole pairs `p` | **3** | MEASURED (Hall count) |
-| Flux linkage `λm` | **16.855 mWb** | MEASURED (3 methods, 0.02 %) |
-| `Rs` per phase | 28.02 mΩ | VESC_ESTIMATE (includes MOSFETs) |
-| `Ld` / `Lq` | 99.2 / 112.8 µH, **Lq/Ld = 1.136** | VESC_ESTIMATE at 40 A |
+| Flux linkage `λm` | **16.855 mWb** | MEASURED (3 methods, 0.02 %). VESC detections 2026-11-05 scatter 16.2–17 mWb around it |
+| `Rs` per phase | **18.76 mΩ** | VESC_ESTIMATE (includes MOSFETs). **Final** (Pol, 2026-11-06): the saved config `vesc/MOTOR_1.9.xml`. 2026-11-05: 18.7 mΩ, 3× at 40 A. Replaces 28.02 mΩ (2026-09-07), which no longer reproduces |
+| `Ld` / `Lq` | **98.4 / 112.8 µH, Lq/Ld = 1.147** (final config 2026-11-06: L 105.6, Lq−Ld 14.42 µH) · history: 99.2 / 112.8 µH (2026-09-07, 40 A), 97.8 / 113.0 µH (2026-11-05) | VESC_ESTIMATE. **Final** (Pol, 2026-11-06). All agree within the known current dependence |
 | Rotor inertia | 1.558·10⁻⁴ kg·m² ±14 % | MEASURED |
 | Back-EMF THD | 9.4 % (5th, 7th) | MEASURED |
 | Kt | 0.0758 Nm/A | Derived |
@@ -84,7 +103,7 @@ no decoupling, MTPA off, field weakening off.
 
 | Limit | Value |
 |---|---|
-| Motor current | ±120 A (abs 160 A) |
+| Motor current | ±120 A (abs 160 A) — Pol's choice, full power; stays for tests too |
 | Battery current | **40 A** discharge / −35 A regen — equals BMS rating, do not raise |
 | Duty | 0.95 |
 | Battery cut-off | 44.2 → 39.0 V |
@@ -97,7 +116,7 @@ CAH, 5V (5V unused). Termination on the VESC side **unclear**: with the logger's
 fitted, CAN-H–CAN-L read 88 Ω, and the readings do not add up; the bus runs with
 0 errors on a short cable, so it is left as is. **Any link VESC ↔ mains-referenced
 equipment needs galvanic isolation** (EXP-001); the logger avoids it by floating on its
-own 12 V battery ([DEC-004](../08_decisions/DEC-004-can-sin-aislar-logger-flotante.md)).
+own 12 V battery ([DEC-004](../08_decisions/DEC-004-non-isolated-can-floating-logger.md)).
 
 Observed in use: battery current peaks ~40 A, typical 20 A; at launch the motor-current
 limit is reached, then duty becomes the limit as speed rises.
@@ -107,7 +126,7 @@ limit is reached, then duty becomes the limit as speed rises.
 13S5P, 65 × SINC ISR18650-26A (no verified datasheet), ~13 Ah.
 48.1 V nominal, 54.6 V full, 39.0 V empty.
 Pack resistance **≈ 0.18 Ω, battery + wiring + BMS** — MEASURED 2026-10-31, CAN log
-(50.9 V at rest → 45.8 V at 29 A; [EXP-002](../07_experiments/EXP-002-ruido-spi-can-logger.md)).
+(50.9 V at rest → 45.8 V at 29 A; [EXP-002](../07_experiments/EXP-002-spi-noise-can-logger.md)).
 Replaces the 0.10 Ω assumption. ~70 mΩ per cell equivalent: part of it is wiring.
 Design assumption 5 A/cell = 25 A continuous; observed peaks ~40 A. **Risk 1** in
 [open-questions](open-questions.md).
@@ -115,7 +134,7 @@ Design assumption 5 A/cell = 25 A continuous; observed peaks ~40 A. **Risk 1** i
 BMS: JK-BD4A17S4P, 40 A continuous, active balancing, Bluetooth only in use.
 Pol reports a CAN output with a closed protocol (`syssi/esphome-jk-bms` documents JK
 protocols); not connected. The VESC already reports pack voltage and current.
-**Decided 2026-11-01 ([DEC-005](../08_decisions/DEC-005-arquitectura-vcu.md)):** the BMS stays a
+**Decided 2026-11-01 ([DEC-005](../08_decisions/DEC-005-vcu-architecture.md)):** the BMS stays a
 passive backup, untouched, and no pack temperature sensor is fitted.
 
 ## 7. Driver inputs and sensors
@@ -130,9 +149,11 @@ to the vehicle control unit (the logger ESP32); the rotor Halls stay on the VESC
   logger ESP32, 10 neodymium magnets on a 160 mm diameter circle, ~5 mm gap. Spacing
   redone with a compass; residual ±8 % gap-to-gap error that repeats every turn, and a
   once-per-turn swing that suggests the magnet circle is not centred on the axle. The
-  logger stores raw magnet times; speed needs `r_roll` (still ASSUMED, section 2).
+  logger stores raw magnet times; speed uses `r_front_roll` = 146 mm (MEASURED 2026-11-06,
+  section 2): one magnet = 91.7 mm.
 - IMU: GY-LSM6DS3 (6-axis) **damaged 2026-11-01** while soldering (SDA pull-up torn off,
-  then the chip stopped answering on I2C). Replacement on the shopping list.
+  then the chip stopped answering on I2C). Replacement on the shopping list. From 2026-11-06 it goes
+  on the VCU board, in a socket, not on the chassis ([DEC-008](../08_decisions/DEC-008-grounding-and-emc.md)).
 
 ## 8. Electronics and tools on hand
 
@@ -140,7 +161,7 @@ to the vehicle control unit (the logger ESP32); the rotor Halls stay on the VESC
 |---|---|
 | ESP32-WROOM-32 (original) | **Destroyed** 2026-09-07 (ground loop, EXP-001) |
 | ESP32 ×3 (new) | No. 2 runs the CAN logger (verified 2026-10-31); two spare |
-| MCP2515 + TJA1050 CAN module | **In use** in the logger, 5 V, SO through a 1k/2k divider ([DEC-004](../08_decisions/DEC-004-can-sin-aislar-logger-flotante.md)) |
+| MCP2515 + TJA1050 CAN module | **In use** in the logger, 5 V, SO through a 1k/2k divider ([DEC-004](../08_decisions/DEC-004-non-isolated-can-floating-logger.md)) |
 | microSD module (AMS1117) + 16 GB card | In use in the logger |
 | 12 V battery + DC-DC to 5 V (5.3 V out) | Powers the logger, floating from the 13S pack |
 | D4184 module, protoboard | Available. D4184 was listed as a DC/DC; the part number is a MOSFET switch module — check |

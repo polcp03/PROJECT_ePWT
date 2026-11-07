@@ -25,7 +25,8 @@ veh.i_gear       = veh.z_wheel / veh.z_motor;   % 8.3636 [-]
 % so that note was stale. The 2026-10-01 re-export also fixed
 % si_motor_poles 14 -> 6 (p = 3 MEASURED), which DOES enter the speed channel.
 % Still open: si_wheel_diameter = 0.30 m on the device vs 2*r_roll = 0.31 m
-% here (~3 %). For logs taken BEFORE 2026-10-01 the poles error applies; the
+% here (~3 %). The VESC speed comes from motor rpm, i.e. the REAR (driven)
+% wheel, so this needs the rear roll-out, not the front one of 2026-11-06. For logs taken BEFORE 2026-10-01 the poles error applies; the
 % factor depends on the formula the firmware uses - check before rescaling.
 % (the old 6.5/8.3636 correction factor was removed: it was based on the stale note)
 
@@ -45,8 +46,21 @@ veh.r_wheel_nom  = veh.d_wheel_nom / 2;        % 165.1 mm
 % tyres run at low pressure, so the rear tyre visibly squashes ("cae bastante").
 % Typical deflection for a low-pressure knobby under this kind of load is
 % 5-10 % of the unloaded radius. Taking ~6 %:
-veh.r_roll       = 0.155;          % [m] ASSUMED, 165.1 mm - 6 %
+veh.r_roll       = 0.155;          % [m] ASSUMED (REAR, driven), 165.1 mm - 6 %
 veh.r_roll_range = [0.150 0.160];  % [m] plausible band until measured
+% The front roll-out of 2026-11-06 (below) gave 146 mm on the FRONT tyre, a
+% different size (4.10 wide, not 5.00) carrying about half the load of a rear
+% one. It does not carry over to the rear: r_roll stays ASSUMED until the rear
+% wheel is rolled out the same way (mark on the tyre, count turns).
+
+% Front-left loaded rolling radius: the wheel with the Hall speed sensor.
+% MEASURED 2026-11-06, Pol seated, straight 4.5 m by tape, 4.9 turns counted
+% (49 magnets), pressure ~1.5 bar. r = 4.5 / (4.9 * 2*pi) = 0.1462 m.
+% Uncertainty ~+/-2 mm: the last 1/10 turn was read by eye (~1 %).
+% Use it for every speed and distance computed from the wheel sensor:
+%   one magnet = 2*pi*r_front_roll/10 = 91.7 mm
+veh.r_front_roll       = 0.146;            % [m] MEASURED 2026-11-06 (06_data/2026-11-06_rollout)
+veh.r_front_roll_range = [0.144 0.148];    % [m] counting resolution
 % >>> This is the single most leveraged unmeasured number in the vehicle. <<<
 % It divides torque to give tractive force AND multiplies speed, so a 6 % error
 % is a 6 % error in predicted acceleration and in predicted top speed at once.
@@ -73,14 +87,19 @@ veh.r_roll_range = [0.150 0.160];  % [m] plausible band until measured
 % 2026-10-08: WEIGHED on a scale -> 38 kg. The 40 kg estimate was 5 % high,
 % i.e. inside its own declared +/-5 % band.
 veh.m_vehicle    = 38;             % [kg] MEASURED (scale, tyres flat)
-veh.m_driver     = 72;             % [kg] MEASURED (scale, 2026-10-08)
-veh.m_total      = veh.m_vehicle + veh.m_driver;   % 110 kg
+veh.m_driver     = 74.5;           % [kg] MEASURED (scale, clothed, 2026-11-06; was 72)
+veh.m_total      = veh.m_vehicle + veh.m_driver;   % 112.5 kg
 
-veh.wheelbase    = 0.71;           % [m] ASSUMED (commercial reference)
-veh.h_cg         = NaN;            % [m] CG height  MISSING - needed for load
-                                   %     transfer, i.e. for any traction work
-veh.x_cg         = 0.65;           % [-] static rear weight fraction  ASSUMED (C01)
-veh.x_cg_range   = [0.55 0.75];    % [-] needs one scale under each axle
+veh.wheelbase    = 0.72;           % [m] MEASURED (tape, hub to hub, 2026-11-06)
+veh.track_front  = 0.46;           % [m] MEASURED (tape, tyre centres, 2026-11-06)
+veh.track_rear   = 0.44;           % [m] MEASURED (tape, tyre centres, 2026-11-06)
+veh.h_cg         = 0.51;           % [m] CG height with rider  ESTIMATED [0.45-0.55]
+                                   %     empty 0.31 m MEASURED (tilt test 2026-11-06)
+                                   %     + seated rider CG ~0.62 m. See 06_data/2026-11-06_mass-cg
+veh.x_cg         = 0.66;           % [-] static rear weight fraction, with rider
+                                   %     MEASURED 2026-11-06 (two scales per axle):
+                                   %     80.0 / 120.7 kg. Empty quad: 0.50.
+veh.x_cg_range   = [0.63 0.69];    % [-] bathroom scales; fractions trusted, kg are not
 veh.mu           = 0.60;           % [-] tyre-road peak friction  ASSUMED (C01)
 veh.mu_range     = [0.45 0.75];    % [-] dirt / loose ground, where the quad is
                                    %     driven. Textbook order of magnitude, no
@@ -145,7 +164,7 @@ veh.J_equiv    = veh.m_total * veh.r_roll^2 / veh.i_gear^2;   % ~0.0378 kg*m^2 (
 %   - a 10 % error in m_total or r_roll changes it by 10 %
 %
 % Sensitivity of predicted acceleration, in descending order:
-%   r_roll     +/-6 %   ASSUMED   <- roll-out test, 5 min, needs wheels
+%   r_roll     +/-6 %   ASSUMED   <- REAR roll-out still to do (front done 2026-11-06: 146 mm)
 %   m_total    done     MEASURED  2026-10-08, scale (38 + 72 kg)
 %   Crr        range    ASSUMED   <- coastdown
 %   eta_drive  range    ASSUMED   <- coastdown

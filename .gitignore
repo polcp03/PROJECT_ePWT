@@ -43,8 +43,8 @@ venv/
 
 # Imagenes generadas de las presentaciones: derivadas de assets/photos/,
 # las rehace _figures.py. Y los renders de verificacion, que hace _render.ps1.
-01_plan/presentations/assets/crops/
-01_plan/presentations/assets/figures/
+09_reviews/assets/crops/
+09_reviews/assets/figures/
 _renders*/
 .render/
 
@@ -65,3 +65,9 @@ BOOKS/
 
 # Estado local del monitor del ESP32 (05_firmware/esp32.py): log, pausa, cola de envio
 05_firmware/.monitor/
+
+# Video clips for the short portfolio video: large, kept on the PC only
+09_reviews/assets/video/
+*.mov
+*.MOV
+*.mp4

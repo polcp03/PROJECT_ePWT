@@ -6,7 +6,7 @@ a second ESP32) never changes the firmware.
 
 **Status (2026-11-01):** works under throttle. 137 s recording, 33 783 frames,
 peaks of 49 A motor / 29 A battery: 0 corrupted frames, 0 SPI errors, 0 overflows,
-0 bus errors. How it got there: [EXP-002](../../../07_experiments/EXP-002-ruido-spi-can-logger.md).
+0 bus errors. How it got there: [EXP-002](../../../07_experiments/EXP-002-spi-noise-can-logger.md).
 
 **Wheel speed added (2026-11-01):** `wheel_rx` stamps each front-wheel magnet into the
 same file, on the same clock. Compiled and flashed; the Hall input itself was validated
@@ -76,8 +76,9 @@ t_us,id,ext,dlc,d0,...,d7                id and data in hex
 #wstat,t_us,pulses,rejected,queue_drops  wheel sensor health, once per second
 ```
 
-Speed from two consecutive `#wheel` lines: `v = (2π·r_roll/10) / Δt`. With `r_roll` =
-155 mm (ASSUMED) one magnet = 97.4 mm. `rejected` > 0 means electrical noise on GPIO 34.
+Speed from two consecutive `#wheel` lines: `v = (2π·r_front_roll/10) / Δt`. With
+`r_front_roll` = 146 mm (MEASURED 2026-11-06, front-left wheel, rider seated) one magnet =
+91.7 mm. `rejected` > 0 means electrical noise on GPIO 34.
 
 Decode: `04_model/scripts/can_log_decode.py <out_dir> log_017.csv`.
 

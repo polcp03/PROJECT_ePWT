@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "preview-scratch",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "C:\\Users\\POLCRU~1\\AppData\\Local\\Temp\\claude\\C--Users-Pol-Crua-as-Documents-NEWS-Engineering-PROJECT-ePWT\\fb70ab8a-9e36-4f98-af92-b41f4ba8e9ff\\scratchpad"
+      ],
+      "port": 8765
+    },
+    {
+      "name": "preview-entrenador",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8766",
+        "--directory",
+        "C:\\Users\\POLCRU~1\\AppData\\Local\\Temp\\claude\\d2e4fea354646c2d\\1abbe27f-9cec-4785-882a-a342a9b2f85e\\scratchpad"
+      ],
+      "port": 8766
+    }
+  ]
+}

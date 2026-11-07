@@ -1,270 +1,257 @@
-# Visión — ePWT
+# Vision — ePWT
 
-Capturado el 2026-08-31 a partir del braindump estratégico completo.
-**Este archivo no se ejecuta.** Existe para que nada se pierda y para que el ciclo
-activo pueda ignorarlo con tranquilidad. Se revisa cada ~3 meses, no cada semana.
-
----
-
-## Objetivo 0 — El único que no se negocia
-
-Convertirme en un ingeniero técnicamente sólido, capaz de trabajar en sistemas
-eléctricos, electrónicos, control, software y motores eléctricos. Todo lo demás
-está subordinado a esto.
-
-**Contexto profesional:** ~2 años de experiencia, ingeniería de automoción
-(calibración de motores térmicos). Traslado a Israel previsto (fecha abierta;
-el proyecto continúa allí sin interrupción). Sectores objetivo: robótica,
-semiconductores, defensa, drones, motores eléctricos, electrónica, control.
-
-**Ventaja que ya tengo y no debo tratar como cero:** calibrar un motor eléctrico
-(mapas de corriente, curvas de par, field weakening) es conceptualmente cercano a
-calibrar uno térmico (inyección, ignición). El oficio transfiere; el dominio no.
+Captured on 2026-08-31 from the complete strategic braindump.
+**This file is not executed.** It exists so that nothing is lost and so that the active cycle
+can ignore it in peace. It is reviewed every ~3 months, not every week.
 
 ---
 
-## Las cuatro capas
+## Goal 0 — The only one that is not negotiable
 
-### Capa 1 — El sustrato: el quad
-Plataforma física de aprendizaje. El hardware **ya existe y funciona** (motor, VESC,
-batería 13S5P, BMS, ESP32). No es un proyecto de fabricación mecánica.
+Become a technically solid engineer, able to work on electrical and electronic systems,
+control, software and electric motors. Everything else is subordinate to this.
 
-Rol del hardware en este proyecto: **fuente de parámetros medidos y banco de
-validación**, no objeto de rediseño.
+**Professional context:** ~2 years of experience, automotive engineering (combustion engine
+calibration). Move to Israel planned (date open; the project continues there without
+interruption). Target sectors: robotics, semiconductors, defence, drones, electric motors,
+electronics, control.
 
-Áreas técnicas a desarrollar: control (clásico, PID, motores eléctricos,
-estabilidad, respuesta dinámica, control de tracción, launch control), electrónica
-de potencia (inversores, sensores, baterías, BMS, comunicaciones, embebidos),
-software (arquitectura, modularidad, interfaces, Git/GitHub, PRs, código mantenible).
-
-#### Áreas de conocimiento a desarrollar
-
-Punto de partida: ingeniería de automoción, base mecánica. La ampliación va hacia
-electrónica, software, control y sistemas eléctricos. De fundamentos a avanzado.
-
-**Control** — control clásico, PID, MPC, control de motores eléctricos, estrategias,
-estabilidad, respuesta dinámica, modelado de sistemas, control bajo restricciones,
-control de tracción, launch control. No implementar sin comprender las matemáticas
-y la física de debajo.
-
-**Sistemas eléctricos y electrónicos** — motores, inversores, electrónica de potencia,
-sensores, actuadores, baterías, BMS, comunicaciones, microcontroladores, sistemas
-embebidos, arquitectura electrónica.
-
-**Software** — la base de Python para análisis es razonable; la disciplina de ingeniero
-de software no. Históricamente ha delegado esta parte en equipos. Por eso interesa
-especialmente: arquitectura, cómo estructurar un proyecto, separar responsabilidades,
-organizar módulos, diseñar interfaces, gestionar dependencias, mantener un proyecto
-grande, código mantenible, Git, GitHub, Pull Requests, ramas, revisión de código,
-documentación. **El objetivo no es saber programar: es saber construir software con
-arquitectura correcta.**
-
-### Capa 2 — El método
-- **Ciclo de 2 semanas con mentores.** El motor del proyecto. Deadline externa,
-  crítica real, y obligación de explicar. Resuelve simultáneamente la procrastinación,
-  la saturación y la verificación de comprensión.
-- **Aprender haciendo:** construir, experimentar, equivocarse, analizar, explicar,
-  reconstruir. No cursos pasivos.
-- **Explicar como test de comprensión.** Si no lo sé explicar simple, no lo entiendo.
-- **Primeros principios, racionados.** Profundo en el núcleo (Clarke/Park, inversor,
-  máquina eléctrica, dinámica longitudinal). Copiar sin vergüenza en todo lo demás.
-
-### Capa 3 — La infraestructura
-Repositorio Git como fuente única de verdad. `CLAUDE.md` corto. Skills y agentes
-**solo cuando codifiquen un proceso que ya haya hecho tres veces.**
-
-### Capa 4 — Congelada (ver `backlog.md`)
-Marca personal, contenido, empresa, second brain, agentes de información.
-Reconocidas como valiosas. Aplazadas por decisión explícita, no por descarte.
+**An advantage I already have and must not treat as zero:** calibrating an electric motor
+(current maps, torque curves, field weakening) is conceptually close to calibrating a
+combustion one (injection, ignition). The craft transfers; the domain doesn't.
 
 ---
 
-## Problemas personales que el sistema debe atacar
+## The four layers
 
-Estos no son adornos: son la razón de que el sistema tenga la forma que tiene.
+### Layer 1 — The substrate: the quad
+Physical learning platform. The hardware **already exists and works** (motor, VESC, 13S5P
+battery, BMS, ESP32). It is not a mechanical fabrication project.
 
-| Problema | Cómo lo ataca el sistema |
+Role of the hardware in this project: **source of measured parameters and validation bench**,
+not an object to redesign.
+
+Technical areas to develop: control (classical, PID, electric motors, stability, dynamic
+response, traction control, launch control), power electronics (inverters, sensors, batteries,
+BMS, communications, embedded), software (architecture, modularity, interfaces, Git/GitHub,
+PRs, maintainable code).
+
+#### Knowledge areas to develop
+
+Starting point: automotive engineering, mechanical base. The expansion goes towards
+electronics, software, control and electrical systems. From fundamentals to advanced.
+
+**Control** — classical control, PID, MPC, electric motor control, strategies, stability,
+dynamic response, system modelling, constrained control, traction control, launch control.
+Don't implement without understanding the mathematics and physics underneath.
+
+**Electrical and electronic systems** — motors, inverters, power electronics, sensors,
+actuators, batteries, BMS, communications, microcontrollers, embedded systems, electronic
+architecture.
+
+**Software** — the Python base for analysis is reasonable; the discipline of a software
+engineer is not. Historically this part was delegated to teams. That is why it matters
+especially: architecture, how to structure a project, separate responsibilities, organise
+modules, design interfaces, manage dependencies, maintain a large project, maintainable code,
+Git, GitHub, Pull Requests, branches, code review, documentation. **The goal is not knowing how
+to program: it is knowing how to build software with the right architecture.**
+
+### Layer 2 — The method
+- **Two-week cycle with mentors.** The engine of the project. External deadline, real critique,
+  and the obligation to explain. It solves procrastination, overload and checking understanding
+  at the same time.
+- **Learning by doing:** build, experiment, get it wrong, analyse, explain, rebuild. No passive courses.
+- **Explaining as a test of understanding.** If I can't explain it simply, I don't understand it.
+- **First principles, rationed.** Deep in the core (Clarke/Park, inverter, electric machine,
+  longitudinal dynamics). Copy without shame everywhere else.
+
+### Layer 3 — The infrastructure
+Git repository as the single source of truth. Short `CLAUDE.md`. Skills and agents **only when
+they encode a process I have already done three times.**
+
+### Layer 4 — Frozen (see `backlog.md`)
+Personal brand, content, company, second brain, information agents. Recognised as valuable.
+Postponed by explicit decision, not discarded.
+
+---
+
+## Personal problems the system must attack
+
+These are not decoration: they are the reason the system has the shape it has.
+
+| Problem | How the system attacks it |
 |---|---|
-| Sin deadline, procrastino indefinidamente | Ciclo de 2 semanas con entregable a mentores |
-| Me saturo al ver todo lo pendiente | Solo existe el ciclo activo; el resto vive en `backlog.md` |
-| Busco el plan perfecto en vez de ejecutar | Planificación detallada solo del ciclo actual; los siguientes, en una línea |
-| Digo "sí, lo he entendido" bajo presión sin haberlo entendido | Obligación de explicar en cada review; el agente examinador |
-| Ideas dispersas entre papel, WhatsApp y ningún sitio | `backlog.md` como único destino |
-| Entiendo pero explico mal | Presentaciones quincenales, en inglés |
-| Vergüenza social / hablar en público | Presentaciones ahora; vídeo más adelante |
+| Without a deadline, I procrastinate indefinitely | Two-week cycle with a deliverable to mentors |
+| I get overwhelmed seeing everything pending | Only the active cycle exists; the rest lives in `backlog.md` |
+| I look for the perfect plan instead of executing | Detailed planning only for the current cycle; the next ones, in one line |
+| I say "yes, I understood" under pressure without having understood | Obligation to explain at every review; the examiner agent |
+| Ideas scattered between paper, WhatsApp and nowhere | `backlog.md` as the single destination |
+| I understand but explain badly | Fortnightly presentations, in English |
+| Social shyness / public speaking | Presentations now; video later |
 
 ---
 
-## Filosofía de uso de la IA
+## Philosophy of AI use
 
-**No delegar la cognición: aumentarla.** La IA no debe darme conclusiones que yo
-debería alcanzar. Debe extraer lo relevante, explicar fundamentos, generar
-contraargumentos, encontrar errores en mi razonamiento y **examinarme**.
+**Don't delegate cognition: augment it.** The AI must not give me conclusions I should reach
+myself. It should extract what is relevant, explain fundamentals, generate counter-arguments,
+find errors in my reasoning and **examine me**.
 
-Corolario práctico: un agente que me entrega una síntesis para que la acepte tiene
-valor negativo. Un agente que me pregunta "¿por qué crees eso?" tiene valor alto.
+Practical corollary: an agent that hands me a synthesis to accept has negative value. An agent
+that asks me "why do you think that?" has high value.
 
-**Agente examinador (aprobado, sin construir todavía):** alimentado con libros de
-texto reales del dominio, con el rol de cuestionarme y comprobar si domino la teoría
-antes de una review. Se construye cuando exista material y una rutina que codificar.
-Uno, no diez.
+**Examiner agent (approved, not built yet):** fed with real textbooks of the domain, with the
+role of questioning me and checking whether I master the theory before a review. It gets built
+when there is material and a routine to encode. One, not ten.
 
-**Descartado:** flota de 10+ agentes "expertos". Un subagente es el mismo modelo con
-otro prompt: simula la revisión por pares sin aportar su valor epistémico.
+**Discarded:** a fleet of 10+ "expert" agents. A subagent is the same model with another
+prompt: it simulates peer review without bringing its epistemic value.
 
-**Descartado:** arquitectura portable entre modelos. Decisión: Claude Code, sin plan
-de migración. La portabilidad es un problema que se gana, no que se previene.
+**Discarded:** an architecture portable between models. Decision: Claude Code, no migration
+plan. Portability is a problem you earn, not one you prevent.
 
-### Harness engineering — lo que sí se aplica
+### Harness engineering — what does apply
 
-Pol ha estudiado prompt engineering, context engineering y harness engineering, y ha
-hecho un curso de Claude Code. La referencia metodológica es la filosofía de Boris,
-creador de Claude Code. Quiere aplicarla de verdad, no tener una conversación larga
-con un LLM.
+Pol has studied prompt engineering, context engineering and harness engineering, and did a
+Claude Code course. The methodological reference is the philosophy of Boris, the creator of
+Claude Code. He wants to apply it for real, not have a long conversation with an LLM.
 
-Lo que ya está implementado y funciona:
-- `CLAUDE.md` corto en la raíz, con `CLAUDE.md` propios por área (`04_model/`, `05_firmware/`).
-- El repositorio **es** la memoria externa. Cada sesión recibe punteros, no volcados.
-- Contexto acotado por carpeta. Una sesión = una tarea con objetivo comprobable.
+What is already implemented and works:
+- Short `CLAUDE.md` at the root, with its own `CLAUDE.md` per area (`04_model/`, `05_firmware/`).
+- The repository **is** the external memory. Each session gets pointers, not dumps.
+- Context bounded by folder. One session = one task with a checkable goal.
 
-Lo que está pendiente y **solo entra cuando haya fricción real**:
-- Skills que codifiquen tareas repetidas (criterio: haberlas hecho a mano 3 veces).
-- Loops de verificación explícitos: objetivo → ejecutar → comprobar → corregir → repetir.
-- Agentes en paralelo (uno investiga, otro implementa, otro valida). Idea atractiva,
-  sin valor demostrado todavía en un proyecto de una persona.
+What is pending and **only comes in when there is real friction**:
+- Skills that encode repeated tasks (criterion: having done them by hand 3 times).
+- Explicit verification loops: goal → execute → check → correct → repeat.
+- Agents in parallel (one researches, another implements, another validates). Attractive idea,
+  no value shown yet in a one-person project.
 
-**Principio rector: menos prompts, más herramientas.** Preferir scripts, skills y
-contexto estructurado a explicar lo mismo cada vez. Pero construir la herramienta
-*después* de haber hecho la tarea a mano, nunca antes.
+**Guiding principle: fewer prompts, more tools.** Prefer scripts, skills and structured context
+to explaining the same thing every time. But build the tool *after* having done the task by
+hand, never before.
 
 ---
 
-## Mentalidad: aprender de los mejores
+## Mindset: learning from the best
 
-Dos ideas que Pol quiere que guíen el proyecto, y que en la práctica se contradicen
-si no se raciona:
+Two ideas Pol wants to guide the project, which in practice contradict each other unless rationed:
 
-**No reinventar la rueda.** Las empresas que ya funcionan han gastado cantidades
-enormes en desarrollar estrategias, productos y procesos. Estudiar qué funciona y
-adaptarlo es más inteligente que derivarlo todo desde cero.
+**Don't reinvent the wheel.** The companies that already work have spent huge amounts
+developing strategies, products and processes. Studying what works and adapting it is smarter
+than deriving everything from scratch.
 
-**Primeros principios.** Entender la física real, cuestionar supuestos, reconstruir
-la solución desde los fundamentos.
+**First principles.** Understand the real physics, question assumptions, rebuild the solution
+from the fundamentals.
 
-**La regla que las reconcilia:** primeros principios en el núcleo que quiere dominar
-(motor, inversor, control, dinámica del vehículo). Copiar sin vergüenza en todo lo
-demás (build systems, protocolos, librerías, tooling).
+**The rule that reconciles them:** first principles in the core he wants to master (motor,
+inverter, control, vehicle dynamics). Copy without shame everywhere else (build systems,
+protocols, libraries, tooling).
 
-Corolario que ya ha aparecido en la práctica: Motor Control Blockset trae FOC ya
-implementado. Usarlo directamente daría un quad que funciona y un ingeniero que no ha
-aprendido nada. **Primero construirlo desde las ecuaciones, después compararlo con la
-implementación de referencia.** La diferencia entre ambas versiones es el aprendizaje.
+A corollary that has already come up in practice: Motor Control Blockset ships FOC already
+implemented. Using it directly would give a quad that works and an engineer who has learned
+nothing. **First build it from the equations, then compare it with the reference
+implementation.** The difference between the two versions is the learning.
 
-**Israel y la cultura startup.** Una de las razones del traslado es aprender de ese
-ecosistema: probar, fallar, aprender, iterar, no rendirse. No hay idea de startup
-todavía, y está bien — primero conocimiento, experiencia y detectar problemas reales.
-No forzar una idea.
+**Israel and the startup culture.** One of the reasons for the move is to learn from that
+ecosystem: try, fail, learn, iterate, don't give up. There is no startup idea yet, and that is
+fine — first knowledge, experience and spotting real problems. Don't force an idea.
 
-## Por qué profundidad, y no "orquestador generalista"
+## Why depth, and not a "generalist orchestrator"
 
-Añadido el 2026-09-06 tras revisar el discurso dominante sobre el futuro de la
-ingeniería. Es el criterio de decisión para elegir en qué gastar las horas.
+Added on 2026-09-06 after reviewing the dominant discourse about the future of engineering.
+It is the decision criterion for choosing where to spend the hours.
 
-**El discurso que circula:** "cada vez importa menos especializarse; lo que importa
-es entender un poco de todo, plantear bien los problemas y dejar que los agentes de
-IA los resuelvan."
+**The discourse going around:** "specialising matters less and less; what matters is
+understanding a bit of everything, framing problems well and letting AI agents solve them."
 
-**Por qué se compra tan fácil:** los referentes que lo difunden viven de audiencia
-generalista. "No hace falta profundizar" vende mucho más que "pásate 200 horas con
-las ecuaciones de la máquina". Sesgo de fuente, no evidencia.
+**Why it is bought so easily:** the voices spreading it live off a generalist audience. "You
+don't need to go deep" sells far better than "spend 200 hours with the machine's equations".
+Source bias, not evidence.
 
-### El argumento técnico que lo desmonta
+### The technical argument that takes it apart
 
-> Si generar es gratis, **el cuello de botella pasa a ser verificar.**
-> Y solo se puede verificar lo que se entiende de verdad.
+> If generating is free, **the bottleneck becomes verifying.**
+> And you can only verify what you truly understand.
 
-Un agente escribe un FOC completo en 30 segundos. La pregunta que separa a un senior
-de un operador de prompts es: *¿está bien?* ¿El ancho de banda del lazo de corriente
-es coherente con la constante eléctrica del motor? ¿El anti-windup aguanta en
-saturación de tensión? ¿Por qué vibra a 200 rpm? Eso no se orquesta. Se sabe.
+An agent writes a complete FOC in 30 seconds. The question that separates a senior from a
+prompt operator is: *is it right?* Is the current loop bandwidth consistent with the motor's
+electrical time constant? Does the anti-windup hold under voltage saturation? Why does it
+vibrate at 200 rpm? That is not orchestrated. It is known.
 
-Es la misma tesis de Karpathy sobre entidades irregulares: los modelos disparan en
-dominios verificables y se estancan donde la verificación es difícil o inexistente.
-El humano que sabe verificar es el recurso escaso.
+It is the same thesis as Karpathy's on jagged entities: models shoot ahead in verifiable
+domains and stall where verification is hard or absent. The human who knows how to verify is
+the scarce resource.
 
-### Lo que sí es cierto del discurso
+### What is true in the discourse
 
-Descomponer problemas con precisión, diseñar contexto y saber cuándo usar la
-herramienta simple **sí** son habilidades nuevas y valiosas. Pero no sustituyen al
-dominio: lo multiplican. Amplitud sin profundidad no produce un arquitecto; produce
-un jefe de proyecto incapaz de auditar a nadie.
+Breaking problems down precisely, designing context and knowing when to use the simple tool
+**are** new and valuable skills. But they don't replace the domain: they multiply it. Breadth
+without depth does not produce an architect; it produces a project manager unable to audit anyone.
 
-El patrón real de carrera es en **T**: generalista al principio — enviar sistemas
-enteros uno solo, que es exactamente lo que es ePWT — y especialista a partir de
-senior. No "generalista para siempre". Los informes de contratación de 2026 apuntan
-a que el mercado paga la profundidad (brechas del 30–50%), aunque son fuentes de
-reclutamiento y conviene tomarlas como dirección, no como dato duro.
+The real career pattern is a **T**: generalist at the start — shipping whole systems alone,
+which is exactly what ePWT is — and specialist from senior on. Not "generalist forever". 2026
+hiring reports suggest the market pays for depth (gaps of 30–50 %), though they are recruiting
+sources and should be taken as direction, not hard data.
 
-### Consecuencias operativas
+### Operational consequences
 
-1. **Regla de verificación.** Lo que un agente genere en el núcleo (motor, inversor,
-   control, dinámica) debe poder explicarse sin mirarlo. Si no, no está hecho.
-   En build systems, protocolos y glue code: copiar sin vergüenza.
-2. **El gemelo digital es el verificador.** Modelo + banco real = *ground truth*.
-   Permite **comprobar** en vez de creer. Casi ningún candidato tiene eso.
-3. **Práctica deliberada por sesión.** Una habilidad aislada por sesión, no el
-   sistema entero a la vez. Menos carga cognitiva, más retención.
-4. **La amplitud llega sola.** Dominado un lazo de control de verdad, extenderlo a
-   estimación de estado, baterías o percepción es transferencia, no empezar de cero.
+1. **Verification rule.** What an agent generates in the core (motor, inverter, control,
+   dynamics) must be explainable without looking at it. If not, it is not done.
+   Build systems, protocols and glue code: copy without shame.
+2. **The digital twin is the verifier.** Model + real bench = *ground truth*. It lets you
+   **check** instead of believe. Almost no candidate has that.
+3. **Deliberate practice per session.** One isolated skill per session, not the whole system at
+   once. Less cognitive load, more retention.
+4. **Breadth comes by itself.** Once a control loop is truly mastered, extending it to state
+   estimation, batteries or perception is transfer, not starting from scratch.
 
-**Identidad objetivo — la frase que hay que poder decir en una entrevista:**
-no "arquitecto de agentes de IA", sino *ingeniero de control de powertrain que
-verifica con modelos y datos reales, y que opera con agentes*. El segundo perfil es
-escaso; el primero, en 2027, lo tendrá todo el mundo.
+**Target identity — the sentence to be able to say in an interview:** not "AI agent architect",
+but *a powertrain control engineer who verifies with models and real data, and who works with
+agents*. The second profile is scarce; the first, in 2027, everyone will have.
 
-### Lectura del mercado israelí (revisar al llegar)
+### Reading of the Israeli market (review on arrival)
 
-Señal consistente en las ofertas: control de motor con C/C++ bare-metal sobre TI
-C2000, embebido, y bring-up / integración / validación de sistemas autónomos y
-robótica física. Es una economía de hardware, defensa y autonomía, no de SaaS.
-Más de la mitad de las startups vinculadas a la DDR&D trabajan en UAV.
+Consistent signal in job posts: motor control in bare-metal C/C++ on TI C2000, embedded, and
+bring-up / integration / validation of autonomous systems and physical robotics. It is an
+economy of hardware, defence and autonomy, not of SaaS. More than half of the startups linked
+to the DDR&D work on UAVs.
 
-**Consecuencia:** no hay que convertir el quad en un dron. La máquina es la misma
-—PMSM con FOC— y el núcleo transferible es idéntico: FOC + embebido + modelo
-validado. La adaptación al mercado es de **encuadre y de una capa técnica añadida
-más tarde** (estimación de estado / control sin sensor), no de cambio de roadmap.
+**Consequence:** the quad does not have to become a drone. The machine is the same — a PMSM
+with FOC — and the transferable core is identical: FOC + embedded + validated model. The
+adaptation to the market is one of **framing and of a technical layer added later** (state
+estimation / sensorless control), not a change of roadmap.
 
-**Cautela pendiente de confirmar:** buena parte del trabajo de defensa clasificado
-exige ciudadanía y habilitación de seguridad. El objetivo realista de entrada es la
-franja comercial y dual —robótica, movilidad, semiconductores, autonomía— que no
-tiene ese filtro y usa la misma física.
+**Caution still to confirm:** a good part of classified defence work requires citizenship and
+security clearance. The realistic entry target is the commercial and dual-use band — robotics,
+mobility, semiconductors, autonomy — which has no such filter and uses the same physics.
 
 ---
 
-## Horizontes técnicos (no ahora, pero es hacia donde vamos)
+## Technical horizons (not now, but this is where we are going)
 
-- Gemelo digital en Simulink: dinámica longitudinal + máquina eléctrica, parametrizado
-  con medidas reales y validado contra ensayos.
-- Control de par / lazo de corriente en simulación, luego en el ESP32 (Model-Based Design).
-- Control de tracción y launch control.
-- MPC — **requiere un modelo validado primero.** Es secuencia, no rechazo.
-- Telemetría y logging propio; análisis de datos en Python.
-- Percepción, cámaras, sistemas autónomos, robot acompañante. Muy lejos, pero el quad
-  debe seguir siendo una plataforma que crece durante años. El proyecto no "termina".
+- Digital twin in Simulink: longitudinal dynamics + electric machine, parameterised with real
+  measurements and validated against tests.
+- Torque control / current loop in simulation, then on the ESP32 (Model-Based Design).
+- Traction control and launch control.
+- MPC — **needs a validated model first.** It is sequence, not rejection.
+- Own telemetry and logging; data analysis in Python.
+- Perception, cameras, autonomous systems, companion robot. Very far off, but the quad must
+  stay a platform that grows for years. The project does not "end".
 
 ---
 
-## Restricciones y datos duros
+## Constraints and hard data
 
-- **Tiempo disponible:** ~2 h/día, fines de semana incluidos. ~14 h/semana,
-  ~28 h por ciclo. Con flexibilidad al alza.
-- **Mentores:** ingenieros y doctores en motores térmicos, cada 2 semanas.
-  Pueden aportar rigor de ingeniería, crítica de método y accountability.
-  **No pueden validar el dominio EV/FOC** — para eso hace falta otra fuente.
-- **Idioma:** conversación en español; repo público, código, presentaciones y
-  LinkedIn en inglés. El inglés no es objetivo principal, pero es infraestructura:
-  el repo lo leerán reclutadores israelíes.
-- **Aspectos personales secundarios pero reales:** le cuesta hablar en público y tiene
-  cierta vergüenza social. Presentaciones y, más adelante, vídeo, son parte de la cura.
-  No convertirlo en objetivo del proyecto, pero tampoco evitarlo.
-- **Seguridad:** ver `CLAUDE.md`. El margen de batería es el riesgo real del proyecto.
+- **Time available:** ~2 h a day, weekends included, at the time of writing (since 25 Oct:
+  45–60 min Tuesday to Thursday, see the roadmap).
+- **Mentors:** engineers and PhDs in combustion engines, every 2 weeks. They can bring
+  engineering rigour, critique of method and accountability. **They cannot validate the EV/FOC
+  domain** — that needs another source.
+- **Language:** everything in English since 3 Nov 2026 (conversation, repo, presentations,
+  LinkedIn). English is not a main goal, but it is infrastructure: Israeli recruiters will
+  read the repo.
+- **Secondary but real personal aspects:** public speaking is hard and there is some social
+  shyness. Presentations and, later, video are part of the cure. Don't make it a goal of the
+  project, but don't avoid it either.
+- **Safety:** see `CLAUDE.md`. The battery margin is the real risk of the project.

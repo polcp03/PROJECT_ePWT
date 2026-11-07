@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rotating stator field</title>
+<style>
+:root{--text-primary:#1f1e1c;--text-secondary:#5f5e5a;--border-strong:#b4b2a9;--surface-1:#f4f3ef;--radius:8px;--bg:#fbfaf7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--text-primary:#ecebe6;--text-secondary:#a9a79f;--border-strong:#5f5e5a;--surface-1:#2a2a28;--bg:#1b1b1a}}
+body{background:var(--bg);color:var(--text-primary);font-family:system-ui,sans-serif;max-width:720px;margin:0 auto;padding:16px}
+h1{font-size:18px;margin:0 0 4px}p{font-size:14px;color:var(--text-secondary);margin:0 0 12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.th{font-size:14px;fill:var(--text-primary);font-weight:600}.ts{font-size:12px;fill:var(--text-secondary)}
+</style></head><body>
+<h1>My motor: how the stator field turns</h1>
+<p>9 slots, 6 poles (p = 3), seen from the shaft end. Saved 2026-11-06, the day the motor was opened. Source: <code>03_hardware/motor-parameters.md</code>.</p>
+<h2 class="sr-only">Animation of Pol's 9-slot 6-pole motor: the rotor turns, the three phase currents change, and the stator teeth become north or south so that the stator pattern turns with the rotor, one electrical cycle every 120 degrees of rotor.</h2>
+<style>
+.ctl{display:flex;align-items:center;gap:12px;margin:8px 0 0;font-size:13px;color:var(--text-secondary);flex-wrap:wrap}
+.ctl button{font-size:13px;padding:4px 12px;border-radius:var(--radius);border:0.5px solid var(--border-strong);background:var(--surface-1);color:var(--text-primary);cursor:pointer}
+</style>
+<svg id="m" width="100%" viewBox="0 0 680 410" role="img"><title>Rotating field</title><desc>Teeth turn red (north face) or blue (south face) as the three currents change; the pattern follows the rotor.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs></svg>
+<svg id="w" width="100%" viewBox="0 0 680 170" role="img"><title>Phase currents</title><desc>Three sine currents A, B, C; three full cycles per rotor turn.</desc></svg>
+<div class="ctl"><button id="pp">Pause</button><span>Speed</span><input type="range" id="sp" min="2" max="60" value="15" style="flex:1;min-width:120px"><span id="ro" style="min-width:210px">Rotor 0° mech · 0° el.</span></div>
+<script>
+const NS='http://www.w3.org/2000/svg',s=document.getElementById('m'),w=document.getElementById('w'),cx=230,cy=200;
+const P=(r,d)=>{const a=d*Math.PI/180;return[cx+r*Math.cos(a),cy+r*Math.sin(a)]};
+const f=p=>p[0].toFixed(1)+' '+p[1].toFixed(1);
+function el(par,t,a,txt){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt)e.textContent=txt;par.appendChild(e);return e}
+el(s,'path',{d:`M${cx-170} ${cy} a170 170 0 1 0 340 0 a170 170 0 1 0 -340 0 Z M${cx-140} ${cy} a140 140 0 1 0 280 0 a140 140 0 1 0 -280 0 Z`,'fill-rule':'evenodd',fill:'#888780',opacity:'0.3'});
+const ph=['A','B','C'],teeth=[],arr=[];
+for(let i=0;i<9;i++){const t=-90+i*40,u=[Math.cos(t*Math.PI/180),Math.sin(t*Math.PI/180)],v=[-u[1],u[0]];
+const q=(r,k)=>[cx+r*u[0]+k*v[0],cy+r*u[1]+k*v[1]];
+const pts=[q(140,-11),q(92,-11),P(92,t-15),P(86,t-15),P(86,t+15),P(92,t+15),q(92,11),q(140,11)].map(f).join(' ');
+teeth.push(el(s,'polygon',{points:pts,fill:'#888780'}));
+arr.push(el(s,'line',{stroke:'var(--text-primary)','stroke-width':'1.5','marker-end':'url(#arrow)'}));
+const L=P(155,t);el(s,'text',{class:'th',x:L[0],y:L[1],'text-anchor':'middle','dominant-baseline':'central'},ph[i%3]);}
+const rot=el(s,'g',{});
+el(rot,'path',{d:`M${cx-82} ${cy} a82 82 0 1 0 164 0 a82 82 0 1 0 -164 0 Z M${cx-36} ${cy} a36 36 0 1 0 72 0 a36 36 0 1 0 -72 0 Z`,'fill-rule':'evenodd',fill:'#888780',opacity:'0.35'});
+for(let k=0;k<6;k++){const c=-90+k*60,n=k%2==0;
+el(rot,'path',{d:`M${f(P(82,c-24))} A82 82 0 0 1 ${f(P(82,c+24))} L${f(P(72,c+24))} A72 72 0 0 0 ${f(P(72,c-24))} Z`,fill:n?'#D85A30':'#378ADD'});}
+const mk=P(68,-90);el(rot,'line',{x1:cx,y1:cy,x2:mk[0],y2:mk[1],stroke:'#BA7517','stroke-width':'2'});
+el(s,'circle',{cx,cy,r:14,fill:'#5F5E5A',opacity:'0.6'});
+const lg=[[60,'#D85A30','Red: north face'],[84,'#378ADD','Blue: south face'],[108,'#BA7517','Rotor marker']];
+for(const [y,c,t] of lg){el(s,'rect',{x:430,y:y-7,width:14,height:14,rx:3,fill:c});el(s,'text',{class:'ts',x:452,y:y,'dominant-baseline':'central'},t);}
+el(s,'text',{class:'ts',x:430,y:150},'Magnets: fixed on the rotor.');
+el(s,'text',{class:'ts',x:430,y:170},'Teeth: N or S set by current.');
+el(s,'text',{class:'ts',x:430,y:200},'Each blue tooth sits just');
+el(s,'text',{class:'ts',x:430,y:220},'ahead of a red magnet:');
+el(s,'text',{class:'ts',x:430,y:240},'it pulls the rotor round.');
+el(s,'text',{class:'ts',x:430,y:280},'Arrows: flux in the tooth.');
+const x0=60,x1=640,yc=80,A=45,X=m=>x0+(x1-x0)*m/360;
+const col=['#7F77DD','#1D9E75','#BA7517'];
+el(w,'line',{x1:x0,y1:yc,x2:x1,y2:yc,stroke:'var(--border-strong)','stroke-width':'0.5'});
+for(const m of [0,120,240,360]){el(w,'line',{x1:X(m),y1:yc-A-5,x2:X(m),y2:yc+A+5,stroke:'var(--border-strong)','stroke-width':'0.5','stroke-dasharray':'3 3'});el(w,'text',{class:'ts',x:X(m),y:yc+A+22,'text-anchor':'middle'},m+'°');}
+el(w,'text',{class:'ts',x:X(60),y:18,'text-anchor':'middle'},'1 electrical cycle');
+el(w,'text',{class:'ts',x:X(180),y:18,'text-anchor':'middle'},'2nd');
+el(w,'text',{class:'ts',x:X(300),y:18,'text-anchor':'middle'},'3rd');
+el(w,'text',{class:'ts',x:350,y:yc+A+42,'text-anchor':'middle'},'Rotor angle, mechanical: one full turn = 3 current cycles');
+const cur=(k,m)=>Math.cos((120*k-3*m+90)*Math.PI/180);
+for(let k=0;k<3;k++){let d='';for(let m=0;m<=360;m+=2)d+=(m?'L':'M')+X(m).toFixed(1)+' '+(yc-A*cur(k,m)).toFixed(1);el(w,'path',{d,fill:'none',stroke:col[k],'stroke-width':'1.5'});
+el(w,'text',{class:'ts',x:22,y:yc-30+k*30,'dominant-baseline':'central',fill:col[k]},'i'+ph[k]);}
+const cl=el(w,'line',{y1:yc-A-8,y2:yc+A+8,stroke:'var(--text-primary)','stroke-width':'1'});
+let th=0,run=!matchMedia('(prefers-reduced-motion: reduce)').matches,last=null;
+const pp=document.getElementById('pp'),sp=document.getElementById('sp'),ro=document.getElementById('ro');
+pp.textContent=run?'Pause':'Play';
+pp.onclick=()=>{run=!run;pp.textContent=run?'Pause':'Play';last=null;if(run)requestAnimationFrame(tick)};
+function draw(){rot.setAttribute('transform',`rotate(${th.toFixed(2)} ${cx} ${cy})`);
+for(let i=0;i<9;i++){const t=-90+i*40,v=Math.cos((120*i-3*th+90)*Math.PI/180),a=Math.abs(v);
+teeth[i].setAttribute('fill',v>0?'#D85A30':'#378ADD');teeth[i].setAttribute('fill-opacity',(0.1+0.75*a).toFixed(2));
+const h=4+18*a,p1=P(v>0?113+h:113-h,t),p2=P(v>0?113-h:113+h,t);
+arr[i].setAttribute('x1',p1[0]);arr[i].setAttribute('y1',p1[1]);arr[i].setAttribute('x2',p2[0]);arr[i].setAttribute('y2',p2[1]);arr[i].setAttribute('opacity',a>0.15?'1':'0');}
+cl.setAttribute('x1',X(th));cl.setAttribute('x2',X(th));
+ro.textContent=`Rotor ${Math.round(th)}° mech · ${Math.round(3*th)%360}° el.`;}
+function tick(ts){if(!run)return;if(last!==null){th=(th+(ts-last)/1000*sp.value)%360;}last=ts;draw();requestAnimationFrame(tick)}
+draw();if(run)requestAnimationFrame(tick);
+</script></body></html>

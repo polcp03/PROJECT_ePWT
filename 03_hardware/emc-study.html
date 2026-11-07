@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EMC on the quad: where the noise comes from and how to keep it out</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128225;</text></svg>">
+<style>
+/* NEWS_Engineering — hoja de estilo unica para los documentos en HTML.
+   La incrusta tools/render.py dentro de cada fichero generado, para que el HTML
+   sea autocontenido: se puede mover, enviar o abrir sin internet y sigue bien.
+   Si quieres cambiar el aspecto de TODOS los documentos, se cambia aqui. */
+
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#f3f4ef; --surface:#ffffff; --surface-2:#eceee6;
+  --ink:#1b2229; --ink-dim:#5c6570; --ink-faint:#8b939c;
+  --line:#d7d9d0;
+  --accent:#b1560f; --accent-ink:#ffffff; --accent-soft:#f1e3d4;
+  --teal:#1f6f78; --teal-soft:#e0edee;
+  --good:#3f7d43; --good-soft:#e3ede1;
+  --warn:#8d2f2f; --warn-soft:#f2e0df;
+  --shadow:0 1px 2px rgba(20,20,15,.06), 0 6px 20px -10px rgba(20,20,15,.18);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12161b; --surface:#181d24; --surface-2:#1e242b;
+    --ink:#e7e9e4; --ink-dim:#a4acb3; --ink-faint:#717a82;
+    --line:#2b323a;
+    --accent:#e2892f; --accent-ink:#12161b; --accent-soft:#2c2118;
+    --teal:#5fbcc4; --teal-soft:#182529;
+    --good:#7fbf82; --good-soft:#182a1a;
+    --warn:#e08585; --warn-soft:#2b1a1a;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -12px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12161b; --surface:#181d24; --surface-2:#1e242b;
+  --ink:#e7e9e4; --ink-dim:#a4acb3; --ink-faint:#717a82;
+  --line:#2b323a;
+  --accent:#e2892f; --accent-ink:#12161b; --accent-soft:#2c2118;
+  --teal:#5fbcc4; --teal-soft:#182529;
+  --good:#7fbf82; --good-soft:#182a1a;
+  --warn:#e08585; --warn-soft:#2b1a1a;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -12px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Source Serif 4',Georgia,'Times New Roman',serif;
+  font-size:17px; line-height:1.6;
+  padding:24px 16px 72px;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:720px;margin-inline:auto}
+h1,h2,h3,.disp{font-family:'Big Shoulders Display','Arial Narrow',sans-serif;text-transform:uppercase;text-wrap:balance;letter-spacing:.01em}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+a{color:var(--accent);text-underline-offset:2px}
+p{margin:0 0 .85em}
+strong{font-weight:600}
+em{font-style:italic}
+
+/* ---------- Barra de control ---------- */
+.bar{
+  position:sticky; top:0; z-index:20;
+  display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  margin:-24px -16px 20px; padding:10px 16px;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.bar button,.bar a.boton{
+  font-family:'IBM Plex Mono',ui-monospace,monospace;
+  font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink-dim); background:var(--surface);
+  border:1px solid var(--line); border-radius:999px;
+  padding:5px 12px; cursor:pointer;
+}
+.bar a.boton{text-decoration:none}
+.bar button:hover,.bar a.boton:hover{color:var(--ink);border-color:var(--ink-faint)}
+.bar .spacer{flex:1}
+.bar .src{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--ink-faint)}
+
+/* ---------- Cabecera ---------- */
+header.mast{
+  border:1px solid var(--line); background:var(--surface);
+  border-radius:4px; padding:22px; box-shadow:var(--shadow);
+  position:relative; overflow:hidden; margin-bottom:26px;
+}
+header.mast::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--accent)}
+.eyebrow{
+  font-family:'IBM Plex Mono',ui-monospace,monospace;
+  font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-faint); margin-bottom:10px;
+}
+header.mast h1{font-size:clamp(30px,7vw,46px);line-height:.95;margin:0 0 4px}
+.lede{
+  margin-top:18px; padding:14px 16px;
+  background:var(--surface-2); border-left:3px solid var(--accent); border-radius:0 3px 3px 0;
+  font-size:.96em;
+}
+.lede p:last-child{margin-bottom:0}
+.lede blockquote{border:none;background:none;padding:0;margin:0}  /* dentro del lede va plano */
+
+/* ---------- Indice ---------- */
+nav.toc{
+  border:1px solid var(--line); background:var(--surface);
+  border-radius:4px; padding:16px 18px; margin-bottom:30px; box-shadow:var(--shadow);
+}
+nav.toc .eyebrow{margin-bottom:12px}
+nav.toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+nav.toc li{margin:0 0 7px;padding-left:30px;position:relative;font-size:.92em;line-height:1.35}
+nav.toc li::before{
+  counter-increment:t; content:counter(t,decimal-leading-zero);
+  position:absolute; left:0; top:.15em;
+  font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px;
+  color:var(--ink-faint);
+}
+nav.toc li.grp{padding-left:0;margin:14px 0 8px;font-family:'Big Shoulders Display','Arial Narrow',sans-serif;
+  text-transform:uppercase;font-size:1.02em;color:var(--ink-dim);letter-spacing:.04em}
+nav.toc li.grp:first-child{margin-top:0}
+nav.toc li.grp::before{content:none}
+nav.toc a{color:inherit;text-decoration:none;border-bottom:1px solid transparent}
+nav.toc a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ---------- Seccion ---------- */
+section.vert{margin-bottom:34px}
+.vhead{display:flex;gap:12px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:16px}
+.vnum{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);font-weight:600}
+.vhead h2{margin:0;font-size:clamp(20px,4.5vw,27px);line-height:1}
+
+/* ---------- Ficha desplegable ---------- */
+details.item{
+  border:1px solid var(--line); background:var(--surface);
+  border-radius:4px; margin-bottom:10px; box-shadow:var(--shadow); overflow:hidden;
+}
+details.item[open]{border-color:var(--ink-faint)}
+details.item>summary{
+  cursor:pointer; list-style:none; padding:14px 16px 14px 40px; position:relative;
+  font-family:'Big Shoulders Display','Arial Narrow',sans-serif;
+  text-transform:uppercase; font-size:1.18em; line-height:1.1; color:var(--ink);
+}
+details.item>summary::-webkit-details-marker{display:none}
+details.item>summary::before{
+  content:"+"; position:absolute; left:16px; top:13px;
+  font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:15px; color:var(--accent);
+}
+details.item[open]>summary::before{content:"–"}
+details.item>summary:hover{background:var(--surface-2)}
+details.item[open]>summary{border-bottom:1px solid var(--line);background:var(--surface-2)}
+.body{padding:16px}
+.body>:last-child{margin-bottom:0}
+
+/* Etiqueta de apartado dentro de una ficha */
+.lbl{
+  font-family:'IBM Plex Mono',ui-monospace,monospace;
+  font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--accent); margin:18px 0 6px; font-weight:600;
+}
+.body>.lbl:first-child{margin-top:0}
+
+/* ---------- Tira de metadatos + distintivos ---------- */
+.meta{
+  display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center;
+  font-family:'IBM Plex Mono',ui-monospace,monospace;
+  font-size:11.5px; color:var(--ink-dim); margin:0 0 14px;
+}
+.badge{
+  display:inline-block; padding:2px 9px; border-radius:999px;
+  font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; font-weight:500;
+  background:var(--surface-2); color:var(--ink-dim); border:1px solid var(--line);
+}
+.badge.b-neutral{background:var(--surface-2)}
+.badge.b-teal{background:var(--teal-soft);color:var(--teal);border-color:var(--teal)}
+.badge.b-accent{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.badge.b-good{background:var(--good-soft);color:var(--good);border-color:var(--good)}
+.badge.b-warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+
+/* ---------- Puntuacion ---------- */
+.score{
+  display:flex; flex-wrap:wrap; gap:14px; align-items:center;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:4px;
+  padding:12px 14px; margin:0 0 16px;
+}
+.score-total{display:flex;align-items:baseline;gap:5px;font-family:'IBM Plex Mono',ui-monospace,monospace}
+.score-total b{font-size:26px;color:var(--accent);font-weight:600;line-height:1}
+.score-total span{font-size:12px;color:var(--ink-faint)}
+.score-crit{display:flex;gap:11px;flex-wrap:wrap}
+.crit{text-align:center;font-family:'IBM Plex Mono',ui-monospace,monospace}
+.crit .k{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:3px}
+.dots{display:flex;gap:2px;justify-content:center}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line);display:block}
+.dots i.on{background:var(--accent)}
+.score-note{flex-basis:100%;font-size:.86em;color:var(--ink-dim);font-family:'Source Serif 4',Georgia,serif}
+
+/* ---------- Elementos de texto ---------- */
+blockquote{
+  margin:0 0 1em; padding:10px 14px;
+  border-left:3px solid var(--teal); background:var(--teal-soft); border-radius:0 3px 3px 0;
+}
+blockquote p:last-child{margin-bottom:0}
+ul,ol{margin:0 0 1em;padding-left:1.3em}
+li{margin-bottom:.35em}
+li>ul,li>ol{margin-top:.35em;margin-bottom:.35em}
+code{
+  font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:.85em;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:3px; padding:1px 5px;
+}
+pre{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:4px;
+  padding:12px 14px; overflow-x:auto; margin:0 0 1em;
+}
+pre code{background:none;border:none;padding:0;font-size:.82em;line-height:1.5}
+hr{border:none;border-top:1px solid var(--line);margin:22px 0}
+table{width:100%;border-collapse:collapse;margin:0 0 1em;font-size:.92em}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{
+  font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); font-weight:600;
+  border-bottom:2px solid var(--line);
+}
+h3.plain{font-size:1.15em;margin:22px 0 8px;color:var(--ink)}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.1em;
+   text-transform:uppercase;color:var(--ink-faint);margin:18px 0 6px}
+footer.foot{
+  margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
+  font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--ink-faint);
+  display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+}
+
+/* ---------- Esquemas SVG dentro de un item ----------
+   En el .md van como <figure class="esquema"><svg>...</svg><figcaption>...</figcaption></figure>.
+   Los colores se ponen AQUI con clases: dentro de un atributo fill="var(...)" no se aplican. */
+figure.esquema{margin:6px 0 1.1em;padding:12px;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:4px;overflow-x:auto}
+figure.esquema svg{display:block;width:100%;height:auto;min-width:300px;max-width:640px;margin-inline:auto}
+figure.esquema figcaption{font-size:.84em;color:var(--ink-dim);margin-top:8px;line-height:1.45}
+.esquema .trazo{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.esquema .tenue{fill:none;stroke:var(--ink-faint);stroke-width:1.5;stroke-dasharray:4 4}
+.esquema .suelo{fill:none;stroke:var(--ink-dim);stroke-width:2}
+.esquema .peligro{fill:none;stroke:var(--warn);stroke-width:2.5;stroke-linecap:round}
+.esquema .bien{fill:none;stroke:var(--good);stroke-width:2.5;stroke-linecap:round}
+.esquema .relleno{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+.esquema .punto{fill:var(--accent);stroke:none}
+.esquema .punto-peligro{fill:var(--warn);stroke:none}
+.esquema .punto-bien{fill:var(--good);stroke:none}
+.esquema text{fill:var(--ink);font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px}
+.esquema text.tit{font-weight:600;font-size:12.5px;letter-spacing:.06em}
+.esquema text.dim{fill:var(--ink-dim);font-size:11px}
+.esquema text.t-peligro{fill:var(--warn)}
+.esquema text.t-bien{fill:var(--good)}
+
+/* ---------- Indice del archivo de briefs (reports/index.html) ---------- */
+.idx-list{display:flex;flex-direction:column;gap:12px}
+.idx-card{
+  display:block; background:var(--surface); border:1px solid var(--line); border-radius:4px;
+  padding:16px 18px; box-shadow:var(--shadow); text-decoration:none; color:inherit;
+  transition:border-color .15s;
+}
+.idx-card:hover{border-color:var(--accent)}
+.idx-wk{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.1em;
+  color:var(--accent);font-weight:600}
+.idx-card h2{font-size:1.3em;margin:5px 0 6px;text-transform:none;
+  font-family:'Source Serif 4',Georgia,serif;font-weight:600}
+.idx-card p{font-size:.9em;color:var(--ink-dim);margin:0}
+
+/* ---------- Impresion / PDF ---------- */
+@media print{
+  @page{size:A4;margin:14mm 13mm}
+  :root{--bg:#fff;--surface:#fff;--surface-2:#f4f4f0;--ink:#000;--ink-dim:#333;--line:#bbb;--shadow:none}
+  body{background:#fff;font-size:10.5pt;padding:0;line-height:1.45}
+  .bar{display:none}
+  .wrap{max-width:none}
+  details.item{break-inside:avoid;box-shadow:none;margin-bottom:8px}
+  details.item>summary{list-style:none}
+  details.item>summary::before{content:"" !important}
+  details:not([open])>.body{display:block}   /* en papel se imprime todo */
+  header.mast,nav.toc{box-shadow:none;break-inside:avoid}
+  section.vert{break-before:auto}
+  a{color:var(--ink);text-decoration:none}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:8pt;color:#555;word-break:break-all}
+  nav.toc a::after{content:none}
+}
+
+/* Texto para copiar tal cual (un post de LinkedIn): ```texto en el .md */
+pre.texto{white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:.95em;
+  line-height:1.55;background:var(--surface)}
+/* Imagen local metida en el HTML: ![pie](fichero.png) sola en su linea */
+figure.foto{margin:6px 0 1.1em}
+figure.foto img{display:block;width:100%;max-width:540px;height:auto;margin-inline:auto;
+  border:1px solid var(--line);border-radius:6px}
+figure.foto figcaption{font-size:.84em;color:var(--ink-dim);margin-top:6px;text-align:center}
+
+</style>
+</head>
+<body>
+<div class="bar">
+  <a class="boton" href="../../PANEL.html">Panel</a>
+  <button id="todo">Abrir todo</button>
+  <button id="tema">Tema</button>
+  <button id="pdf" onclick="window.print()">PDF</button>
+  <span class="spacer"></span>
+  <span class="src">PROJECT_ePWT/03_hardware/emc-study.md</span>
+</div>
+<div class="wrap">
+  <header class="mast">
+    <div class="eyebrow">NEWS_Engineering · generado el 6 de noviembre de 2026</div>
+    <h1>EMC on the quad: where the noise comes from and how to keep it out</h1>
+    <div class="lede"><blockquote><p>2026-11-06. <strong>The short version:</strong> EMC is not black magic. It is the currents you did not draw. Every current goes back to where it came from.</p><p>At high frequency it takes whatever path has the least inductance, and that includes capacitors you never fitted. On your quad the main risk is not radiation. It is the <strong>common-mode current</strong> that the VESC's switching edges push into the steel chassis.</p><p>Today the only way back to the VESC runs <strong>through your 12 V electronics and the CAN ground wire</strong>.</p><p>The fix is to give that current a short, deliberate path home, right at the inverter, and to keep every signal wire next to its own return. Ferrites are a legitimate tool, not the first one. Your IMU needs no filter: it needs <strong>no cable</strong>.</p><div class="lbl">Decided 2026-11-06:</div><p>You approved this plan. It is DEC-008: floating at DC, 20 nF bond at the inverter, IMU on the VCU board, shielded cable to the wheel Hall. The VCU drawings are at revision C. Tasks and parts: <a href="../01_plan/tasks/tasks.html">tareas-quad</a>, section EMC.</p></blockquote><p>Numbers in this page are tagged like the baseline: <strong>MEASURED</strong> on your quad, <strong>CALC</strong> (worked out here from known physics), <strong>ESTIMATE</strong> (typical value, not yours, to be measured) and <strong>CHECK</strong> (something you look at with a multimeter before deciding). Sources are at the end.</p><p>The research behind this found little that was specific to the Flipsky board. Treat any board-specific claim as CHECK.</p></div>
+  </header>
+  <nav class="toc"><div class="eyebrow">Indice</div><ol><li class="grp"><a href="#fundamentals-why-a-vesc-makes-noise">Fundamentals: why a VESC makes noise</a></li><li><a href="#the-source-fast-edges-not-30-khz">The source: fast edges, not 30 kHz</a></li><li><a href="#four-ways-noise-reaches-a-victim">Four ways noise reaches a victim</a></li><li><a href="#the-phases-make-an-electric-field-the-battery-le">The phases make an electric field, the battery leads a magnetic one</a></li><li><a href="#common-mode-current-the-one-that-causes-real-tro">Common-mode current: the one that causes real trouble</a></li><li><a href="#loop-area-the-one-rule-that-explains-almost-ever">Loop area: the one rule that explains almost everything</a></li><li><a href="#why-the-experts-call-it-black-magic-and-why-it-i">Why the experts call it black magic, and why it is not</a></li><li class="grp"><a href="#your-quad-as-it-is-today">Your quad, as it is today</a></li><li><a href="#the-architecture-seen-as-an-emc-engineer">The architecture, seen as an EMC engineer</a></li><li><a href="#the-mistake-to-avoid-a-hard-bond-of-the-pack-to-">The mistake to avoid: a hard bond of the pack to the chassis</a></li><li class="grp"><a href="#what-to-do-part-by-part">What to do, part by part</a></li><li><a href="#grounding-the-plan-in-five-rules">Grounding: the plan in five rules</a></li><li><a href="#the-inverter-box-aluminium-bonded-the-plate-doin">The inverter box: aluminium, bonded, the plate doing double duty</a></li><li><a href="#the-rotor-halls-in-the-phase-sleeve">The rotor Halls in the phase sleeve</a></li><li><a href="#the-imu-the-fix-is-no-cable">The IMU: the fix is no cable</a></li><li><a href="#can-the-shielded-cables-and-the-vcu-inputs">CAN, the shielded cables and the VCU inputs</a></li><li><a href="#cable-layout-in-a-cramped-chassis">Cable layout in a cramped chassis</a></li><li><a href="#ferrites-an-honest-verdict">Ferrites: an honest verdict</a></li><li class="grp"><a href="#before-deciding-checks-and-a-test-plan">Before deciding: checks and a test plan</a></li><li><a href="#fifteen-minutes-with-the-multimeter-check">Fifteen minutes with the multimeter (CHECK)</a></li><li><a href="#the-test-systems-engineering-style">The test, systems-engineering style</a></li><li><a href="#exercise-for-you">Exercise for you</a></li><li class="grp"><a href="#sources">Sources</a></li></ol></nav>
+  <section class="vert"><div class="vhead"><div class="vnum">01</div><h2>Fundamentals: why a VESC makes noise</h2></div><span id="fundamentals-why-a-vesc-makes-noise"></span><details class="item" id="the-source-fast-edges-not-30-khz"><summary>The source: fast edges, not 30 kHz</summary><div class="body"><p>Each half-bridge in the VESC slams its output (the "switch node") between 0 V and the pack voltage, 30 000 times a second per phase. The 30 kHz is not the problem. <strong>The speed of each edge is.</strong></p><ul><li>Edge: 54 V in roughly 20–50 ns → <strong>dV/dt ≈ 1–3 V/ns</strong> (ESTIMATE; measuring it needs a probe of 200 MHz or more on the switch node, which is not a beginner measurement).</li><li>A trapezoidal wave's spectrum is flat up to <code>1/(π·τ)</code> (τ = pulse width ≈ 17 µs at 50 % duty → <strong>≈ 19 kHz</strong>). It then falls 20 dB per decade up to <code>1/(π·t_rise)</code> (25 ns → <strong>≈ 13 MHz</strong>) and 40 dB per decade after that (CALC).</li><li>So the energy that causes trouble sits between <strong>1 and 100 MHz</strong>. On top of that, the stray inductance of the power loop (~10 nH) rings with the MOSFET capacitance (~1 nF). That puts a ringing at <code>1/(2π√LC)</code> ≈ <strong>50 MHz</strong> (ESTIMATE, order of magnitude).</li></ul><p>The edge frequencies are what an RC filter, a ferrite or a shield has to stop. A 30 kHz filter is not enough on its own.</p></div></details><details class="item" id="four-ways-noise-reaches-a-victim"><summary>Four ways noise reaches a victim</summary><div class="body"><p>Noise always needs three things: a <strong>source</strong>, a <strong>coupling path</strong> and a <strong>victim</strong>. Remove any one and the problem goes away. The paths:</p><table><thead><tr><th>Path</th><th>What couples</th><th>Grows with</th><th>Typical victim on your quad</th></tr></thead><tbody><tr><td><strong>Conducted</strong></td><td>shared wires (supply, ground)</td><td>shared impedance × current</td><td>a ground wire that two circuits share</td></tr><tr><td><strong>Capacitive</strong> (electric field)</td><td>a voltage that jumps, near a wire</td><td><code>C · dV/dt</code></td><td>high-impedance inputs: <strong>Hall lines next to the phases</strong></td></tr><tr><td><strong>Inductive</strong> (magnetic field)</td><td>a current that jumps, near a loop</td><td><code>M · di/dt</code>, loop area, 1/distance</td><td>a sensor wire whose return runs elsewhere</td></tr><tr><td><strong>Radiated</strong></td><td>a cable acting as an antenna</td><td>only when the cable is ~λ/2</td><td>barely: 1 m of cable resonates near 150 MHz</td></tr></tbody></table><p>At 10 cm from the inverter and below ~100 MHz, everything on your quad is <strong>near field</strong>. The far-field boundary <code>λ/2π</code> is 1.6 m at 30 MHz (CALC). That is good news. Near-field coupling is geometry, and geometry is something you control.</p></div></details><details class="item" id="the-phases-make-an-electric-field-the-battery-le"><summary>The phases make an electric field, the battery leads a magnetic one</summary><div class="body"><p>This is first principles, from your own motor:</p><ul><li><strong>Phase cables: the voltage jumps, the current does not.</strong> The phase current has to go through the motor inductance (L ≈ 105 µH, VESC_ESTIMATE). It ramps at most <code>V/L</code> = 54 V / 105 µH ≈ <strong>0.5 A/µs</strong> (CALC). That is slow. Their voltage, though, jumps 54 V in tens of ns. So the phase cables are mainly an <strong>electric-field (capacitive) aggressor</strong>.</li><li><strong>Battery leads: the current jumps.</strong> At every edge the DC-link current switches between 0 and the phase current. The VESC's capacitors supply most of that locally. Whatever they do not supply runs down the battery leads at 30 kHz with fast edges. So the battery leads are mainly a <strong>magnetic-field aggressor</strong>, and their loop area is what matters.</li></ul></div></details><details class="item" id="common-mode-current-the-one-that-causes-real-tro"><summary>Common-mode current: the one that causes real trouble</summary><div class="body"><p>Every conductor that jumps in voltage has a stray capacitance to nearby metal. For that capacitance, current is <code>I = C · dV/dt</code>:</p><ul><li>Motor winding → motor frame: ~0.2–2 nF is typical for a motor this size (ESTIMATE). <strong>Yours: not measured.</strong> The first readings were on the Hall wires by mistake. On the phases, the ANENG 681 reads ~0 nF, which is either below what it resolves or a poor contact (section 4). The design below does not depend on it.</li><li>With 1 nF and 2 V/ns: <strong>I ≈ 2 A peak</strong> for ~25 ns at every edge (CALC). That is 6 edges per PWM period, 30 000 periods per second.</li></ul><p>That current flows into the motor frame, then into the <strong>chassis</strong>, because the motor is bolted to it (<strong>CHECK</strong> continuity). It then has to get back to the VESC, which is where it started. <strong>A floating pack does not stop it. It only means that you have not chosen its way home.</strong> It then returns through whatever stray capacitances are available, and on your quad one of them leads through the 12 V electronics and the CAN ground wire.</p><figure class="esquema">
+<svg viewBox="0 0 640 320" role="img" aria-label="Common-mode current loop on the quad: from the VESC switch node through the phase cables, the motor winding capacitance and the chassis. Today it returns through the VCU and the CAN ground wire; with a 10 nF bond at the inverter it returns locally">
+<text class="tit" x="20" y="24">WHERE THE SWITCHING CURRENT GOES HOME</text>
+<rect class="relleno" x="40" y="50" width="180" height="60"/>
+<text x="56" y="76">VESC</text>
+<text class="dim" x="56" y="96">edges 1–3 V/ns</text>
+<rect class="relleno" x="440" y="50" width="170" height="60"/>
+<text x="456" y="76">MOTOR</text>
+<text class="dim" x="456" y="96">frame on chassis?</text>
+<line class="trazo" x1="220" y1="80" x2="440" y2="80"/>
+<text class="dim" x="232" y="70">phases + Halls, one sleeve</text>
+<line class="peligro" x1="525" y1="110" x2="525" y2="140"/>
+<line class="peligro" x1="508" y1="140" x2="542" y2="140"/>
+<line class="peligro" x1="508" y1="148" x2="542" y2="148"/>
+<line class="peligro" x1="525" y1="148" x2="525" y2="180"/>
+<text class="t-peligro" x="500" y="134" text-anchor="end">winding→frame</text>
+<text class="t-peligro" x="500" y="149" text-anchor="end">~1 nF, 2 A peaks</text>
+<line class="suelo" x1="150" y1="180" x2="620" y2="180"/>
+<text class="dim" x="330" y="198">steel chassis (floating today)</text>
+<line class="peligro" x1="300" y1="180" x2="300" y2="215"/>
+<line class="peligro" x1="284" y1="215" x2="316" y2="215"/>
+<line class="peligro" x1="284" y1="223" x2="316" y2="223"/>
+<line class="peligro" x1="300" y1="223" x2="300" y2="260"/>
+<line class="peligro" x1="300" y1="260" x2="190" y2="260"/>
+<text class="t-peligro" x="312" y="245">stray C to your electronics</text>
+<rect class="relleno" x="40" y="230" width="150" height="60"/>
+<text x="56" y="256">VCU · 12 V side</text>
+<text class="dim" x="56" y="276">ESP32, CAN, sensors</text>
+<line class="peligro" x1="60" y1="230" x2="60" y2="110"/>
+<text class="t-peligro" x="68" y="202">CAN GND:</text>
+<text class="t-peligro" x="68" y="217">today's way back</text>
+<line class="bien" x1="170" y1="110" x2="170" y2="138"/>
+<line class="bien" x1="155" y1="138" x2="185" y2="138"/>
+<line class="bien" x1="155" y1="146" x2="185" y2="146"/>
+<line class="bien" x1="170" y1="146" x2="170" y2="180"/>
+<text class="t-bien" x="196" y="140">20 nF bond (DEC-008)</text>
+<text class="t-bien" x="196" y="155">at the inverter</text>
+</svg>
+<figcaption>Red: the loop today. The switching edge charges the motor's stray capacitance, the current
+crosses the chassis and finds its way back through your 12 V electronics and the CAN ground wire.
+Green: a capacitor from the VESC ground to the chassis right at the inverter gives it a path 5 cm
+long instead of a metre, and that path keeps it out of the VCU.</figcaption>
+</figure></div></details><details class="item" id="loop-area-the-one-rule-that-explains-almost-ever"><summary>Loop area: the one rule that explains almost everything</summary><div class="body"><p>A current makes a magnetic field in proportion to the <strong>area of the loop</strong> formed by its way out and its way back. A victim picks up voltage in proportion to <strong>its own loop area</strong>. Both effects fall off with distance.</p><p>Worked example (CALC): a sensor wire 30 cm long, with its return 1 cm away (loop of 30 cm²). It sits 5 cm from a battery lead whose current changes 20 A in 1 µs:</p><ul><li>Field at 5 cm: <code>B = μ₀I / 2πr</code> → 4 µT per amp.</li><li>Mutual inductance: <code>M ≈ 4 µT/A × 0.003 m²</code> ≈ <strong>12 nH</strong>.</li><li>Picked-up voltage: <code>V = M · di/dt</code> = 12 nH × 20 A/µs ≈ <strong>0.24 V</strong>. Move the wire to 1 cm and it becomes ~1.2 V. That is a full logic level on a high-impedance input.</li><li><strong>Twist the wire with its return</strong> and the loop area drops to almost zero. Each twist cancels the next, and the pickup falls to millivolts.</li></ul><figure class="esquema">
+<svg viewBox="0 0 640 230" role="img" aria-label="Loop area: battery leads apart form a large loop, together they cancel; a sensor wire with its return elsewhere forms a large loop, twisted with its return it picks up almost nothing">
+<text class="tit" x="20" y="24">SAME WIRES, DIFFERENT LOOP AREA</text>
+<text class="dim" x="20" y="56">battery leads</text>
+<rect class="peligro" x="140" y="45" width="170" height="50"/>
+<text class="t-peligro" x="150" y="115">apart: the loop is an antenna</text>
+<line class="bien" x1="400" y1="62" x2="600" y2="62"/>
+<line class="bien" x1="400" y1="70" x2="600" y2="70"/>
+<text class="t-bien" x="400" y="115">together: the fields cancel</text>
+<text class="dim" x="20" y="156">sensor wire</text>
+<path class="peligro" d="M140 145 H310 V195 H140 Z"/>
+<text class="t-peligro" x="150" y="215">return elsewhere: ~1 V pickup</text>
+<path class="bien" d="M400 160 q12 -14 25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0"/>
+<path class="bien" d="M400 160 q12 14 25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0"/>
+<text class="t-bien" x="400" y="215">twisted with its return: mV</text>
+</svg>
+<figcaption>The current and the copper are the same in both columns; only the area between the way out
+and the way back changes. Each twist of a pair reverses the pickup of the one before it.</figcaption>
+</figure><p>Loop area and distance both act linearly. Twisting is free and divides the problem by 10–100. That is why "twist every signal with its return" comes before shields, boxes and ferrites.</p></div></details><details class="item" id="why-the-experts-call-it-black-magic-and-why-it-i"><summary>Why the experts call it black magic, and why it is not</summary><div class="body"><div class="lbl">What is predictable:</div><p>DV/dt, di/dt, loop areas, the order of magnitude of stray capacitance, skin depth, the frequency of a ringing. Everything in this section.</p><div class="lbl">What is not predictable from the drawing:</div><p>The real stray capacitances and inductances of your wiring, the resonances of a tubular chassis and its cables, and which way the return current actually takes. Nobody draws those, so the circuit "should" work and does not.</p><div class="lbl">The professional answer is a method, not a simulation:</div><p>Cut the source, shrink the loops, give every current a deliberate return, then <strong>measure before and after one change at a time</strong>. You already did exactly this in EXP-002. The noise entered through the breadboard SPI wiring, not through CAN.</p><p>The bus showed 0 errors at 49 A while single-ended, long, high-impedance wires failed. That is the whole of EMC in one experiment of yours.</p></div></details></section><section class="vert"><div class="vhead"><div class="vnum">02</div><h2>Your quad, as it is today</h2></div><span id="your-quad-as-it-is-today"></span><details class="item" id="the-architecture-seen-as-an-emc-engineer"><summary>The architecture, seen as an EMC engineer</summary><div class="body"><p>From baseline, DEC-004 and DEC-005:</p><table><thead><tr><th>Domain</th><th>Contents</th><th>Tied to the chassis?</th></tr></thead><tbody><tr><td>48 V</td><td>13S pack, BMS, VESC (bare board, held by a zip tie on painted steel), motor, rotor Halls</td><td>No (floating). The motor's aluminium case sits on a painted steel bracket bolted to the chassis: probably connected, continuity not yet measured</td></tr><tr><td>12 V</td><td>12 V battery, DC-DC to 5 V, ESP32 VCU, MCP2515/TJA1050, throttle, brakes, wheel Hall, IMU</td><td>No: the negative never goes to the chassis (by design, Pol 2026-11-06)</td></tr><tr><td>Link between them</td><td><strong>CAN-H, CAN-L and CAN GND</strong>, nothing else</td><td>—</td></tr></tbody></table><p><strong>What is already right</strong>, and why:</p><ol><li><strong>One galvanic link between the domains.</strong> One link means no DC ground loop. That is the lesson of the destroyed ESP32 (EXP-001), already applied.</li><li><strong>Throttle moved off the VESC's ADC.</strong> If it were tied to both, there would be two ground paths.</li><li><strong>CAN is differential.</strong> The TJA1050's receiver works with each bus wire anywhere between <strong>−12 V and +12 V</strong> relative to its ground (datasheet test window). Noise that hits both wires equally cancels. EXP-002 confirms it: 0 bus errors.</li><li><strong>Separate 12 V battery.</strong> No DC-DC from the pack, so no shared supply current.</li></ol><p><strong>What is weak:</strong></p><ol><li><strong>The common-mode current has no chosen path home.</strong> See the figure in section 1.</li><li><strong>The rotor Halls share a sleeve with the phases.</strong> Each Hall wire sits a few millimetres from wires that jump 54 V in tens of ns. More in section 3.</li><li><strong>The VESC is a bare board 10 cm from the LV electronics.</strong> The capacitive coupling from its switch nodes falls off with distance, and 10 cm is not much distance.</li><li><strong>The perfboard VCU, the IMU cable and the wheel-sensor run</strong> are single-ended, high-impedance lines. That is the kind of wire that failed in EXP-002.</li></ol></div></details><details class="item" id="the-mistake-to-avoid-a-hard-bond-of-the-pack-to-"><summary>The mistake to avoid: a hard bond of the pack to the chassis</summary><div class="body"><div class="lbl">Safety first, stated plainly</div><p>Do not connect the pack negative to the chassis with a wire or a bolt. Today the chassis floats, so a chafed <strong>positive</strong> cable touching the frame does nothing. It is a single fault and it is harmless.</p><p>With the negative bonded, that same chafe is a <strong>dead short of a 13S5P pack through the frame</strong>: hundreds of amps, and the BMS may or may not open in time.</p><p>54.6 V is below the 60 V DC limit where shock becomes the concern, so the risk here is <strong>fire, not shock</strong>. Floating is a safety feature. Keep it, and bond for high frequency only (next section).</p><p>Automotive 48 V systems are not a counter-example. They are designed with fused, insulated returns and with isolation in mind; they do not just bolt the negative to whatever metal is nearby.</p></div></details></section><section class="vert"><div class="vhead"><div class="vnum">03</div><h2>What to do, part by part</h2></div><span id="what-to-do-part-by-part"></span><details class="item" id="grounding-the-plan-in-five-rules"><summary>Grounding: the plan in five rules</summary><div class="body"><ol><li><strong>The 48 V pack stays floating at DC.</strong> No wire from pack negative to chassis.</li><li><strong>High-frequency bond at the inverter:</strong> two <strong>10 nF, 100 V ceramic (X7R) capacitors in parallel</strong> from the VESC's power ground to the chassis plate under it, leads under 2 cm, plus a <strong>1 MΩ</strong> resistor across them so the chassis cannot float up with static. Why 10 nF: it has to be a much lower impedance than the stray capacitance it short-circuits (~1 nF). At 10 MHz, 20 nF is ~0.8 Ω (CALC). A capacitor blocks DC, so a chafed positive cable still shorts nothing.</li><li><strong>The 12 V side stays floating from the chassis.</strong> If you bonded it too, the high-frequency loop "VESC ground → 10 nF → chassis → 12 V negative → CAN GND → VESC" would carry the common-mode current through the CAN ground wire again. <strong>CAN GND remains the only link</strong>, carrying almost no current, which is what a reference wire should do.</li><li><strong>The motor frame stays bolted to the chassis</strong>, as it is. That is what makes the chassis the return path in rule 2, and the loop then closes 5 cm from where it started. Your motor sits on a <strong>painted</strong> bracket, so the bolts may or may not make contact. If the continuity check fails, add a short braided strap from the motor case to bare chassis steel. Without it, the path from motor to chassis is only a capacitance, and rule 2 loses most of its effect.</li><li><strong>Write it down as a drawing:</strong> sheet 1 of the VCU drawings already shows the two domains. Add the chassis and the 10 nF bond to it so that whoever wires the quad (you, in six months) does not undo it.</li></ol><p>If you ever replace the 12 V battery with a DC-DC fed from the pack, the architecture changes. A non-isolated DC-DC is a second link between the domains. It would have to be an <strong>isolated</strong> one. That decision goes to <code>08_decisions/</code> before you buy anything.</p></div></details><details class="item" id="the-inverter-box-aluminium-bonded-the-plate-doin"><summary>The inverter box: aluminium, bonded, the plate doing double duty</summary><div class="body"><p>Your plan is right, with three details.</p><ul><li><strong>Aluminium, 1.5–2 mm.</strong> Skin depth is <strong>0.49 mm at 30 kHz and 27 µm at 10 MHz</strong> (CALC, <code>δ = 1/√(π f μ σ)</code>). At the frequencies that matter, 2 mm of aluminium blocks the electric field completely. Steel blocks low-frequency magnetic field better (δ ≈ 0.1 mm at 30 kHz). It is also heavier and worse for heat, and the magnetic field at 30 kHz is not your problem.</li><li><strong>The leak is never the wall. It is the holes and the cables.</strong> A cable that passes through the wall carries the noise straight out. So bring the battery and phase cables out <strong>through the same side</strong>, bundled, and the CAN and Hall cables out as far away from them as the box allows.</li><li><strong>Bare metal contact.</strong> Scrape the paint where the box meets the chassis plate, use a toothed washer and a bolt, and protect the joint against corrosion afterwards (paint or grease over the finished joint). One square centimetre of bare metal beats any length of wire. A wire ("pigtail") has ~1 nH per mm, so 5 cm is ~31 Ω at 100 MHz (CALC).</li><li><strong>Heat.</strong> Look at how the Flipsky plate is cooled before closing it in. The box bottom can serve as the heatsink with a thermal pad, if the plate is <strong>isolated</strong> from the board's ground. <strong>CHECK</strong> with the multimeter: is the VESC's aluminium plate connected to its power ground? If it is, it must not touch the box directly: it would be the DC bond rule 1 forbids.</li><li><strong>The steel chassis plate is your best shield, and it costs nothing.</strong> Inverter on top, LV box underneath: the plate is a metal wall between the aggressor and the victims. Do not waste it. Keep the LV wiring from going around its edge next to the VESC's cables.</li></ul></div></details><details class="item" id="the-rotor-halls-in-the-phase-sleeve"><summary>The rotor Halls in the phase sleeve</summary><div class="body"><p>You cannot separate them. So you work on the victim and on the common-mode current:</p><ul><li><strong>Why they get hit:</strong> wire-to-wire capacitance is ~20–50 pF per metre (ESTIMATE). Your <strong>50 cm</strong> of shared sleeve, motor to inverter (Pol, 2026-11-06), gives ~15 pF. At 2 V/ns that injects <strong>~30 mA spikes</strong> into a Hall line (CALC). A Hall output that is "off" is held high only by a pull-up: <strong>2.2 kΩ</strong> in the official VESC 6 schematics (R42–R44, versions 6.4 and MK5). That is a high-impedance node, and a 30 mA spike moves it easily.</li><li><strong>The fix that works:</strong> a small <strong>capacitor from each Hall line to ground at the VESC's Hall connector</strong>. The 30 mA × 25 ns charge (0.75 nC) into 10 nF moves the line by only <strong>75 mV</strong> (CALC). In the official schematics I could read the component list but not the drawing, and that list shows <strong>no filter capacitor on the Hall lines</strong>. Flipsky does not publish its own layout, so your board may differ. Either way the fix is the same: fit them on the plug side, three 10 nF ceramics from H1, H2 and H3 to the Hall GND pin, soldered inside the connector housing or on a small adapter. Values used in practice run from 1 to 22 nF. Keep the corner frequency well above your Hall edge rate: at top speed your motor runs at <strong>~290 Hz electrical</strong> (CALC: <code>(Vbus/√3)/λ</code> = 31 V / 16.855 mWb). With 2.2 kΩ and 10 nF the delay is 22 µs, about <strong>2.3° electrical at top speed</strong>. That is acceptable, and it is the reason not to go to 100 nF.</li><li><strong>A ferrite on the whole sleeve</strong> (phases and Halls through the same ring) is the textbook common-mode fix for a motor cable. See the ferrite card below before dismissing it.</li><li><strong>Symptoms to watch</strong> in VESC Tool: Hall errors, rough low-speed running, and noise in the phase current that is worse in sensored mode than in sensorless mode. Before blaming noise, check the wiring order after detection. Many reported "Hall errors" are wiring, not EMC.</li></ul></div></details><details class="item" id="the-imu-the-fix-is-no-cable"><summary>The IMU: the fix is no cable</summary><div class="body"><p>You expect the IMU to be the most vulnerable part. You are right, but the reason changes the fix. I2C is open-drain: every rising edge is a pull-up resistor charging the cable capacitance.</p><p>That is slow, single-ended and high-impedance. Noise does not make the readings noisy. It <strong>corrupts bits or locks the bus</strong>: a glitch on the clock leaves the IMU in the middle of a byte, holding SDA low indefinitely.</p><p>An RC filter does not fix that, and a shield only reduces it.</p><ol><li><strong>Put the IMU on the VCU board</strong>, inside the LV box, which is bolted rigidly to the chassis near the middle of the quad. No cable means no antenna. The box is close to the centre of gravity, which is where you want an IMU anyway. Mount the box rigidly, with no rubber, or you will measure the box's vibration rather than the quad's.</li><li><strong>Pull-ups of 4.7 kΩ to 3V3, not 10 kΩ</strong>, and the bus at 100 kHz. <strong>CHECK</strong> whether the new module already carries pull-ups; if it does, the two sets sit in parallel.</li><li><strong>In firmware:</strong> bus-lockup recovery (up to 9 clock pulses until SDA goes high, then a STOP), plus a counter of I2C errors written to the log. Then you will know, rather than guess.</li><li>If the IMU ever has to go far away, use the LSM6DS3's <strong>SPI</strong> mode or a differential extender. Do not use a longer I2C cable.</li></ol><p>The shielded 4-wire cable you bought is then free for a better job: the <strong>front wheel-speed Hall</strong>, the longest signal run on the quad.</p></div></details><details class="item" id="can-the-shielded-cables-and-the-vcu-inputs"><summary>CAN, the shielded cables and the VCU inputs</summary><div class="body"><ul><li><strong>CAN:</strong> twisted pair <strong>plus the GND wire, twisted together</strong>, as short as possible. Measure 60 Ω between CAN-H and CAN-L with everything off. Your 88 Ω reading is still unexplained: two 120 Ω terminations give 60 Ω. A TVS diode for CAN (e.g. PESD1CAN) costs cents. A common-mode choke (ACT45B type) only if a measurement asks for it: leave room for it on the board.</li><li><strong>Shields: one end only, and to the side of the source.</strong> CAN cable shield to the inverter box. Wheel-sensor shield to VCU ground at the VCU. Never use the shield as the signal return. Bond it with as short a connection as possible, because a long pigtail cancels the shield at high frequency.</li><li><strong>Every signal twisted with its own return</strong>: throttle (3 wires), brakes, wheel Hall, 12 V supply.</li><li><strong>RC filters, sized to the signal</strong> (CALC):</li></ul><table><thead><tr><th>Input</th><th>Signal it must pass</th><th>Filter</th><th>Corner</th><th>Note</th></tr></thead><tbody><tr><td>Throttle (GPIO 35)</td><td>&lt; 10 Hz</td><td>1 kΩ + 100 nF</td><td>1.6 kHz</td><td>already designed, fit it</td></tr><tr><td>Brakes (32, 33)</td><td>&lt; 10 Hz</td><td>10 kΩ + 100 nF</td><td>160 Hz</td><td>already designed</td></tr><tr><td>Wheel Hall (34)</td><td>~115 pulses/s at 40 km/h</td><td>10 kΩ + <strong>1 nF</strong></td><td>16 kHz</td><td>do <strong>not</strong> use 100 nF: 1 ms edges would blur pulse timing</td></tr><tr><td>Rotor Halls (on the VESC)</td><td>~1.7 kHz edges at top speed</td><td>1–10 nF to GND</td><td>depends on the board's pull-up</td><td>CHECK what is fitted</td></tr></tbody></table><p>The capacitor goes <strong>at the pin</strong>, with its ground on the same point as the ESP32's ground. The spike current then circulates in a loop a few millimetres long.</p><ul><li><strong>VCU supply:</strong> TVS on the 12 V input (SMBJ16A class; a lead-acid battery on charge reaches 14.4 V), reverse-polarity protection, and 100 nF + 10 µF at each module. Record <code>esp_reset_reason()</code> at every boot (you already do this in <code>boot.txt</code>), so that a brownout is never mistaken for EMC.</li></ul></div></details><details class="item" id="cable-layout-in-a-cramped-chassis"><summary>Cable layout in a cramped chassis</summary><div class="body"><ol><li><strong>Battery + and − together</strong>, zip-tied every 5 cm or twisted, from pack to VESC. A gap between them is a loop antenna carrying the 30 kHz ripple.</li><li><strong>The three phases bundled tight</strong>, as short as the layout allows.</li><li><strong>Low-voltage cables cross power cables at 90°</strong>, never parallel. Where they have to run together, keep the largest gap you can, and keep the chassis plate between them.</li><li><strong>Short battery leads</strong> to the VESC. Long leads add inductance in series with the DC-link capacitors and raise the voltage spikes on the board. If the leads are long, the usual VESC practice is an extra low-ESR capacitor at the board end.</li><li><strong>LV box under the plate, cables leaving it on the side away from the VESC's cables.</strong></li></ol></div></details><details class="item" id="ferrites-an-honest-verdict"><summary>Ferrites: an honest verdict</summary><div class="body"><p>Your instinct is half right.</p><ul><li><strong>At 30 kHz a ferrite does nothing.</strong> It is a few ohms. If the goal were to filter the PWM, it would be dead weight.</li><li><strong>It is not meant for 30 kHz.</strong> A clamp-on ferrite is a resistor that only common-mode current sees (current flowing the same way in every wire of the bundle). It works between ~10 and 300 MHz, which is exactly where your switching edges and cable resonances sit. Typical clamp: 100–250 Ω at 100 MHz with one pass, ×4 with two turns (ESTIMATE; material 31 for 1–300 MHz, 43 for 20–300 MHz). Signal current goes out and back through the same ring, so it cancels and passes untouched.</li><li><strong>Weight: 20–40 g</strong> for a clamp on the phase sleeve, against a 38 kg vehicle (0.1 %).</li><li><strong>When it is the right engineering:</strong> when you cannot change the source or the routing. That is exactly your Hall-in-the-phase-sleeve case. It is also a 2-minute A/B test: clip it on, measure, and remove it if nothing improves.</li><li><strong>When it is bad engineering:</strong> as the first fix, to hide a loop you could have closed. That is probably what you have seen on chargers.</li></ul></div></details></section><section class="vert"><div class="vhead"><div class="vnum">04</div><h2>Before deciding: checks and a test plan</h2></div><span id="before-deciding-checks-and-a-test-plan"></span><details class="item" id="fifteen-minutes-with-the-multimeter-check"><summary>Fifteen minutes with the multimeter (CHECK)</summary><div class="body"><p>Status 2026-11-06, from Pol's answers. All with the pack disconnected:</p><table><thead><tr><th>#</th><th>Check</th><th>Status</th></tr></thead><tbody><tr><td>1</td><td>Motor case ↔ chassis, continuity (beep)</td><td><strong>Done: continuity.</strong> The bracket bolts bite through the paint. No strap needed</td></tr><tr><td>2</td><td>Motor case ↔ a phase: must read open (MΩ). Then phase ↔ case on the <strong>capacitance</strong> range</td><td><strong>Insulation done, capacitance unresolved.</strong> Phases A–B–C: continuity. Phase ↔ case: open (insulation good). The first readings (0.04–0.28 nF) were taken on the <strong>Hall wires</strong> by mistake. On the phases, the capacitance to the bare aluminium case and to the shaft reads <strong>~0 nF</strong>, against an expected 0.1–0.5 nF. Either the meter cannot resolve it or the contact is poor. <strong>Not blocking:</strong> the 20 nF bond is sized for anything up to ~2 nF. Last try, if you want it: phase → a point that beeps with the chassis (a screw head)</td></tr><tr><td>3</td><td>VESC aluminium plate ↔ VESC power ground (battery negative pad)</td><td><strong>Done: open.</strong> The plate is isolated from the DC bus, so it can sit on a box bolted to the chassis</td></tr><tr><td>4</td><td>12 V negative ↔ chassis</td><td><strong>Done: open</strong></td></tr><tr><td>4b</td><td>Pack negative ↔ chassis</td><td><strong>Done: open.</strong> Both domains float, as designed</td></tr><tr><td>5</td><td>Shared Hall/phase sleeve length</td><td><strong>Done: 50 cm.</strong> DC leads, inverter to battery: ~40 cm</td></tr><tr><td>6</td><td>Capacitors on the VESC's Hall inputs</td><td><strong>Done, from the schematic:</strong> the VESC 6 reference has 2.2 kΩ pull-ups and no capacitors. Flipsky's layout is not public</td></tr></tbody></table></div></details><details class="item" id="the-test-systems-engineering-style"><summary>The test, systems-engineering style</summary><div class="body"><p>You already have a baseline: <strong>throttle spikes of +80 mV at 5 A with no RC</strong> (MEASURED 2026-11-05), and 0 CAN errors at 49 A (EXP-002). Use it:</p><ol><li><strong>Requirement first, written by you:</strong> something like "with battery current at 40 A, the throttle reading varies by at most X mV at rest, and the CAN error counters, I2C error counter and resets all stay at 0." Pick X yourself and say why (hint: what fraction of the throttle span is an acceptable torque error?).</li><li><strong>One change at a time</strong>, measured at 5, 20 and 40 A with the wheels in the air: baseline → throttle RC fitted → 10 nF bond → Hall capacitors → ferrite on the sleeve.</li><li><strong>Measure what you can:</strong> throttle ADC peak-to-peak and CAN errors (logger), Hall errors (VESC Tool). With the scope, use its FFT and a home-made near-field probe: 2–3 cm of coax bent into a loop at the 50 Ω input. It gives relative readings only, which is enough for before/after. An AM radio tuned between stations also "hears" the PWM and the DC-DC, crudely.</li><li><strong>Scope safety (EXP-001):</strong> the scope ground clip is mains earth. Never clip it to anything in the 48 V domain. In the 12 V domain, use a laptop without its charger, as DEC-004 says.</li></ol><p>This becomes <strong>EXP-004</strong> in <code>07_experiments/</code> when you decide to run it.</p></div></details><details class="item" id="exercise-for-you"><summary>Exercise for you</summary><div class="body"><p>Answer in your own words, in the app or in chat. I grade.</p><ol><li>The pack is floating. Why does the common-mode current still flow, and where does it go today?</li><li>Why a <strong>capacitor</strong> from the VESC ground to the chassis, and not a wire? Give the safety reason and the EMC reason.</li><li>Your phase cables carry 120 A. Why are they mainly an <em>electric</em>-field problem for the Halls, and the battery leads a <em>magnetic</em>-field one? Use your motor's inductance.</li><li>Someone tells you to bond the 12 V negative to the chassis "for a better ground". Draw the loop that this creates and say which wire would carry the noise.</li><li>The wheel Hall gets 10 kΩ + 100 nF "to be safe". What breaks, at what speed?</li></ol></div></details></section><section class="vert"><div class="vhead"><div class="vnum">05</div><h2>Sources</h2></div><span id="sources"></span><ul><li>Henry W. Ott, <em>Electromagnetic Compatibility Engineering</em>, Wiley 2009: grounding, shielding, cable coupling. Reference text. Chapter numbers not verified here. Slides: <a href="https://resourcecenter.emc.ieee.org//member-resources/knowledge-platform/emc_mem_kno_ott_010101_sld" target="_blank" rel="noopener">IEEE EMC Society, Ott</a></li><li>Common-mode EMI in inverter drives, review: <a href="https://doaj.org/article/16b218f429ac49998c3f303ee9447466" target="_blank" rel="noopener">IEEE Access 2021 (DOAJ)</a> · <a href="https://pub.pg.edu.pl/pl/download/117382-motor-cable-effect-on-the-converter-fed-ac-motor-common-mode-current" target="_blank" rel="noopener">motor cable effect on common-mode current</a></li><li><code>I = C·dV/dt</code>, chokes and filters in drives: <a href="https://PGE.com/assets/pge/docs/contact-us/report-an-issue/VFD-EMI_problems.pdf" target="_blank" rel="noopener">PG&amp;E, VFD EMI problems</a></li><li>TJA1050 receiver window −12/+12 V, bus pins −27/+40 V: <a href="https://manualmachine.com/datasheets/tja1050/5140383-datasheets-philips" target="_blank" rel="noopener">TJA1050 datasheet copy</a>. Confirm on NXP's current revision</li><li>Hall line filter, 22 nF and phase lag, ferrite on the phase bundle: <a href="https://discourse.odriverobotics.com/t/hall-sensor-noise/11732" target="_blank" rel="noopener">ODrive forum, Hall sensor noise</a> · <a href="https://endless-sphere.com/sphere/threads/grin-phaserunner-with-cyclone-3000-hall-sensor-problem.97905/latest" target="_blank" rel="noopener">endless-sphere, Phaserunner Hall problem</a> · <a href="https://vesc-project.com/node/442" target="_blank" rel="noopener">VESC forum, Hall noise in sensored mode</a></li><li>Hall errors that were wiring, not noise: <a href="https://electric-skateboard.builders/t/hall-sensor-detection-failure-vesc-4-12/108751" target="_blank" rel="noopener">esk8 builders</a> · <a href="https://endless-sphere.com/sphere/threads/hall-sensor-error-but-tested-ok-with-a-multimeter.128093/" target="_blank" rel="noopener">endless-sphere</a></li><li>CAN wiring in VESC builds, shields one end vs both: <a href="https://forum.esk8.news/t/hows-everyone-wiring-4wd-over-can-these-days/90988" target="_blank" rel="noopener">esk8.news, 4WD over CAN</a></li><li>I2C rise time, capacitance and pull-ups: <a href="https://www.nxp.com/docs/en/user-guide/UM10204.pdf" target="_blank" rel="noopener">NXP UM10204, I2C specification</a></li><li>CAN physical layer, split termination: <a href="https://www.ti.com/lit/an/slla270/slla270.pdf" target="_blank" rel="noopener">TI SLLA270</a></li><li>VESC 6 reference schematics, Hall pull-ups R42–R44 = 2.2 kΩ: <a href="https://vesc-project.com/node/311" target="_blank" rel="noopener">vesc-project.com, schematics page</a> (<a href="https://vesc-project.com/sites/default/files/Benjamin%20Posts/VESC_6.pdf" target="_blank" rel="noopener">VESC 6.4</a>, <a href="https://vesc-project.com/sites/default/files/Benjamin%20Posts/VESC_6_mk5.pdf" target="_blank" rel="noopener">VESC 6 MK5</a>). Flipsky's Mini 6.7 Pro is "based on VESC 6.6" (<a href="https://flipsky.net/products/mini-fsesc6-7-pro-70a" target="_blank" rel="noopener">Flipsky</a>); its own schematic is not published</li><li>Your own evidence: EXP-001, EXP-002, VCU pinout</li></ul></section>
+  <footer class="foot">
+    <span>Fuente: PROJECT_ePWT/03_hardware/emc-study.md</span>
+    <span>python tools/render.py PROJECT_ePWT/03_hardware/emc-study.md</span>
+  </footer>
+</div>
+<script>
+(function(){
+  var fichas = function(){ return document.querySelectorAll('details.item'); };
+  var b = document.getElementById('todo');
+  b.addEventListener('click', function(){
+    var abrir = b.textContent.indexOf('Abrir') === 0;
+    fichas().forEach(function(d){ d.open = abrir; });
+    b.textContent = abrir ? 'Cerrar todo' : 'Abrir todo';
+  });
+
+  // Un enlace del indice abre la ficha a la que apunta.
+  document.querySelectorAll('nav.toc a').forEach(function(a){
+    a.addEventListener('click', function(){
+      var d = document.querySelector(a.getAttribute('href'));
+      if (d && d.tagName === 'DETAILS') d.open = true;
+    });
+  });
+
+  // Dentro del Artifact la pagina va en un marco que no deja imprimir.
+  try { if (window.self !== window.top) document.getElementById('pdf').hidden = true; }
+  catch(e) { document.getElementById('pdf').hidden = true; }
+
+  // Al imprimir se abre todo y despues se deja como estaba.
+  var previo = [];
+  window.addEventListener('beforeprint', function(){
+    previo = [];
+    fichas().forEach(function(d){ previo.push(d.open); d.open = true; });
+  });
+  window.addEventListener('afterprint', function(){
+    fichas().forEach(function(d, i){ d.open = previo[i]; });
+  });
+
+  // Tema: sigue al sistema hasta que se toca el boton.
+  var guardado = null;
+  try { guardado = localStorage.getItem('tema'); } catch(e) {}
+  if (guardado) document.documentElement.setAttribute('data-theme', guardado);
+  document.getElementById('tema').addEventListener('click', function(){
+    var oscuro = getComputedStyle(document.body).backgroundColor === 'rgb(18, 22, 27)';
+    var nuevo = oscuro ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', nuevo);
+    try { localStorage.setItem('tema', nuevo); } catch(e) {}
+  });
+})();
+</script>
+</body>
+</html>

@@ -47,25 +47,31 @@
 mot.p            = 3;              % [-]  MEASURED
 
 % Stator resistance, per phase.
-% Mean of THREE consecutive VESC detections, 2026-09-07, all at I = 40.00 A:
-%   27.83 / 28.14 / 28.10 mOhm  ->  28.02 +/- 0.14 mOhm, 0.5 % spread.
+% FINAL (Pol, 2026-11-06): the value in the saved config,
+%   03_hardware/vesc/MOTOR_1.9.xml, foc_motor_r = 18.76 mOhm.
+% 2026-11-05: THREE VESC detections at I = 40 A, after rewriting the config,
+%   all 18.7 mOhm. Replaces the 2026-09-07 value (27.83 / 28.14 / 28.10 ->
+%   28.02 mOhm, same 40 A), which no longer reproduces. Cause of the change
+%   not found; temperature alone cannot explain 33 %.
 % Still a VESC_ESTIMATE: it includes MOSFET on-resistance and dead-time, so it
 % is the resistance the CURRENT LOOP sees, an upper bound on the winding
 % copper. That is the right number for simulating the loop; it is not the right
 % number for a copper-loss or thermal model. Temperature of the run unknown
 % (no motor sensor), and copper moves 0.39 %/K.
-mot.Rs           = 0.02802;        % [Ohm]  VESC_ESTIMATE, 3 runs
+mot.Rs           = 0.01876;        % [Ohm]  VESC_ESTIMATE, final config 2026-11-06
 
 % Inductances. VESC stores the average L and the saliency difference:
 %   Lq = L + diff/2 ,  Ld = L - diff/2      (foc_math.c:782-783)
-% Same three detections at I = 40.00 A:
+% FINAL (Pol, 2026-11-06): the saved config, foc_motor_l = 105.6 uH and
+%   foc_motor_ld_lq_diff = 14.42 uH  ->  Ld 98.39, Lq 112.81 uH, Lq/Ld 1.147.
+% History, the 2026-09-07 detections at I = 40.00 A:
 %   L      : 105.95 / 106.10 / 105.96 uH  ->  106.00 +/- 0.07 uH  (0.06 %)
 %   Lq-Ld  :  13.41 /  13.91 /  13.31 uH  ->   13.54 +/- 0.26 uH  (1.9 %)
-mot.L_avg        = 106.00e-6;      % [H]  VESC_ESTIMATE, 3 runs
-mot.L_diff       = 13.54e-6;       % [H]  VESC_ESTIMATE, 3 runs
-mot.Ld           = mot.L_avg - mot.L_diff/2;   %  99.23 uH
-mot.Lq           = mot.L_avg + mot.L_diff/2;   % 112.77 uH
-% Saliency ratio Lq/Ld = 1.136.
+mot.L_avg        = 105.6e-6;       % [H]  VESC_ESTIMATE, final config 2026-11-06
+mot.L_diff       = 14.42e-6;       % [H]  VESC_ESTIMATE, final config 2026-11-06
+mot.Ld           = mot.L_avg - mot.L_diff/2;   %  98.39 uH
+mot.Lq           = mot.L_avg + mot.L_diff/2;   % 112.81 uH
+% Saliency ratio Lq/Ld = 1.147 (1.136 in the 09-07 runs).
 % RESOLVED: the saliency is repeatable to 1.9 % when the detection settings are
 % held fixed. The old 9.45 / 16.90 uH spread came from runs at DIFFERENT
 % detection currents (the 2026-07-29 run used 97.85 A against 40 A here), i.e.
@@ -95,11 +101,6 @@ mot.lambda_m     = 0.016855;       % [Wb]  MEASURED
 % calibration, but the raw data supersedes it.
 % Scripts: 04_model/scripts/backemf_extract.py + backemf_fit.py
 
-% The VESC's own detection gives 15.92 mWb, 5.5 % LOWER. That sign is the one
-% theory predicts: the VESC infers lambda from the voltage it *commands*, which
-% is below the voltage actually applied because of dead time, and it subtracts
-% an R that is itself inflated by the MOSFET drop. Both errors push lambda down.
-% The agreement is therefore a genuine cross-validation, not a coincidence.
 % THIRD, INDEPENDENT CONFIRMATION - 2026-09-07, no-load steady state.
 % Held at the duty ceiling (0.9486) for 443 logged samples: 16440 ERPM,
 % |v_dq| = 28.886 V, iq = 1.883 A, Vbat 52.77 V.
@@ -108,16 +109,17 @@ mot.lambda_m     = 0.016855;       % [Wb]  MEASURED
 % costs td*fsw*Vbus = 0.12us * 30kHz * 52.77 = 0.19 V. Adding it back:
 %     lambda = 16.858 mWb   vs   16.855 mWb from the scope  ->  0.02 % apart.
 % Two methods sharing no assumption, agreeing to two parts in ten thousand.
-% It also explains the detection's 5.5 % shortfall: the same 0.19 V absolute
-% error is a much larger fraction of the low voltage present during detection.
 mot.lambda_m_nl  = 0.016858;       % [Wb] MEASURED, no-load telemetry route
 
-% The VESC detection (3 runs, 2026-09-07): 15.978 / 15.859 / 15.919 mWb
-% -> 15.919 +/- 0.049 mWb, repeatable to 0.3 % but 5.5 % LOW, as above.
-mot.lambda_m_vesc = 0.015919;      % [Wb] what the CONTROLLER believes it has.
-% Use mot.lambda_m for the plant and mot.lambda_m_vesc wherever the model
-% reproduces the VESC observer - the 5.5 % mismatch is real and lives in the
-% hardware, not in the model.
+% The VESC's own FOC detection is NOT a reference (corrected 2026-11-06).
+% Within one session it repeats to 0.3 % (2026-09-07, 3 runs at 40 A:
+% 15.978 / 15.859 / 15.919 mWb), but between sessions it ranges from 15.86 to
+% 17.0 mWb (16.07, 16.016, 16.19, then 17.0 / 16.2 / 16.7 / 16.8), about 7 %.
+% The measured 16.855 sits inside that range, so no fixed detection bias can be
+% claimed; the earlier "5.5 % low" came from the 09-07 session alone.
+% The saved config (03_hardware/vesc/MOTOR_1.9.xml, 2026-11-06) now holds the
+% measured 16.855 mWb, so the VESC observer and the plant use the same value.
+mot.lambda_m_vesc = 0.016855;      % [Wb] what the controller's config holds
 
 % Back-EMF waveform is not a pure sinusoid. MEASURED harmonic content of the
 % line-to-line voltage, identical in both captures (share of the fundamental):
@@ -134,17 +136,17 @@ mot.bemf_thd     = 0.094;          % [-] MEASURED
 % Derived constants (do not edit - computed from the above)
 mot.Kt           = 1.5 * mot.p * mot.lambda_m;   % [Nm/A] torque per amp of iq
 mot.Ke_phase_pk  = mot.lambda_m;                 % [V*s/rad_elec] peak phase BEMF
-mot.tau_e_d      = mot.Ld / mot.Rs;              % [s] 3.49 ms
-mot.tau_e_q      = mot.Lq / mot.Rs;              % [s] 3.82 ms
+mot.tau_e_d      = mot.Ld / mot.Rs;              % [s] 5.24 ms
+mot.tau_e_q      = mot.Lq / mot.Rs;              % [s] 6.01 ms
 % Kt = 0.0758 Nm/A  ->  40 A = 3.03 Nm, 120 A = 9.10 Nm.
-% (0.0716 with the VESC's own lambda. The 5.5 % gap is hardware, not model:
-%  the controller commands torque against a flux it underestimates.)
+% (0.0716 with the single 09-07 detection, 15.92 mWb: the reason the detection
+%  is not used.)
 % Kt scales linearly with p, so the whole torque axis of the model is only as
 % good as the pole-pair measurement.
 
 % Rotor inertia and drag, motor alone (chain off).
 % MEASURED 2026-09-07 from a VESC log: three spin-ups to the no-load speed
-% followed by free coast-downs. 06_data/inercia/2026-09-07_test_inercia.csv
+% followed by free coast-downs. 06_data/inercia/2026-09-07_inertia_test.csv
 % Script: 04_model/scripts/inertia_from_vesc_log.py
 %
 % Drag model:  T_drag(w) = T0 + b*w

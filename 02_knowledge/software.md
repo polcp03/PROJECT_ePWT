@@ -1,26 +1,27 @@
-# Software — lo que sé explicar
+# Software — what I can explain
 
-Cómo se trabaja: skill `software-con-ia`. Yo pongo el contrato y la prueba; la IA escribe el código.
-Aquí van mis respuestas ya corregidas.
+How the work is done: skill `software-con-ia`. I set the contract and the test; the AI writes
+the code. Here go my answers, already corrected.
 
-## ¿Cómo sé que un programa embebido está bien sin leer el código? (2-nov-2026)
+## How do I know an embedded program is right without reading the code? (2 Nov 2026)
 
-**Lo que dije:** leo dos nodos de CAN, hago una prueba (acelero, el motor se mueve), veo que lo que
-hago se correlaciona con lo que leo y no hay errores de CAN. Si el resultado es bueno, no hace falta
-leer cómo está hecho.
+**What I said:** I read two CAN nodes, I run a test (I accelerate, the motor moves), I see that
+what I do correlates with what I read and there are no CAN errors. If the result is good, there
+is no need to read how it is made.
 
-**Corrección.** El instinto es el bueno, y es el de un calibrador: comprobar contra la realidad física.
-Pero se queda en el escalón 3 de 6 (escalera en la skill `software-con-ia`):
+**Correction.** The instinct is the right one, and it is a calibrator's: check against physical
+reality. But it stops at step 3 of 6 (ladder in the `software-con-ia` skill):
 
-- "Plausible" no es un criterio. Hace falta un número: **0 tramas perdidas** y la frecuencia de
-  tramas igual a la que tiene configurada el VESC.
-- "No hay errores" solo vale si hay algo que los cuenta. Mi `can_logger` sí los cuenta:
-  `queue drops`, `hw overflows`, `SPI err` y los contadores de error del controlador de CAN
-  (`RX err`, `TX err`). La prueba es que sigan a 0. **El contrato tiene que exigir esos contadores**: sin ellos,
-  un fallo es invisible.
-- Una prueba de dos minutos no ve los fallos lentos: un contador de tiempo de 32 bits en
-  microsegundos vuelve a 0 a los **71,6 minutos**. Hay que aguantar 30 minutos o más a carga máxima.
-- Y hay que provocar los fallos: desconectar el cable, apagar un nodo, llenar la SD. ¿Qué hace?
+- "Plausible" is not a criterion. It needs a number: **0 frames lost** and the frame rate equal
+  to the one configured in the VESC.
+- "No errors" only counts if something counts them. My `can_logger` does: `queue drops`,
+  `hw overflows`, `SPI err` and the CAN controller's error counters (`RX err`, `TX err`). The
+  test is that they stay at 0. **The contract has to demand those counters**: without them, a
+  failure is invisible.
+- A two-minute test doesn't see slow failures: a 32-bit microsecond timer wraps to 0 after
+  **71.6 minutes**. It has to hold for 30 minutes or more at full load.
+- And the failures have to be provoked: unplug the cable, switch a node off, fill the SD. What
+  does it do?
 
-**Bien dicho, en una frase:** sin leer el código me fío de él si cumple un criterio con número, lo
-mantiene en una prueba larga y tiene contadores que demuestran que no ha fallado nada.
+**Said well, in one sentence:** without reading the code I trust it if it meets a criterion with
+a number, keeps it through a long test and has counters that prove nothing has failed.

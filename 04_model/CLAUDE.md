@@ -1,92 +1,91 @@
-# Sesión: Simulink / gemelo digital
+# Session: Simulink / digital twin
 
-Contexto adicional para trabajar en `04_model/`. Se suma al `CLAUDE.md` raíz.
+Extra context for working in `04_model/`. It adds to the root `CLAUDE.md`.
 
-## Regla nº1 — Parámetros en `.m`, estructura en `.slx`
+## Rule no. 1 — Parameters in `.m`, structure in `.slx`
 
-Git **no puede hacer diff de un `.slx`**: es un binario. Si metes los números dentro de
-los bloques, pierdes el historial de por qué cambió el modelo.
+Git **cannot diff a `.slx`**: it is a binary. If you put the numbers inside the blocks, you
+lose the history of why the model changed.
 
-Por tanto:
-- Todos los parámetros viven en `params/*.m` como texto plano, con **unidades SI** y
-  un comentario que diga si el valor es **MEDIDO** o **ASUMIDO**, y de dónde sale.
-- Los bloques del `.slx` referencian variables, nunca números literales.
-- Un cambio de calibración es entonces un diff legible en Git.
+Therefore:
+- Every parameter lives in `params/*.m` as plain text, in **SI units**, with a comment saying
+  whether the value is **MEASURED** or **ASSUMED**, and where it comes from.
+- The `.slx` blocks reference variables, never literal numbers.
+- A calibration change is then a readable diff in Git.
 
-## Regla nº2 — Un parámetro asumido se declara
+## Rule no. 2 — An assumed parameter is declared
 
-Si falta un dato de `03_hardware/baseline.md`, no lo estimes en silencio. Márcalo
-`ASSUMED` en el `.m` y anótalo como pregunta abierta. Un modelo lleno de asunciones
-ocultas produce resultados convincentes y falsos.
+If a value from `03_hardware/baseline.md` is missing, don't estimate it silently. Mark it
+`ASSUMED` in the `.m` and log it as an open question. A model full of hidden assumptions
+produces convincing, false results.
 
-## Regla nº3 — El modelo no vale nada hasta que se correlaciona
+## Rule no. 3 — The model is worth nothing until it correlates
 
-Antes de usar el modelo para diseñar control, tiene que reproducir un ensayo real
-medido (`06_data/`). Hasta entonces es una hipótesis, no una herramienta.
+Before the model is used to design control, it has to reproduce a real measured test
+(`06_data/`). Until then it is a hypothesis, not a tool.
 
-## Regla nº3b — Las predicciones se congelan antes de medir
+## Rule no. 3b — Predictions are frozen before measuring
 
-Desde C01. Una predicción se escribe con su banda en `results/C0X_predictions.md`
-**antes** del ensayo que la comprueba, y no se retoca después. Si una entrada
-cambia antes del ensayo (p. ej. una masa que pasa a MEDIDA), se publica una
-versión nueva y se dice qué cambió y por qué no es re-ajustar. Ajustar parámetros
-con un ensayo y "validar" con el mismo ensayo no valida nada: se valida con otro.
+Since C01. A prediction is written with its band in `results/C0X_predictions.md` **before**
+the test that checks it, and is not touched afterwards. If an input changes before the test
+(e.g. a mass that becomes MEASURED), a new version is published, saying what changed and why
+it is not refitting. Fitting parameters with one test and "validating" with the same test
+validates nothing: you validate with another one.
 
-## Cómo enseñarme
+## How to teach me
 
-Antes de un bloque, la física. Antes del modelo, la ecuación. Quiero saber qué
-hipótesis mete cada simplificación y cuándo deja de valer. Si propones una estructura
-de modelo, dime también qué **no** captura.
+Before a block, the physics. Before the model, the equation. I want to know which assumption
+each simplification brings in and when it stops holding. If you propose a model structure,
+also tell me what it does **not** capture.
 
-## Orden de construcción
+## Build order
 
-1. Dinámica longitudinal del vehículo (masa, rueda, transmisión, rodadura, aero).
-2. Máquina eléctrica en dq (PMSM).
-3. Inversor + lazo de corriente.
-4. FOC completo (Clarke, Park, control Id/Iq).
-5. Estrategias de vehículo (tracción, launch).
+1. Longitudinal vehicle dynamics (mass, wheel, drivetrain, rolling, aero).
+2. Electric machine in dq (PMSM).
+3. Inverter + current loop.
+4. Full FOC (Clarke, Park, Id/Iq control).
+5. Vehicle strategies (traction, launch).
 
-No saltar niveles. Cada nivel se valida antes del siguiente.
+Don't skip levels. Each level is validated before the next.
 
-## Estructura de la carpeta
+## Folder structure
 
 ```
-params/     scripts .m con parámetros (texto, versionable)
-models/     archivos .slx
-scripts/    scripts de ensayo, comparación modelo-vs-datos, plots
-results/    figuras y salidas de correlación
+params/     .m scripts with parameters (text, versionable)
+models/     .slx files
+scripts/    test scripts, model-vs-data comparison, plots
+results/    figures and correlation outputs
 ```
 
-## Qué hay ahora (2026-10-09)
+## What is here now (2026-10-09)
 
-| Archivo | Qué es |
+| File | What it is |
 |---|---|
-| `scripts/build_longitudinal_L1.m` | Construye `models/longitudinal_L1.slx` desde cero. **El script es la fuente revisable**; el `.slx` es un artefacto |
-| `scripts/run_predictions_L1.m` | Predicciones C01 + barrido de sensibilidad + CSV para el deck |
-| `scripts/build_longitudinal_L2.m` | L2 = L1 reagrupado en 4 subsistemas + 2 huecos vacíos (load transfer, launch control) |
-| `scripts/run_regression_L1_L2.m` | L2 tiene que dar lo mismo que L1 mientras los huecos estén vacíos |
-| `results/C01_predictions.md` | Predicciones congeladas, v2 |
+| `scripts/build_longitudinal_L1.m` | Builds `models/longitudinal_L1.slx` from scratch. **The script is the reviewable source**; the `.slx` is a build artefact |
+| `scripts/run_predictions_L1.m` | C01 predictions + sensitivity sweep + CSVs for the deck |
+| `scripts/build_longitudinal_L2.m` | L2 = L1 regrouped in 4 subsystems + 2 empty gaps (load transfer, launch control) |
+| `scripts/run_regression_L1_L2.m` | L2 has to give the same as L1 while the gaps are empty |
+| `results/C01_predictions.md` | Frozen predictions, v2 |
 
-Construir un `.slx` desde un script cumple la regla nº1 mejor que editarlo a mano:
-cada bloque y cada conexión quedan en texto y salen en el diff.
+Building a `.slx` from a script meets rule no. 1 better than editing it by hand: every block
+and every connection stays in text and shows up in the diff.
 
-## Regla nº4 — El agente lee y simula; los bloques los pongo yo
+## Rule no. 4 — The agent reads and simulates; I place the blocks
 
-El Simulink Agentic Toolkit expone tools de **escritura** sobre el `.slx` (crear y
-conectar bloques, cambiar parámetros). No se usan salvo petición explícita mía en
-esa misma conversación.
+The Simulink Agentic Toolkit exposes **write** tools on the `.slx` (create and connect blocks,
+change parameters). They are not used unless I explicitly ask in that same conversation.
 
-Motivo: el `.slx` es binario, así que un cambio hecho por el agente **no se puede
-revisar en el diff**. Un modelo que yo no he construido es un modelo que no sé
-defender delante de un mentor, y eso rompe el Objetivo 0.
+Reason: the `.slx` is binary, so a change made by the agent **cannot be reviewed in the
+diff**. A model I didn't build is a model I can't defend in front of a mentor, and that breaks
+Goal 0.
 
-Reparto:
-- **Agente**: leer estructura del modelo, consultar parámetros, lanzar simulaciones,
-  comparar contra `06_data/`, escribir y ejecutar `.m` de `params/` y `scripts/`,
-  señalar qué no cuadra y por qué.
-- **Yo**: colocar y conectar los bloques.
+Split:
+- **Agent**: read the model structure, query parameters, run simulations, compare against
+  `06_data/`, write and run the `.m` files in `params/` and `scripts/`, point out what doesn't
+  add up and why.
+- **Me**: place and connect the blocks.
 
-> [!warning] Excepción registrada — C01, 2026-10-08
-> L1 y la estructura de L2 los construyó el agente, a petición explícita, con la
-> review al día siguiente. Resultado: un modelo que no sabía explicar, y una noche
-> de preguntas para reconquistarlo. **Los huecos de L2 los relleno yo.**
+> [!warning] Recorded exception — C01, 2026-10-08
+> L1 and the structure of L2 were built by the agent, on explicit request, with the review the
+> next day. Result: a model I couldn't explain, and a night of questions to win it back. **I
+> fill the L2 gaps myself.**

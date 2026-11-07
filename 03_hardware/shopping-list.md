@@ -1,75 +1,120 @@
-# Lista de compra — hardware pendiente
+# Shopping list — pending hardware
 
-Actualizada 2026-11-01 (noche): velocidad de rueda montada, tarjeta e IMU rotas. Marcar `[x]` al recibir y
-mover al inventario de `baseline.md`.
+Updated 2026-11-06: **everything below is ordered and on its way** (Pol). Tick arrivals on
+[Quad Tasks](https://claude.ai/artifact/4hkig3fuuywMzBDRh6fefu), section 1; the Sunday sync marks
+them here and moves them to the inventory in `baseline.md`.
+`[~]` ordered · `[x]` arrived.
 
-## Ahora — para usar el registrador montado en el quad (~35 €)
+## For the logger mounted on the quad (~55 €)
 
-- [ ] **Tarjeta microSD 16–32 GB, de marca (SanDisk o Samsung)** · ~6 €
-  Buscar: `microSD SanDisk 32GB`
-  La Kodak de 16 GB murió el 2026-11-01: contesta, pero no guarda lo que se le escribe
-  (ni un formateo). Sin tarjeta el registrador no graba nada. **La primera.** Más de 32 GB
-  viene en exFAT y hay que pasarla a FAT32.
-  Al llegar el lector, mirar la vieja en el PC: no la ve = chip muerto; la ve pero no
-  formatea = se bloqueó en solo lectura; formatea bien = revisar el módulo SD.
-  Se calentó estando en reposo: fallo interno. Causas probables: cortes de corriente
-  grabando (muchos reinicios ese día), meterla o sacarla en caliente, estática.
+- [~] **microSD card 16–32 GB, branded (SanDisk or Samsung)** · ~6 €
+  Search: `microSD SanDisk 32GB`
+  The 16 GB Kodak died on 2026-11-01: it answers but keeps nothing written to it (not even a
+  format). Without a card the logger records nothing. Over 32 GB comes as exFAT and must be
+  reformatted to FAT32.
+  When the reader arrives, check the old one on the PC: not seen = dead chip; seen but won't
+  format = locked read-only; formats fine = check the SD module.
+  It got warm while idle: internal failure. Likely causes: power cuts while recording (many
+  resets that day), inserting or removing it powered, static.
 
-- [ ] **IMU GY-LSM6DS3 ×1 (o ×2, por si acaso)** · ~5 € cada una
-  Buscar: `GY-LSM6DS3`
-  La de inventario se rompió soldándola (se arrancó la resistencia de SDA). Al soldar la
-  nueva: pines primero en la protoboard, punta fina y poco tiempo.
+- [~] **IMU GY-LSM6DS3 ×2** · ~5 € each
+  Search: `GY-LSM6DS3`
+  The one in stock broke while soldering (the SDA resistor came off). Soldering the new one:
+  pins in the breadboard first, fine tip, short time.
 
-- [ ] **Condensadores cerámicos 100 nF ("104"), surtido** · ~3 €
-  Buscar: `condensador ceramico 100nF 104 pack`
-  Uno junto a cada sensor (Hall, IMU), entre VCC y GND. El de 220 µF que hay no filtra
-  el ruido rápido.
+- [~] **Ceramic capacitors 100 nF ("104"), assorted** · ~3 €
+  Search: `condensador ceramico 100nF 104 pack`
+  One next to each sensor (Hall, IMU), between VCC and GND. The 220 µF in stock does not filter
+  fast noise.
 
-- [ ] **Termistor NTC 10 kΩ con cable ×2** (uno de repuesto) · ~2 €
-  Buscar: `NTC 10K 3950 termistor cable`
-  Temperatura del motor, al pin `TEMP` del conector de los Hall del **VESC** (no a la VCU;
-  comprobar el pin en la placa). Pegado a la carcasa con cinta kapton o epoxi térmico.
-  En VESC Tool: tipo NTC y la beta de la pieza comprada (3950 o 3380). Reactiva los límites
-  de 85/100 °C y da `R(T)` para validar el modelo ([DEC-005](../08_decisions/DEC-005-arquitectura-vcu.md)).
-  Decidido por Pol el 2026-11-01.
+- [~] **NTC thermistor 10 kΩ with lead ×2** (one spare) · ~2 €
+  Search: `NTC 10K 3950 termistor cable`
+  Motor temperature, to the **VESC's** temperature input (not the VCU). The motor's Hall cable
+  has no temperature wire (seen 2026-11-06), so it needs its own. Stuck to the case with kapton
+  tape or thermal epoxy. In VESC Tool: type NTC and the beta of the part bought (3950 or 3380).
+  Re-enables the 85/100 °C limits and gives `R(T)` to validate the model
+  ([DEC-005](../08_decisions/DEC-005-vcu-architecture.md)). Decided by Pol on 2026-11-01.
 
-- [ ] **Lector microSD USB ×1** · ~5 €
-  Buscar: `lector tarjetas microSD USB`
-  El PC no tiene ranura SD. Descargar por el USB del ESP32 funciona pero mete basura en
-  ficheros grandes (hay que bajar cada uno tres veces). Con lector: segundos y sin errores.
+- [~] **USB microSD card reader ×1** · ~5 €
+  Search: `lector tarjetas microSD USB`
+  The PC has no SD slot. Downloading over the ESP32's USB works but corrupts big files (each
+  one had to be downloaded three times). With a reader: seconds and no errors.
 
-- [ ] **Placa perforada + tiras de pines hembra** · ~5 €
-  Buscar: `placa perforada PCB prototipo 7x9 cm` y `tira pines hembra 2.54`
-  La protoboard con cables dupont no aguanta las vibraciones del quad, y los cables
-  largos del SPI fueron la entrada del ruido (EXP-002). Soldado y corto. ESP32 y módulos
-  en zócalos de pines hembra, para poder cambiarlos.
+### The logger board (~20 €)
 
-- [ ] **Caja de plástico pequeña** · ~5 € (opcional)
-  Buscar: `caja estanca ABS 100x68x50`
-  Polvo y barro. De plástico: una de aluminio habría que conectarla a masa con criterio.
+Layout: [`05_firmware/vcu-design/perfboard-layout.html`](../05_firmware/vcu-design/perfboard-layout.html)
+(artifact https://claude.ai/artifact/FaUSu6HwdwUUkRSe6dvWig, sheet 3). The breadboard with dupont
+wires does not survive the quad's vibration, and the long SPI wires were where the noise got in
+(EXP-002): soldered and short, with the ESP32 and the modules pluggable.
 
-## Ya en inventario — NO comprar
+- [~] **Double-sided perfboard 9×15 cm (plated holes)** ×2 · ~4 €
+  Search: `placa perforada 9x15 doble cara`
+  The 7×9 one is too small: the layout takes 44×34 holes (112×86 mm). The second is a spare.
+  The IMU no longer needs its own small board: it plugs into the VCU board.
+- [~] **Female pin headers 2.54 mm, 1×40** ×3 · ~2 €
+  Search: `tira pines hembra 2.54 40`
+  Sockets for the ESP32 (2×19), the SD module (1×6, it stands upright in it) and the IMU
+  (1×8, on the VCU board).
+- [~] **Male pin header 2.54 mm, 1×40** ×1 · ~1 €
+  For the CAN cable board (1×7).
+- [~] **Screw terminals, 5.08 mm pitch, 2 and 3 poles** · ~3 €
+  Search: `borne tornillo 5.08 2P 3P`. Needed: 1 two-pole (J1; the IMU terminal J6 is gone)
+  and 4 three-pole (wheel, throttle, brakes and CAN to the VESC). Buy a pack.
+- [~] **Bare tinned copper wire 0.6 mm** · ~2 €
+  Search: `hilo cobre estañado 0.6mm`. Only for the GND, +5 V and +3.3 V buses.
+- [~] **Solid insulated wire 22 AWG, colour kit** · ~6 €
+  Search: `cable rigido 22AWG kit colores`. Everything else: it may cross over another wire.
+- [~] **Dupont cable female–female 10 cm (strip of 40)** · ~2 €
+  From the CAN module to the board: its pins point up, so it does not plug in. Peel off a strip
+  of 7 wires that stay together, with a drop of hot glue at each end.
+- [~] **Nylon M3 standoffs 10 mm with screws (kit)** · ~4 €
+  Search: `separadores nylon M3 kit`. The CAN module above the board, the board inside the box.
+- [~] **Shielded 4-core cable, 1 m**
+  For the front wheel Hall (DEC-008), shield to GND at the VCU end only.
+- [~] **Sealed ABS box ~150×110×70 mm** · ~8 €
+  Search: `caja estanca ABS 150x110x70`
+  Dust and mud. At least 60 mm tall inside: the SD stands upright (42 mm) and the CAN module
+  sits on standoffs. Plastic: an aluminium one would need grounding with care. Bolt it
+  **rigidly** to the chassis, no rubber: the IMU is inside now.
 
-- ESP32 ×2 de repuesto (el nº 2 hace de registrador)
-- MCP2515 + TJA1050, módulo microSD (la tarjeta, muerta), batería 12 V + DC-DC a 5 V
-- Sensores Hall 3144 (uno montado en la rueda delantera, el resto de repuesto) + imanes;
-  el acelerador Hall de 5 V
-- Protoboard, cables dupont, resistencias, osciloscopio, multímetro, soldador
+## EMC parts (DEC-008) · ~10 €
 
-## Cuando toque la unidad de control del vehículo
+Small parts for the grounding plan.
 
-Pinout decidido: [`05_firmware/docs/vcu-pinout.md`](../05_firmware/docs/vcu-pinout.md). Las
-resistencias (10 k, 12 k) salen del inventario y los condensadores, del surtido de 100 nF
-de arriba. Lo único por decidir es el corte de emergencia.
+- [~] **Ceramic capacitor 10 nF, 100 V, X7R** ×10 · ~2 €
+  Search: `condensador ceramico 10nF 100V X7R`. Two for the bond VESC ground → chassis, three for
+  the rotor Halls at the VESC plug, the rest spare. **100 V, not 50 V**: the bond sees the pack.
+- [~] **Ceramic capacitor 1 nF** ×5 · ~1 €
+  C9, the wheel input filter, and spares.
+- [~] **Resistor 1 MΩ** ×2 and **4.7 kΩ** ×4 · ~1 €
+  1 MΩ across the bond capacitors (bleeds static). 4.7 kΩ: IMU pull-ups, only if the new module has none.
+- [~] **TVS diode SMBJ16A** ×2 · ~2 €
+  At the 12 V input of the VCU, against spikes on the 12 V wiring.
+- [~] *Optional:* **clamp-on ferrite, material 31, for ~10 mm cable** ×1 · ~4 €
+  Only for the A/B test of EXP-004 on the phase sleeve. Kept only if the measurement improves.
 
-## Descartado o aplazado
+The aluminium box for the VESC is not on the list: you make it yourself.
 
-- **Módulo CAN aislado ISO1050:** descartado el 2026-10-31. El registrador flota con su
-  propia batería; ver [DEC-004](../08_decisions/DEC-004-can-sin-aislar-logger-flotante.md).
-  Se revisa si el ESP32 llega a mandar par al VESC.
-- **Aislador USB ADUM3160 y ferritas de pinza:** aplazados. Eran para diagnosticar el corte
-  del USB del VESC bajo carga; el registrador ya graba con carga sin USB.
-- **Resistencias de 120 Ω:** aplazadas. El MCP2515 trae la suya (jumper J1) y el bus
-  funciona con 0 errores.
-- **ESP32-WROOM-32 nº 1:** destruido el 2026-09-07. Cortocircuito interno. Marcada y
-  guardada aparte para no confundirla con una buena.
+## Already in stock — do NOT buy
+
+- ESP32 ×2 spare (no. 2 is the logger)
+- MCP2515 + TJA1050, microSD module (the card is dead), 12 V battery + DC-DC to 5 V
+- Hall sensors 3144 (one fitted on the front wheel, the rest spare) + magnets; the 5 V Hall throttle
+- Breadboard, dupont wires, resistors, oscilloscope, multimeter, soldering iron
+
+## When the vehicle control unit comes
+
+Pinout decided: [`05_firmware/vcu-design/vcu-pinout.md`](../05_firmware/vcu-design/vcu-pinout.md).
+The resistors (10 k, 12 k) come from stock and the capacitors from the 100 nF assortment above.
+The only thing left to decide is the emergency stop.
+
+## Dropped or postponed
+
+- **Isolated CAN module ISO1050:** dropped on 2026-10-31. The logger floats on its own battery;
+  see [DEC-004](../08_decisions/DEC-004-non-isolated-can-floating-logger.md). Revisited if the
+  ESP32 ends up commanding torque to the VESC.
+- **USB isolator ADUM3160:** postponed. It was for diagnosing the VESC's USB dropping out under
+  load; the logger already records under load without USB.
+- **120 Ω resistors:** postponed. The MCP2515 has its own (jumper J1) and the bus runs with 0 errors.
+- **ESP32-WROOM-32 no. 1:** destroyed on 2026-09-07. Internal short. Marked and kept apart so
+  it is not mistaken for a good one.

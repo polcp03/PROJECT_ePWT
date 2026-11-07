@@ -1,191 +1,219 @@
-# Roadmap por ciclos
+# Roadmap by cycle
 
-Regla: **solo el ciclo activo está planificado en detalle.** Los siguientes existen
-como dirección, no como plan. Se concretan al abrirlos. Si esta lista empieza a crecer
-hacia abajo con detalle, es la señal de que estoy buscando el plan perfecto otra vez.
+Rule: **only the active cycle is planned in detail.** The next ones exist as direction, not as
+a plan. They become concrete when they open. If this list starts growing downwards with detail,
+that is the sign I am looking for the perfect plan again.
 
-Presupuesto: ~14 h por ciclo (1 h/día, desde el 20-oct; antes 2 h/día).
+Budget: ~14 h per cycle (1 h a day since 20 Oct; before, 2 h a day).
 
-## Calendario real
+## Real calendar
 
-> [!warning] Vacaciones 10 → 27 de septiembre
-> Sin ordenador. **No se planifica trabajo dentro de ese hueco.** Un proyecto que
-> exige trabajar en vacaciones el primer mes no llega al mes doce.
+> [!warning] Holidays 10 → 27 September
+> No computer. **No work is planned inside that gap.** A project that demands working on
+> holiday in its first month does not reach month twelve.
 
-| Ciclo   | Fechas          | Objetivo                                       | Review            |
+| Cycle   | Dates           | Goal                                           | Review            |
 | ------- | --------------- | ---------------------------------------------- | ----------------- |
-| **C00** | 2 → 9 sep       | Kickoff con mentores + primeras medidas        | mar 8 o mié 9 sep |
-| —       | 10 → 27 sep     | *Vacaciones*                                   | —                 |
-| **C01** | 28 sep → 11 oct | Modelo longitudinal antes que datos (pivote 8-oct) — **hecho** | vie 9 oct |
-| **C02** | 20 → 30 oct     | Motor + inversor: **modelar y saber explicarlo**. Nada de validar. Ver [C02](C02.md) | **vie 30 oct** |
-| **C03** | 31 oct → 13 nov | Modelo dq (L3), primer control (lazo abierto/cerrado, PI) y el motor en Simulink (L4). Plan en Google Calendar (25-oct); artifacts aún sin construir | vie 13 nov        |
-| **C04** | 14 → 27 nov     | Dirección (1-nov): validar el modelo de motor con los logs CAN | vie 27 nov        |
-| **C05** | 28 nov → 11 dic | Dirección: validación del vehículo (coast-down, aceleración) con el registrador | vie 11 dic        |
-| **C06** | 12 → 25 dic     | Dirección: cerrar el modelo validado; unidad de control v0 si cabe. Navidad: probablemente se mueve | vie 25 dic |
+| **C00** | 2 → 9 Sep       | Kickoff with mentors + first measurements      | Tue 8 or Wed 9 Sep |
+| —       | 10 → 27 Sep     | *Holidays*                                     | —                 |
+| **C01** | 28 Sep → 11 Oct | Longitudinal model before data (pivot 8 Oct) — **done** | Fri 9 Oct |
+| **C02** | 20 → 30 Oct     | Motor + inverter: **model it and be able to explain it**. No validation. See [C02](cycles/C02.md) | **Fri 30 Oct** (cancelled, merged into C03) |
+| **C03** | 31 Oct → 13 Nov | dq model (L3), first control (open/closed loop, PI) and the motor in Simulink (L4). See [C03](cycles/C03.md) | Fri 13 Nov        |
+| **C04** | 14 → 27 Nov     | Direction (1 Nov): validate the motor model with the CAN logs | Fri 27 Nov        |
+| **C05** | 28 Nov → 11 Dec | Direction: vehicle validation (coast-down, acceleration) with the logger | Fri 11 Dec        |
+| **C06** | 12 → 25 Dec     | Direction: close the validated model; control unit v0 if it fits. Christmas: probably moves | Fri 25 Dec |
 
-**Secuencia decidida el 20-oct:** modelo de motor + inversor → data logger → validación
-(coast-down, correlación modelo ↔ vehículo). Sin logger no hay datos y sin datos no se valida.
+## Skill gates — a cycle does not close without its gate
 
-**Actualizada el 1-nov:** el registrador CAN se adelantó y funciona (31-oct, EXP-002), así
-que el eslabón de los datos ya está. Orden acordado con Pol:
+Since 2026-11-04 ([DEC-007](../08_decisions/DEC-007-skill-gates-and-ros2-telemetry.md)). Pol's
+request: *"I note things down and never do them"*. So the software and systems skills are
+**blocking points**: if a cycle's gate is not done, there is no deck and no review, and the
+next cycle does not open. Each gate fits inside the cycle's 14 h (1–3 sessions); it is not a
+side course. Method for every code gate: skill `software-con-ia` (Pol writes the contract and
+the acceptance test with a number, the AI writes the code, one C trap per change).
 
-1. **C03 sin cambios:** modelo dq y lazo PI en Simulink. Inversor y motor.
-2. **Validar el motor con los logs:** corriente, erpm, ciclo de trabajo y tensión del VESC
-   contra el modelo (p. ej. ciclo × tensión frente a erpm debe dar λm).
-3. **Unidad de control v0** (dic–ene): acelerador y freno → ESP32 → orden de corriente por
-   CAN → VESC. Sin control, con las protecciones en el código (freno + gas = par cero,
-   timeout de CAN en el VESC). Arquitectura y sensores en [DEC-005](../08_decisions/DEC-005-arquitectura-vcu.md);
-   revisar DEC-004 antes.
-4. **IMU y velocidad de rueda** registradas en la SD.
-5. **Control de tracción:** primero en Simulink, después en el ESP32.
+| Cycle | Gate (done = the evidence exists in the repo) | Skill it builds |
+|---|---|---|
+| **C03** · 13 Nov | First `REQ-MOD` in `00_system/`: the motor model's acceptance criterion **with a number**, written before C04 measures it | Systems engineering, sim-to-real |
+| **C04** · 27 Nov | **Python on data:** Pol writes the contract and acceptance test of the model-vs-CAN-log comparison; the AI writes it; Pol explains its output. **Reading C #1:** Pol explains, in his words, how `can_logger` decodes a VESC frame (traps 4 types/scales and 5 byte order) | Python on real data · reading C |
+| **C05** · 11 Dec | **Reading C #2:** how `can_logger` keeps time and writes to the SD without losing frames (traps 1 overflow, 3 interrupts, 8 blocking). Coast-down fit script with its own acceptance test | Reading C · real time |
+| **C06** · 25 Dec | **VCU contract before any VCU code:** `REQ-VCU` with numbers, module contracts, and the safe state when something fails (traps 9 state machines, 10 watchdog) | Real-time C architecture · safety |
+| **VCU** · Q1 2027 | Every VCU release passes steps 4 and 5 of the verification ladder (a number, and 30 min with provoked faults, error counters at 0) | Real-time C · validation |
+| **Telemetry** · after VCU v0 | **ROS 2 on a Raspberry Pi:** `REQ-TEL` (rate, latency, frame loss, range) before choosing the radio; a node that reads the VCU's CAN, records (rosbag) and shows it live on the PC | ROS 2 · Linux · communications |
 
-**Fuera, por decisión de Pol:** el BMS por CAN (el VESC ya da tensión y corriente del pack;
-el foco es motor e inversor) y la sonda de temperatura del pack (DEC-005, 1-nov). Recordatorio: la unidad de control enseña control de vehículo
-y C embebido, no inversor; el inversor se aprende en el modelo.
+A gate can move to the next cycle **only once**, and only with a line in the cycle log saying
+why. Twice is the signal the plan is wrong, not Pol.
 
-**Fin de 2026: modelo validado contra el vehículo real.** Ese es el objetivo del año.
+**Sequence decided on 20 Oct:** motor + inverter model → data logger → validation (coast-down,
+model ↔ vehicle correlation). No logger, no data; no data, no validation.
 
-Después de C06 (no antes): control de tracción, launch control, y **entonces** MPC —
-que requiere exactamente lo que C06 produce, un modelo validado.
+**Updated 1 Nov:** the CAN logger came early and works (31 Oct, EXP-002), so the data link is
+in place. Order agreed with Pol:
 
-### Horizonte largo — una línea por trimestre, y nada más
+1. **C03 unchanged:** dq model and PI loop in Simulink. Inverter and motor.
+2. **Validate the motor with the logs:** the VESC's current, erpm, duty and voltage against the
+   model (e.g. duty × voltage against erpm must give λm).
+3. **Control unit v0** (Dec–Jan): throttle and brake → ESP32 → current command over CAN → VESC.
+   No control, with the protections in the code (brake + throttle = zero torque, CAN timeout in
+   the VESC). Architecture and sensors in [DEC-005](../08_decisions/DEC-005-vcu-architecture.md);
+   review DEC-004 first.
+4. **IMU and wheel speed** recorded on the SD.
+5. **Traction control:** first in Simulink, then on the ESP32.
+6. **Telemetry over ROS 2** (2026-11-04, DEC-007): a Raspberry Pi above the VCU, reading its
+   CAN and sending it to the PC over a radio link. ROS 2 never runs inside the VCU, which stays
+   real-time C. No autonomy: there is no need for it on the quad.
 
-Deliberadamente vago. Concretarlo ahora sería buscar el plan perfecto.
+**Out, by Pol's decision:** the BMS over CAN (the VESC already gives pack voltage and current;
+the focus is motor and inverter) and the pack temperature probe (DEC-005, 1 Nov). Reminder: the
+control unit teaches vehicle control and embedded C, not the inverter; the inverter is learned
+in the model.
 
-| Trimestre | Dirección |
+**End of 2026: model validated against the real vehicle.** That is the goal of the year.
+
+After C06 (not before): traction control, launch control, and **then** MPC — which needs
+exactly what C06 produces, a validated model.
+
+### Long horizon — one line per quarter, and nothing more
+
+Deliberately vague. Making it concrete now would be looking for the perfect plan.
+
+| Quarter | Direction |
 |---|---|
-| **T4 2026** (C01–C06) | Del hardware medido a un modelo validado |
-| **T1 2027** | Control implementado: del modelo al ESP32. Aquí entra el firmware en serio |
-| **T2 2027** | Funciones de vehículo: tracción, launch. Y MPC si el modelo aguanta |
-| **T3 2027+** | El quad es plataforma: percepción, autonomía, lo que aparezca |
+| **Q4 2026** (C01–C06) | From measured hardware to a validated model |
+| **Q1 2027** | Control implemented: from the model to the ESP32. Firmware gets serious here |
+| **Q2 2027** | Vehicle functions: traction, launch. Telemetry over ROS 2 on a Raspberry Pi. And MPC if the model holds |
+| **Q3 2027+** | The quad is a platform: a learned controller validated against the classic one (if it meets a requirement); an autonomous drone is a separate project |
 
-## Cómo funciona un ciclo
+## How a cycle works
 
-El ciclo es el motor del proyecto. Sin ritual, es solo el nombre de una carpeta.
+The cycle is the engine of the project. Without a ritual, it is just a folder name.
 
-> [!todo] Apertura — 1 sesión, el día después de la review
-> 1. Leer el cierre del ciclo anterior. Qué salió mal se arrastra, no se olvida.
-> 2. Elegir **un** objetivo. Uno. Si necesita un "y", son dos ciclos.
-> 3. Definir el entregable: qué se enseña el día de la review.
-> 4. Escribir el plan diario. 14 bloques de 2 h.
-> 5. Todo lo que no quepa → `backlog.md`.
+> [!todo] Opening — 1 session, the day after the review
+> 1. Read the previous cycle's close. What went wrong is carried over, not forgotten.
+> 2. Pick **one** goal. One. If it needs an "and", it is two cycles.
+> 3. Define the deliverable: what is shown on review day.
+> 4. Write the daily plan.
+> 5. Everything that does not fit → `backlog.md`.
 
-> [!tip] Durante — cada sesión
-> Cerrar escribiendo **una línea** en la bitácora: qué hice, qué aprendí, qué queda.
-> Es la costumbre más barata y de más valor del sistema. Sin ella, cada sesión
-> empieza a ciegas.
+> [!tip] During — every session
+> Close by writing **one line** in the log: what I did, what I learned, what is left.
+> It is the cheapest and most valuable habit in the system. Without it, every session starts blind.
 
-> [!success] Cierre — últimas sesiones antes de la review
-> 1. Rellenar Resultado / Qué aprendí / Qué salió mal.
-> 2. **Examen del ciclo** (`C0X-examen.md`): Claude pregunta, yo respondo de memoria,
->    veredicto por respuesta. **Mis respuestas corregidas son el guion del deck.**
-> 3. Acordar la lista de slides **antes** de que se construya nada (lección de C01).
-> 4. Deck con la skill `review-deck`: `_check.py` y `_audit.py` a cero antes de presentar.
-> 5. Ensayar en voz alta con la pregunta probable de cada slide (notas del orador).
-> 6. Si no lo sé explicar sin apuntes, **no está terminado**.
+> [!success] Close — the last sessions before the review
+> 0. **Skill gate done?** (table above). If not, it is done now, before anything else. No
+>    gate, no deck.
+> 1. Fill in Result / What I learned / What went wrong.
+> 1b. **Update the V** (`00_system/verification.md`, 10 min): which requirements were closed
+>    and with what data, and the new requirements the cycle brought up. In the review, one
+>    slide: what is verified and what is not. Skill `ingenieria-sistemas`.
+> 2. **Cycle exam** (in ePWT Bench): Claude asks, I answer from memory, a verdict per answer.
+>    **My graded answers are the deck's script.**
+> 3. Agree the slide list **before** anything is built (lesson from C01).
+> 4. Deck with the `review-deck` skill: `_check.py` and `_audit.py` at zero before presenting.
+> 5. Rehearse out loud with the likely question for each slide (speaker notes).
+> 6. If I can't explain it without notes, **it is not finished**.
 
-### La review, en 45 minutos
+### The review, in 45 minutes
 
-Sus mentores son ingenieros de motores térmicos: no pueden validar el FOC, pero sí
-el razonamiento de ingeniería. El formato aprovecha lo que sí saben:
+The mentors are combustion engine engineers: they cannot validate FOC, but they can validate
+the engineering reasoning. The format uses what they do know:
 
-| Tiempo | Qué |
+| Time | What |
 |---|---|
-| 5 min | Qué dije que haría |
-| 15 min | Qué he hecho, con datos |
-| 10 min | **Lo que no entiendo** — la parte más valiosa |
-| 10 min | Crítica: ¿el razonamiento se sostiene? |
-| 5 min | Objetivo del siguiente ciclo |
+| 5 min | What I said I would do |
+| 15 min | What I have done, with data |
+| 10 min | **What I don't understand** — the most valuable part |
+| 10 min | Critique: does the reasoning hold? |
+| 5 min | Goal of the next cycle |
 
-Los 10 minutos de "lo que no entiendo" son el núcleo. Enseñar solo lo que funciona
-convierte la review en un teatro y desperdicia a dos doctores.
+The 10 minutes of "what I don't understand" are the core. Showing only what works turns the
+review into theatre and wastes two PhDs.
 
-## Cómo mido si esto funciona
+## How I measure whether this works
 
-El objetivo es "ser mejor ingeniero", que no se mide. Estos cuatro indicadores sí,
-y se revisan **cada 3 ciclos**, no cada semana:
+The goal is "be a better engineer", which cannot be measured. These four indicators can, and
+they are reviewed **every 3 cycles**, not every week:
 
-1. **¿Puedo explicar algo hoy que hace 6 semanas no?** Sin apuntes, a alguien que no
-   sabe del tema. Es el único indicador que importa de verdad.
-2. **¿El modelo predice mejor?** A partir de C06, el error de correlación es un número
-   que baja o no baja. No admite autoengaño.
-3. **¿Cuántos ciclos he cerrado en fecha?** Mide el sistema, no el conocimiento.
-   Si van dos seguidos fallando, el problema es el plan, no yo.
-4. **¿Cuántas decisiones tengo escritas con su porqué?** Mide si estoy haciendo
-   ingeniería o solo tocando cosas.
+1. **Can I explain something today that I couldn't 6 weeks ago?** Without notes, to someone
+   who doesn't know the subject. It is the only indicator that really matters.
+2. **Does the model predict better?** From C06 on, the correlation error is a number that goes
+   down or doesn't. It admits no self-deception.
+3. **How many cycles have I closed on time?** It measures the system, not the knowledge. If
+   two in a row fail, the problem is the plan, not me.
+4. **How many decisions do I have written down with their why?** It measures whether I am doing
+   engineering or just touching things.
 
-> [!warning] Lo que NO se mide
-> Horas invertidas, archivos escritos, líneas de código, commits. Todo eso se puede
-> subir sin aprender nada. Optimizar un indicador falso es peor que no medir.
+> [!warning] What is NOT measured
+> Hours spent, files written, lines of code, commits. All of that can go up without learning
+> anything. Optimising a false indicator is worse than not measuring.
 
-## Por qué este orden
+## Why this order
 
-Cada ciclo consume la salida del anterior. C02 no puede empezar sin los números de C01.
-C04 no significa nada sin la máquina de C03. MPC no es implementable sin C06.
+Each cycle consumes the output of the previous one. C02 cannot start without C01's numbers.
+C04 means nothing without C03's machine. MPC cannot be implemented without C06.
 
-No es una secuencia arbitraria: es la cadena de dependencias real. Saltarse un eslabón
-produce un sistema que parece funcionar y que no se puede depurar, porque no sabes qué
-capa está mintiendo.
+It is not an arbitrary sequence: it is the real dependency chain. Skipping a link produces a
+system that seems to work and cannot be debugged, because you don't know which layer is lying.
 
-## El data logger: por qué NO va primero, y la excepción
+## The data logger: why it does NOT go first, and the exception
 
-> [!note] Historia
-> Escrito antes de construirlo. El registrador existe desde el 31-oct-2026 y graba con
-> carga sin depender del USB del VESC: lo de abajo queda como razonamiento de entonces.
+> [!note] History
+> Written before building it. The logger exists since 31 Oct 2026 and records under load
+> without depending on the VESC's USB: what follows is the reasoning at the time.
 
-**El problema real:** hoy solo puedo registrar con el motor en vacío. Con el vehículo
-funcionando, el USB del VESC se corta bajo carga. Para logs con carga haría falta un
-data logger propio con ESP32 — que no existe todavía.
+**The real problem:** today I can only record with the motor unloaded. With the vehicle
+running, the VESC's USB drops out under load. Logs under load would need a custom ESP32 data
+logger — which does not exist yet.
 
-**¿Habría que construirlo primero, entonces?** No, y por dos razones:
+**So should it be built first?** No, for two reasons:
 
-1. **C01 no lo necesita.** R de fase, pares de polos y back-EMF se miden con el motor
-   parado o girando a mano. Multímetro y osciloscopio. Cero software.
-2. **No sé aún qué medir.** Un logger se diseña a partir de las señales que el modelo
-   pide. Construirlo antes del modelo es adivinar qué canales, a qué frecuencia y con
-   qué resolución — y equivocarse sale caro en semanas de trabajo embebido.
+1. **C01 doesn't need it.** Phase R, pole pairs and back-EMF are measured with the motor
+   stopped or turned by hand. Multimeter and oscilloscope. Zero software.
+2. **I don't know yet what to measure.** A logger is designed from the signals the model asks
+   for. Building it before the model is guessing which channels, at what rate and with what
+   resolution — and guessing wrong costs weeks of embedded work.
 
-**La excepción que sí merece adelantarse (30 minutos):** diagnosticar el corte de USB.
-El síntoma es "bajo carga" → apunta a EMI de la conmutación de fase o a bucle de tierra.
-Pero hay un detalle que cambia el cálculo: **un ensayo de coast-down es, por definición,
-sin par** — acelerar, soltar, y dejar que el vehículo decelere solo. Con corriente de
-fase casi nula, es plausible que el USB **no** se corte.
+**The exception that does deserve to come early (30 minutes):** diagnose the USB dropout. The
+symptom is "under load" → it points to EMI from phase switching or to a ground loop. But one
+detail changes the calculation: **a coast-down test is, by definition, torque-free** —
+accelerate, release, and let the vehicle slow down by itself. With almost no phase current,
+it is plausible that the USB does **not** drop out.
 
-Y el coast-down es exactamente el ensayo de validación que necesita C02.
+And the coast-down is exactly the validation test C02 needs.
 
-Por tanto, antes de dar por hecho que hace falta el logger: probar un coast-down
-registrando por USB. Si funciona, **C02 se valida sin construir nada** y el logger se
-queda donde está, en C05. Si no funciona, ya tengo el dato con certeza en vez de con
-una suposición — y sé que el logger es un bloqueante real.
+So, before assuming the logger is needed: try a coast-down recording over USB. If it works,
+**C02 is validated without building anything** and the logger stays where it is, in C05. If it
+doesn't, I have the fact for certain instead of an assumption — and I know the logger is a
+real blocker.
 
-Media hora de osciloscopio en D+/D- y en el raíl de 5 V durante una rampa de carga
-completa el diagnóstico. Ver `03_hardware/open-questions.md`.
+Half an hour of oscilloscope on D+/D- and on the 5 V rail during a load ramp completes the
+diagnosis. See `03_hardware/open-questions.md`.
 
-## Lo que cambia ahora que sé qué toolboxes tengo
+## What changes now that I know which toolboxes I have
 
-Verificado el 2026-09-01: la licencia de estudiante trae **las 40 toolboxes**,
-incluidas Motor Control Blockset, Simscape Electrical, Vehicle Dynamics Blockset,
-Powertrain Blockset, MPC Toolbox y Embedded Coder. Ver `08_decisions/DEC-002-entorno-tecnico.md`.
+Verified on 2026-09-01: the student licence includes **all 40 toolboxes**, including Motor
+Control Blockset, Simscape Electrical, Vehicle Dynamics Blockset, Powertrain Blockset, MPC
+Toolbox and Embedded Coder. See `08_decisions/DEC-002-technical-environment.md`.
 
-Esto no acelera el roadmap. Lo hace **más peligroso**, y conviene decirlo claro:
+This does not speed up the roadmap. It makes it **more dangerous**, and it is worth saying
+clearly:
 
-Motor Control Blockset trae FOC para PMSM ya hecho. Arrastrar ese bloque da un quad que
-funciona y un ingeniero que no ha aprendido nada. El objetivo declarado del proyecto es
-entender FOC, no usarlo.
+Motor Control Blockset ships a finished FOC for PMSM. Dragging that block in gives a quad that
+works and an engineer who has learned nothing. The declared goal of the project is to
+understand FOC, not to use it.
 
-**Regla para todo el roadmap:** primero lo construyo desde las ecuaciones, después lo
-comparo contra la implementación de referencia. La diferencia entre mi versión y la suya
-es el contenido de aprendizaje — ahí está lo que no sabía que no sabía.
+**Rule for the whole roadmap:** first I build it from the equations, then I compare it against
+the reference implementation. The difference between my version and theirs is the learning
+content — that is where what I didn't know I didn't know lives.
 
-Dos consecuencias concretas:
-- **C03/C04:** construir Clarke, Park y los lazos de corriente a mano antes de abrir
-  ningún ejemplo de MCB.
-- **MPC (post-C06):** deja de ser inalcanzable. MPC Toolbox está. Sigue necesitando el
-  modelo validado de C06, así que la secuencia no cambia — solo deja de ser un horizonte
-  lejano y pasa a ser un objetivo real a ~6 meses.
+Two concrete consequences:
+- **C03/C04:** build Clarke, Park and the current loops by hand before opening any MCB example.
+- **MPC (post-C06):** stops being out of reach. MPC Toolbox is there. It still needs C06's
+  validated model, so the sequence does not change — it just stops being a distant horizon and
+  becomes a real goal ~6 months out.
 
-## Qué NO está en este roadmap, a propósito
+## What is NOT in this roadmap, on purpose
 
-Rediseño mecánico, montaje de batería, soportes, chasis. El hardware es la planta y el
-banco de validación, no el objeto de trabajo. Cambios de hardware, sí — cuando el modelo
-o los datos los pidan, no por iniciativa propia.
+Mechanical redesign, battery mounting, brackets, chassis. The hardware is the plant and the
+validation bench, not the object of the work. Hardware changes, yes — when the model or the
+data ask for them, not on my own initiative.
