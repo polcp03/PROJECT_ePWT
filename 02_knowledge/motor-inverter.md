@@ -26,6 +26,16 @@ Maximum torque comes when the coils' field is **90 electrical degrees** ahead of
 field. To put it there, the inverter has to know where the rotor is: on my quad the Hall sensor
 says so.
 
+## One coil, three phases, three pole pairs (L2, 3 Nov, graded right)
+
+- **One coil with AC does not make a rotating field.** The coil is fixed, so its field stays on
+  one axis: it grows, goes to zero and flips each half cycle. It pulses, it does not turn.
+- **At the instant iU is at its peak Î, iV = iW = −Î/2.** The sum must be zero, and by symmetry
+  the two are equal: cos(−120°) = cos(−240°) = −½. On the plot, the other two cross there.
+- **One electrical turn = 1/3 of a mechanical turn on my motor.** θe = p·θm with p = 3. One
+  electrical cycle moves the field by one north–south pair of magnets, and my rotor has three
+  pairs around it. Magnets belong to the rotor, not to a phase.
+
 ## The path of the energy
 
 Battery (chemical → electrical, watched by the BMS) → **DC link**: capacitors that supply the
