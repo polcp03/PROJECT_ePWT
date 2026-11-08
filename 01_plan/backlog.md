@@ -83,6 +83,54 @@ inside the current cycles. The order:
 | **Learned controller (reinforcement learning) trained on the twin** | (1) Pol writes the requirement it would meet, with a number; (2) model validated (C06); (3) VCU commanding torque with a safety envelope. Then: compare it on the quad against the classic PI controller |
 | **Machine learning on the CAN logs** (motor parameter estimation, fault detection) | Enough logs with load, and a question the physics model cannot answer |
 
+### 2027 ideas — after the 2026 plan closes (Pol, 2026-11-08)
+
+Goal of the whole block: get the robotics basics (radio, boards, Linux, learning) on the quad
+itself, not on a separate toy. Nothing here starts before C06 closes (25 Dec).
+
+| Idea | What it teaches | Entry condition |
+|---|---|---|
+| **LoRa as the telemetry radio candidate** (Pol). Two LoRa modules (ESP32 + SX127x/SX126x), quad → PC. Measure RSSI and SNR against distance on a real run and compare with the link budget computed beforehand. LoRa carries a few kbit/s, so the full CAN log does not fit: choosing *which* signals go over the air is the systems lesson | **RF fundamentals:** dBm, link budget, antenna gain, path loss, Fresnel zone, spreading factor vs range vs rate, legal band and duty cycle (868 MHz in Europe; check the local rules before transmitting) | `REQ-TEL` written with numbers (rate, latency, loss, range). LoRa competes against Wi-Fi / ESP-NOW on those numbers; it is not chosen first |
+| **Own PCB in KiCad** (Pol). Draw the VCU board (today perfboard rev C, DEC-008) as schematic + layout: footprints, ground plane, CAN and supply routing, connector placement. Run the design-rule and electrical-rule checks. Ordering it is optional; the design is the goal | **PCB design:** schematic capture, layout, grounding and EMC in practice (it connects to DEC-008), design reviews | After C06. *Cheap option earlier:* only the **schematic** of rev C, as the wiring reference before soldering — Pol decides |
+| **ROS 2 on the Raspberry Pi** — already decided (DEC-007, step 4 above) | Linux, ROS 2 nodes, topics, rosbag | After VCU v0 |
+| **Reinforcement learning** — already parked above, with its three conditions | Learning control, sim-to-real | Model validated + VCU with safety envelope |
+
+**Modern control and testing** (Pol agreed 2026-11-08: know the current methods, not only the
+classic ones):
+
+| Idea | What it teaches | Entry condition |
+|---|---|---|
+| **State estimation: Kalman filter** fusing IMU + wheel speed → vehicle speed and wheel slip. The core of every mobile robot, and traction control needs it | Estimation, Kalman filters, sensor fusion | IMU and wheel speed both on the logger and verified on the card |
+| **MPC instead of PI** where it pays off (already in the table above): the controller predicts with the model and optimises the next steps, with limits built in. Compare it on the model and on the quad against the PI | Model predictive control, constraints, real-time optimisation | Model validated (C06) |
+| **Hardware-in-the-loop bench**: the Simulink plant on the PC talking CAN to the real VCU, so VCU code is tested without the quad moving | HIL testing, the standard validation method in automotive and robotics | VCU v0 running |
+
+Dropped by Pol (2026-11-08): **own FOC in C on a small motor** (no real use for him) and a
+**simulated quad** in Gazebo/Isaac Sim on its own (no purpose without autonomy).
+
+### Autonomy: a drone that films the quad (Pol, 2026-11-08)
+
+**The honest problem:** the quad will not be autonomous, so on the quad alone there is nothing
+for reinforcement learning, perception or motion planning to do. Autonomy needs a vehicle that
+decides where to go.
+
+**The idea:** a separate project, after the quad. A drone that follows and films the quad by
+itself. The quad sends its position and speed over its telemetry radio (the LoRa/ROS 2 link
+above becomes the bridge between both projects), and the drone decides where to fly.
+
+What it would teach, which is what Pol wants to learn about autonomous systems:
+
+- **Perception:** find the quad in the camera image (detection, tracking).
+- **State estimation:** fuse GPS, IMU and the quad's telemetry (the Kalman filter, again).
+- **Decision and motion planning:** keep distance and framing, avoid obstacles, what to do if
+  the link drops.
+- **Learning:** here reinforcement learning has a real task (a follow or framing policy),
+  trained first in a simulator (PX4 or ArduPilot software-in-the-loop with Gazebo). The
+  simulator makes sense here, not on the quad.
+- **Safety:** geofence, return-to-home, legal rules for flying near people.
+
+Entry condition: the quad's plan closed (model validated, VCU, ROS 2 telemetry). Not to be
+planned before then.
+
 The underlying reason does not change: robotics startups ask for C/C++, Linux, ROS 2 and
 communications, and today the repository has no code that shows it. The skill gates in the
 [roadmap](roadmap.md) make sure each cycle adds some.
