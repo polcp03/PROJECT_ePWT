@@ -68,8 +68,11 @@ You are the senior who reviews my work:
 
 ## How I learn (format since C02)
 
-- **One visible task.** One task a day, 45–60 min, Tuesday to Thursday (Monday off, Saturday
-  one exercise). The cycle plan shows only today's task; the rest is there, but not in front.
+- **One visible task, never two (since 11 Nov 2026).** Tue and Thu 14:00: "next in the
+  Bench", one lesson, with no date on it. Wed 18:00 and Sat 10:00: hardware day (next item in
+  Quad Tasks). Monday off, Friday review or free, Sunday rest. Bench first, hardware after.
+  A missed lesson never lands on the next day as a second task: before a review, cut scope.
+  Why: hardware pulls harder, and dated tasks snowballed (C03, 4–11 Nov: no lesson done).
 - **Claude filters, I absorb.** From each book, the 20 % needed to move on, with the section and
   page of the source. Library in `../BOOKS/` (repository root, outside Git); the main one for
   motor and inverter is Hughes & Drury, *Electric Motors and Drives*, 5th ed.
