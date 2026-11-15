@@ -1,6 +1,6 @@
 # Quad tasks
 
-> Updated 6 Nov 2026. **Tick things off in the [Quad Tasks page](https://claude.ai/artifact/4hkig3fuuywMzBDRh6fefu)**,
+> Updated 15 Nov 2026. **Tick things off in the [Quad Tasks page](https://claude.ai/artifact/4hkig3fuuywMzBDRh6fefu)**,
 > not in a chat. Your ticks are saved there; every Sunday the sync copies them into this file.
 > Nothing here is a new direction: it all comes from the roadmap, DEC-005 and DEC-008.
 >
@@ -16,35 +16,35 @@ Format, read by build.py:
 
 ## 1 · Buy {#buy}
 
-Everything is ordered (6 Nov). Tap **Arrived** when it is in your hands.
+Everything is ordered (6 Nov). Tap **Arrived** when it is in your hands. Arrived by 11 Nov: the logger and VCU-board parts; still on the way: the ABS box and the EMC parts.
 
 ### For the logger and the VCU board
 
-- [~] microSD card 16–32 GB, branded (SanDisk or Samsung) · ~6 € {#sd-card buy}
+- [x] microSD card 16–32 GB, branded (SanDisk or Samsung) · ~6 € {#sd-card buy}
   The old Kodak died on 1 Nov: it answers but keeps nothing. Without a card the logger records
   nothing. Over 32 GB comes as exFAT and must be reformatted to FAT32.
-- [~] USB microSD card reader · ~5 € {#sd-reader buy}
+- [x] USB microSD card reader · ~5 € {#sd-reader buy}
   The PC has no SD slot. Downloading over the ESP32's USB corrupts big files; a reader takes seconds.
-- [~] IMU GY-LSM6DS3 ×2 · ~5 € each {#imu buy}
+- [x] IMU GY-LSM6DS3 ×2 · ~5 € each {#imu buy}
   The old one broke while soldering (the SDA resistor came off). The second is a spare.
-- [~] NTC thermistor 10 kΩ with lead ×2 (`NTC 10K 3950`) · ~2 € {#ntc buy}
+- [x] NTC thermistor 10 kΩ with lead ×2 (`NTC 10K 3950`) · ~2 € {#ntc buy}
   Motor temperature, to the VESC's temperature input. The second is a spare.
-- [~] 100 nF ceramic capacitors ("104"), assorted · ~3 € {#caps-100n buy}
+- [x] 100 nF ceramic capacitors ("104"), assorted · ~3 € {#caps-100n buy}
   One next to every sensor, between VCC and GND.
-- [~] Double-sided perfboard 9×15 cm ×2 · ~4 € {#perfboard buy}
+- [x] Double-sided perfboard 9×15 cm ×2 · ~4 € {#perfboard buy}
   The 7×9 one is too small: the layout takes 112×86 mm. The second is a spare.
-- [~] Pin headers 2.54 mm: female 1×40 ×3, male 1×40 ×1 · ~3 € {#headers buy}
+- [x] Pin headers 2.54 mm: female 1×40 ×3, male 1×40 ×1 · ~3 € {#headers buy}
   Sockets for the ESP32, the SD module (stands upright) and the IMU (1×8, on the VCU board).
-- [~] Screw terminals 5.08 mm: 1 two-pole, 4 three-pole · ~3 € {#terminals buy}
+- [x] Screw terminals 5.08 mm: 1 two-pole, 4 three-pole · ~3 € {#terminals buy}
   The edge connectors: a screwed wire does not shake loose.
-- [~] Bare tinned copper wire 0.6 mm · ~2 € {#bus-wire buy}
+- [x] Bare tinned copper wire 0.6 mm · ~2 € {#bus-wire buy}
   Only for the GND, +5 V and +3.3 V buses.
-- [~] Solid insulated wire 22 AWG, colour kit · ~6 € {#wire-22awg buy}
-- [~] Dupont cable female–female 10 cm, strip of 40 · ~2 € {#dupont buy}
+- [x] Solid insulated wire 22 AWG, colour kit · ~6 € {#wire-22awg buy}
+- [x] Dupont cable female–female 10 cm, strip of 40 · ~2 € {#dupont buy}
   From the CAN module to the board: a strip of 7 wires, a drop of hot glue at each end.
-- [~] Nylon M3 standoffs 10 mm, kit · ~4 € {#standoffs buy}
+- [x] Nylon M3 standoffs 10 mm, kit · ~4 € {#standoffs buy}
   CAN module above the board, board inside the box.
-- [~] Shielded 4-core cable, 1 m {#shielded-cable buy}
+- [x] Shielded 4-core cable, 1 m {#shielded-cable buy}
   For the front wheel Hall (DEC-008). Shield to ground at the VCU end only.
 - [~] Sealed ABS box ~150×110×70 mm · ~8 € {#abs-box buy}
   At least 60 mm tall inside. Bolted rigidly near the middle of the quad, no rubber: the IMU is inside.
@@ -65,9 +65,9 @@ Everything is ordered (6 Nov). Tap **Arrived** when it is in your hands.
 
 ### Borrow, don't buy
 
-- [ ] Two identical bathroom scales {#scales}
+- [x] Two identical bathroom scales {#scales}
   Load per axle and height of the centre of gravity (section 4).
-- [ ] Long tape measure, 10 m {#tape}
+- [x] Long tape measure, 10 m {#tape}
   For the roll-out (section 4).
 
 ## 2 · Paperwork you owe {#debt}
@@ -119,15 +119,17 @@ Numbers the model marks as assumed or missing. None needs code.
 - [x] Roll-out over 10 m → real rolling radius {#rollout}
   Done 6 Nov on the front-left wheel: 49 magnets in 4.5 m, you seated → **146 mm** (Ø 292 mm).
   This is the radius for the wheel-sensor speed. It does not give the rear one.
-- [ ] Rear roll-out → driven-wheel rolling radius {#rollout-rear}
+- [x] Rear roll-out → driven-wheel rolling radius {#rollout-rear}
   Same as the front: you seated, chalk mark on a **rear** tyre at a taped line, push straight,
   count whole turns (5 or more), measure the distance. The rear is a different tyre with twice
   the load: it sets traction force, top speed and the VESC's wheel diameter (0.30 or 0.31 m?).
   While you're there, wrap a tape round the free front-left tyre (wheel lifted) for its unloaded size.
-- [ ] Load per axle and centre-of-gravity height {#cg}
+  Ticked done on 8 Nov; the number is not in the repo yet.
+- [x] Load per axle and centre-of-gravity height {#cg}
   Scale under each axle on level ground, with and without you. For the height, lift one axle a
   known amount and see how much weight moves to the other. **Derive the formula yourself before
   measuring**: it is a moment balance.
+  Measured 6 Nov: `06_data/2026-11-06_mass-cg/`. Ticked done on 8 Nov.
 
 ## 5 · Wiring against noise (EMC) {#emc}
 

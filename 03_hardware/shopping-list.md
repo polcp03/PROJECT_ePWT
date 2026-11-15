@@ -1,13 +1,13 @@
 # Shopping list — pending hardware
 
-Updated 2026-11-06: **everything below is ordered and on its way** (Pol). Tick arrivals on
+Updated 2026-11-15: the logger and VCU-board parts **arrived** (ticked 8 and 11 Nov, moved to the inventory in `baseline.md`); the ABS box and the EMC parts are still on the way. Tick arrivals on
 [Quad Tasks](https://claude.ai/artifact/4hkig3fuuywMzBDRh6fefu), section 1; the Sunday sync marks
 them here and moves them to the inventory in `baseline.md`.
 `[~]` ordered · `[x]` arrived.
 
 ## For the logger mounted on the quad (~55 €)
 
-- [~] **microSD card 16–32 GB, branded (SanDisk or Samsung)** · ~6 €
+- [x] **microSD card 16–32 GB, branded (SanDisk or Samsung)** · ~6 €
   Search: `microSD SanDisk 32GB`
   The 16 GB Kodak died on 2026-11-01: it answers but keeps nothing written to it (not even a
   format). Without a card the logger records nothing. Over 32 GB comes as exFAT and must be
@@ -17,17 +17,17 @@ them here and moves them to the inventory in `baseline.md`.
   It got warm while idle: internal failure. Likely causes: power cuts while recording (many
   resets that day), inserting or removing it powered, static.
 
-- [~] **IMU GY-LSM6DS3 ×2** · ~5 € each
+- [x] **IMU GY-LSM6DS3 ×2** · ~5 € each
   Search: `GY-LSM6DS3`
   The one in stock broke while soldering (the SDA resistor came off). Soldering the new one:
   pins in the breadboard first, fine tip, short time.
 
-- [~] **Ceramic capacitors 100 nF ("104"), assorted** · ~3 €
+- [x] **Ceramic capacitors 100 nF ("104"), assorted** · ~3 €
   Search: `condensador ceramico 100nF 104 pack`
   One next to each sensor (Hall, IMU), between VCC and GND. The 220 µF in stock does not filter
   fast noise.
 
-- [~] **NTC thermistor 10 kΩ with lead ×2** (one spare) · ~2 €
+- [x] **NTC thermistor 10 kΩ with lead ×2** (one spare) · ~2 €
   Search: `NTC 10K 3950 termistor cable`
   Motor temperature, to the **VESC's** temperature input (not the VCU). The motor's Hall cable
   has no temperature wire (seen 2026-11-06), so it needs its own. Stuck to the case with kapton
@@ -35,7 +35,7 @@ them here and moves them to the inventory in `baseline.md`.
   Re-enables the 85/100 °C limits and gives `R(T)` to validate the model
   ([DEC-005](../08_decisions/DEC-005-vcu-architecture.md)). Decided by Pol on 2026-11-01.
 
-- [~] **USB microSD card reader ×1** · ~5 €
+- [x] **USB microSD card reader ×1** · ~5 €
   Search: `lector tarjetas microSD USB`
   The PC has no SD slot. Downloading over the ESP32's USB works but corrupts big files (each
   one had to be downloaded three times). With a reader: seconds and no errors.
@@ -47,29 +47,29 @@ Layout: [`05_firmware/vcu-design/perfboard-layout.html`](../05_firmware/vcu-desi
 wires does not survive the quad's vibration, and the long SPI wires were where the noise got in
 (EXP-002): soldered and short, with the ESP32 and the modules pluggable.
 
-- [~] **Double-sided perfboard 9×15 cm (plated holes)** ×2 · ~4 €
+- [x] **Double-sided perfboard 9×15 cm (plated holes)** ×2 · ~4 €
   Search: `placa perforada 9x15 doble cara`
   The 7×9 one is too small: the layout takes 44×34 holes (112×86 mm). The second is a spare.
   The IMU no longer needs its own small board: it plugs into the VCU board.
-- [~] **Female pin headers 2.54 mm, 1×40** ×3 · ~2 €
+- [x] **Female pin headers 2.54 mm, 1×40** ×3 · ~2 €
   Search: `tira pines hembra 2.54 40`
   Sockets for the ESP32 (2×19), the SD module (1×6, it stands upright in it) and the IMU
   (1×8, on the VCU board).
-- [~] **Male pin header 2.54 mm, 1×40** ×1 · ~1 €
+- [x] **Male pin header 2.54 mm, 1×40** ×1 · ~1 €
   For the CAN cable board (1×7).
-- [~] **Screw terminals, 5.08 mm pitch, 2 and 3 poles** · ~3 €
+- [x] **Screw terminals, 5.08 mm pitch, 2 and 3 poles** · ~3 €
   Search: `borne tornillo 5.08 2P 3P`. Needed: 1 two-pole (J1; the IMU terminal J6 is gone)
   and 4 three-pole (wheel, throttle, brakes and CAN to the VESC). Buy a pack.
-- [~] **Bare tinned copper wire 0.6 mm** · ~2 €
+- [x] **Bare tinned copper wire 0.6 mm** · ~2 €
   Search: `hilo cobre estañado 0.6mm`. Only for the GND, +5 V and +3.3 V buses.
-- [~] **Solid insulated wire 22 AWG, colour kit** · ~6 €
+- [x] **Solid insulated wire 22 AWG, colour kit** · ~6 €
   Search: `cable rigido 22AWG kit colores`. Everything else: it may cross over another wire.
-- [~] **Dupont cable female–female 10 cm (strip of 40)** · ~2 €
+- [x] **Dupont cable female–female 10 cm (strip of 40)** · ~2 €
   From the CAN module to the board: its pins point up, so it does not plug in. Peel off a strip
   of 7 wires that stay together, with a drop of hot glue at each end.
-- [~] **Nylon M3 standoffs 10 mm with screws (kit)** · ~4 €
+- [x] **Nylon M3 standoffs 10 mm with screws (kit)** · ~4 €
   Search: `separadores nylon M3 kit`. The CAN module above the board, the board inside the box.
-- [~] **Shielded 4-core cable, 1 m**
+- [x] **Shielded 4-core cable, 1 m**
   For the front wheel Hall (DEC-008), shield to GND at the VCU end only.
 - [~] **Sealed ABS box ~150×110×70 mm** · ~8 €
   Search: `caja estanca ABS 150x110x70`

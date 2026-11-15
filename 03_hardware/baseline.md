@@ -167,6 +167,11 @@ to the vehicle control unit (the logger ESP32); the rotor Halls stay on the VESC
 | 12 V battery + DC-DC to 5 V (5.3 V out) | Powers the logger, floating from the 13S pack |
 | D4184 module, protoboard | Available. D4184 was listed as a DC/DC; the part number is a MOSFET switch module — check |
 | Oscilloscope, multimeter, soldering | Available. Floating phase voltages need a differential probe |
+| microSD card 16–32 GB (new) + USB card reader | Arrived by 8 Nov. Not yet formatted or recorded on (task `first-record`) |
+| IMU GY-LSM6DS3 ×2 | Arrived by 8 Nov; one for the VCU board, one spare |
+| NTC 10 kΩ 3950 ×2 | Arrived by 8 Nov; not fitted yet (task `ntc-fit`) |
+| Logger/VCU board parts: perfboard 9×15 ×2, pin headers, screw terminals, bus wire, 22 AWG kit, dupont strip, M3 standoffs, 100 nF capacitors | Arrived by 8 Nov; board not built yet (task `perfboard-build`) |
+| Shielded 4-core cable, 1 m | Arrived 11 Nov; for the front wheel Hall (DEC-008) |
 
 **CAN logger working** (2026-11-01): [`05_firmware/arduino/can_logger/`](../05_firmware/arduino/can_logger/README.md).
 What is still to buy: [shopping-list](shopping-list.md).
